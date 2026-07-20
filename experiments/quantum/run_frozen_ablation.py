@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-"""CAF 真机验证 S0 —— 冻结 iteration-0 快照 + Exp A(注入/不注入) + Exp B 经典行(exact/sim_qaoa)。
+"""CAF frozen-state validation (S0).
 
-关键设计（修正版）：exact 与 sim 都从【同一次 QAOA 运行】取，且所有候选都用 weights
-钉在 C 序，消除变量顺序/跨方法/跨快照歧义：
-  - exact   = argmin over 可行态 of bqm 能量（真·QUBO 最优）
-  - sim_qaoa= shot 采样后 best-feasible（hw 同口径）
-两者同一 QUBO、同一快照、同一变量序 → 可直接比较。
+This script freezes the iteration-0 snapshot and runs:
+  - Exp A: injected vs non-injected local solves
+  - Exp B: exact vs sim_qaoa on the same local QUBO
 
-全离线，不调真机。
+Key design choice:
+both exact and simulated QAOA candidates are produced from the same QAOA setup, and
+all candidates are aligned to the same community-local variable order. This removes
+ambiguity from variable ordering, cross-method comparisons, and cross-snapshot reuse.
+
+The script is fully offline and does not submit jobs to real hardware.
 """
 import argparse
 import itertools
@@ -55,7 +58,7 @@ def feedback(current_state, community, cand_Corder, cov_df, ret_s, risk_factor, 
 
 
 def _relax(adjusted, sub_cov, K, q_eff):
-    """局部 QUBO 的连续松弛 min q·xᵀΣx − rᵀx  s.t. 0≤x≤1, Σx=K（warm-start 用）。"""
+    """Continuous relaxation of the local QUBO, used for warm-start initialization."""
     n = len(adjusted)
     x0 = np.full(n, K / n)
     res = minimize(lambda x: q_eff * (x @ sub_cov @ x) - adjusted @ x, x0, method="SLSQP",
@@ -65,10 +68,12 @@ def _relax(adjusted, sub_cov, K, q_eff):
 
 
 def solve_local(get_model, to_cqm, adjusted, sub_cov, K, q_eff, cfg):
-    """对单个局部 QUBO 跑一次 QAOA，返回 (exact_cand, sim_cand, E_exact, E_sim)，均按 C 序。
+    """Run one local QAOA solve and return exact/simulated candidates in community order.
 
-    exact = bqm 能量最优可行态（穷举）；sim = QAOA shot 解码候选。同一 bqm、同一变量序。
-    cfg.warmstart=True 时用 Egger warm-start（从连续松弛初态出发）。
+    `exact` is the feasible state with minimum BQM energy found by exhaustive search.
+    `sim` is the best feasible candidate decoded from QAOA shots on the same BQM.
+    When `cfg.warmstart=True`, Egger-style warm-start is initialized from the
+    continuous relaxation.
     """
     model, weights = get_model(adjusted, sub_cov, budget=K, risk_factor=q_eff)
     n = len(weights)
@@ -78,14 +83,14 @@ def solve_local(get_model, to_cqm, adjusted, sub_cov, K, q_eff, cfg):
         label_of_Cpos = [weights[j].name for j in range(n)]
         ws = {label_of_Cpos[j]: float(c[j]) for j in range(n)}
     opt = QiskitQAOAOptimizer(cfg, warmstart_c=ws)
-    sim_cand, _, _ = opt(model, weights)                 # 已按 weights(C) 序
-    sim_cand = normalize_local_solution(sim_cand, n, K)  # 强制基数（C 序不变）
+    sim_cand, _, _ = opt(model, weights)                 # already aligned to community-local weight order
+    sim_cand = normalize_local_solution(sim_cand, n, K)  # enforce exact cardinality without changing local order
 
     cqm = to_cqm(model)
     bqm, _ = dimod.cqm_to_bqm(cqm)
-    label_of_Cpos = [weights[j].name for j in range(n)]   # C 序 -> bqm label
+    label_of_Cpos = [weights[j].name for j in range(n)]   # map community-local positions to BQM labels
 
-    # exact：穷举可行态，bqm.energy，返回 C 序
+    # Exhaustive feasible search under the same BQM, returned in community-local order.
     best_combo, best_e = None, None
     for combo in itertools.combinations(range(n), K):
         sample = {label_of_Cpos[j]: (1 if j in combo else 0) for j in range(n)}
@@ -117,7 +122,7 @@ def main():
     ap.add_argument("--qaoa-restarts", type=int, default=6)
     ap.add_argument("--qaoa-maxiter", type=int, default=80)
     ap.add_argument("--num-reads", type=int, default=200)
-    ap.add_argument("--warmstart", action="store_true", help="Egger warm-start QAOA（从连续松弛初态）")
+    ap.add_argument("--warmstart", action="store_true", help="Enable Egger-style warm-start QAOA from the continuous relaxation.")
     args = ap.parse_args()
 
     Clustering, Denoiser, SimulatedAnnealingDwave, Pipeline, get_model, rebal = load_upstream_components(args.jpm_repo)
@@ -146,13 +151,13 @@ def main():
     base_obj = float(evaluate_state_vector(current_state, cov_df, ret_s, risk_factor=q)["objective"])
 
     sizes = [(i, int(len(c))) for i, c in enumerate(communities)]
-    print("社区大小:", sizes)
+    print("Community sizes:", sizes)
 
     cfg = QAOAConfig(p=args.qaoa_p, restarts=args.qaoa_restarts, maxiter=args.qaoa_maxiter,
                      seed=args.base_seed, optimizer="COBYLA", shots=4000, decode="shots",
                      warmstart=args.warmstart)
 
-    # ---- 扫描所有 n≤16 社区：注入/不注入 exact + sim_qaoa（同一次 QAOA）----
+    # ---- Scan all communities with n<=16: injected/non-injected exact + sim_qaoa from the same QAOA setup ----
     scan = []
     for i, C_i in enumerate(communities):
         n_i = int(len(C_i)); K_i = int(subcard[i])
@@ -163,7 +168,7 @@ def main():
         sh_i = 2.0 * q_eff * (v[C_i] - sub_i @ x_i)
         adj_i = ret[C_i] - sh_i
         ex_i, sm_i, E_ex, E_sm = solve_local(get_model, to_cqm, adj_i, sub_i, K_i, q_eff, cfg)
-        exn_i, _, _, _ = solve_local(get_model, to_cqm, ret[C_i], sub_i, K_i, q_eff, cfg)  # 不注入
+        exn_i, _, _, _ = solve_local(get_model, to_cqm, ret[C_i], sub_i, K_i, q_eff, cfg)  # no injection
         dO_i, acc_i = feedback(current_state, C_i, ex_i, cov_df, ret_s, q, base_obj)
         dO_n, acc_n = feedback(current_state, C_i, exn_i, cov_df, ret_s, q, base_obj)
         dO_s, acc_s = feedback(current_state, C_i, sm_i, cov_df, ret_s, q, base_obj)
@@ -175,26 +180,26 @@ def main():
                      "approx": (E_sm / E_ex) if E_ex != 0 else None,
                      "hamming": int(np.sum(sm_i != ex_i))})
     scan.sort(key=lambda r: (r["dO_inject"] if r["dO_inject"] is not None else 0.0))
-    print("\n---- 全社区扫描（按 ΔO_inject 升序；负=改进）----")
+    print("\n---- Full community scan (sorted by ΔO_inject ascending; negative means improvement) ----")
     print(f"{'comm':>5} {'n':>3} {'K':>3} {'dO_inject':>11} {'acc':>5} {'dO_noinj':>10} {'dO_sim':>10} {'accS':>5} {'approx':>7} {'hamm':>5}")
     for r in scan:
         def fmt(x, f="{:.6f}"): return "—" if x is None else (f.format(x) if isinstance(x, float) else str(x))
         print(f"{r['idx']:>5} {r['n']:>3} {r['K']:>3} {fmt(r['dO_inject']):>11} {fmt(r.get('acc_inject')):>5} "
               f"{fmt(r.get('dO_noinject')):>10} {fmt(r['dO_sim']):>10} {fmt(r.get('acc_sim')):>5} {fmt(r.get('approx'),'{:.3f}'):>7} {fmt(r.get('hamming')):>5}")
 
-    # 选真机靶点：n≤6 且 exact 与 sim 都 ΔO<-EPS
+    # Select the hardware target: n<=6 and both exact and sim achieve ΔO < -EPS.
     both = [r for r in scan if r["n"] <= 6 and r["dO_inject"] is not None and r["dO_inject"] < -EPS and r["dO_sim"] < -EPS]
     exact_only = [r for r in scan if r["n"] <= 6 and r["dO_inject"] is not None and r["dO_inject"] < -EPS]
     if both:
-        ci = max(both, key=lambda r: -r["dO_sim"])["idx"]; why = "n≤6 且 exact 与 sim_qaoa 都 ΔO<0（真机靶点成立）"
+        ci = max(both, key=lambda r: -r["dO_sim"])["idx"]; why = "n<=6 and both exact and sim_qaoa satisfy ΔO<0 (hardware target available)"
     elif exact_only:
-        ci = max(exact_only, key=lambda r: -r["dO_inject"])["idx"]; why = "⚠️ 仅 exact ΔO<0、sim 未命中（QAOA 在该 QUBO 上未集中到最优）"
+        ci = max(exact_only, key=lambda r: -r["dO_inject"])["idx"]; why = "warning: only exact satisfies ΔO<0 while sim misses it (QAOA does not concentrate on the optimum for this QUBO)"
     else:
-        ci = min([r["idx"] for r in scan if r["n"] <= 6], key=lambda idx: len(communities[idx])); why = "⚠️ 无 n≤6 余量社区"
+        ci = min([r["idx"] for r in scan if r["n"] <= 6], key=lambda idx: len(communities[idx])); why = "warning: no improving n<=6 community is available"
     C = communities[ci]; K_C = int(subcard[ci]); n = len(C)
-    print(f"\n选定社区 #{ci}: n_local={n}, k_local={K_C}  （{why}）")
+    print(f"\nSelected community #{ci}: n_local={n}, k_local={K_C} ({why})")
 
-    # ---- 主表（选定社区，复用扫描结果）----
+    # ---- Main table for the selected community, reusing the scan results ----
     sel = next(r for r in scan if r["idx"] == ci)
     rows = [
         {"solver": "noop", "injection": "—", "global_dO": 0.0, "accepted": False},
@@ -203,16 +208,16 @@ def main():
         {"solver": "sim_qaoa", "injection": "on", "global_dO": sel["dO_sim"], "accepted": sel["acc_sim"]},
         {"solver": "hw_qaoa", "injection": "on", "global_dO": None, "accepted": None},
     ]
-    print("\n================ S0 主表（经典部分）================")
+    print("\n================ S0 Main Table (classical rows) ================")
     print(f"{'solver':<10} {'inject':<6} {'global_dO':>12} {'accepted':>9}")
     for r in rows:
-        dO = f"{r['global_dO']:.6f}" if r['global_dO'] is not None else "—(待真机)"
+        dO = f"{r['global_dO']:.6f}" if r['global_dO'] is not None else "—(pending hardware)"
         ac = str(r['accepted']) if r['accepted'] is not None else "—"
         print(f"{r['solver']:<10} {r['injection']:<6} {dO:>12} {ac:>9}")
     print("====================================================")
     if sel.get("E_exact") is not None:
-        print(f"exact 与 sim 是否同解: Hamming={sel['hamming']}  (0=sim 命中真·QUBO 最优)")
-        print(f"通过门: exact ΔO<0 = {sel['dO_inject']<0}; 注入有效 = {sel['dO_inject']<sel['dO_noinject']}; sim 命中 = {sel['dO_sim']<-EPS}")
+        print(f"Exact and sim agreement: Hamming={sel['hamming']}  (0 means sim reaches the exact QUBO optimum)")
+        print(f"Checks: exact ΔO<0 = {sel['dO_inject']<0}; injection helps = {sel['dO_inject']<sel['dO_noinject']}; sim hits target = {sel['dO_sim']<-EPS}")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -222,7 +227,7 @@ def main():
             "scan": scan, "rows": rows}
     out = args.out_dir / f"S0_freeze_control_{ts}.json"
     out.write_text(json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\n快照+结果已保存: {out}")
+    print(f"\nSnapshot and results saved to: {out}")
 
 
 if __name__ == "__main__":
