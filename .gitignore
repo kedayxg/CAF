@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+env/
+.env
+
+# LaTeX / TeX build files
+*.aux
+*.log
+*.out
+*.fls
+*.synctex.gz
+*.bbl
+*.blg
+*.toc
+
+# Outputs & Data (Ignore large generated benchmark results if you want)
+outputs/
+outputs_*/
+overnight_logs/
+reproduce_outputs/
+reproduce_outputs/**/benchmark_summary.partial.json
+*.npy
+*.csv
+!data/
+!data/russell3000_subset/
+!data/russell3000_subset/*.npy
+!data/russell3000_subset/README.md
+temp.lp
+
+# Archived investigation helpers (keep local if needed, but do not treat as core release files)
+experiments/quantum/_investigation/
+**/plot_*.py
+
+# Local hardware credentials
+experiments/config.py
+
+# OS specific
+.DS_Store
+Thumbs.db

@@ -1,0 +1,631 @@
+#!/usr/bin/env python
+"""CAF 真机验证驱动（S2–S4）：在 WK_C180 上跑 warm-start QAOA，与理想模拟器同 θ* 对比。
+
+流程（单进程，保证 sim 与 hw 同一快照/同一社区/同一 θ*）：
+  1. 冻结 iteration-0 快照，选 comm#2（n≤6，S0 已验证 exact=sim=ΔO<0）。
+  2. 理想模拟器跑 warm-start QAOA → θ*（QiskitQAOAOptimizer.last_theta）、E_sim、sim 候选、ΔO_sim。
+  3. 用【同一 θ*、同一 warm-start ansatz】在 WK_C180 上：
+       - expval_pauli_operator(prog, H_C) → E_hw（与 E_sim 比 = 纯执行噪声）；
+       - run_instruction 采样 → hw 候选 → 回代全局 ΔO_hw。
+  4. 事前判据（protocol §4）：accepted_hw==accepted_sim 且 ΔO_hw<0 且 ΔO_hw/ΔO_sim≥0.7。
+
+⚠️ 本脚本依赖 pyqpanda3 + API_TOKEN，在本机 caf 环境跑不了；需在本源环境运行。
+⚠️ 几处 pyqpanda3 细节需按 E006 结果/官方文档确认，已在代码里标 VERIFY。
+默认 --dry-run：只转译、打印门数/深度，不提交（先看再花配额）；加 --submit 才真跑。
+"""
+import argparse
+import json
+import math
+import random
+import time
+from datetime import datetime
+from pathlib import Path
+
+import numpy as np
+import dimod
+from scipy.optimize import minimize
+
+_HW = Path(__file__).resolve().parent
+PROJECT_ROOT = _HW.parents[1]
+SNAPSHOT_ROOT = PROJECT_ROOT.parent
+CAF_ROOT = PROJECT_ROOT
+HARDWARE_RESULTS_ROOT = SNAPSHOT_ROOT / "results" / "hardware"
+for p in (str(CAF_ROOT), str(_HW)):
+    import sys
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+from caf_core import evaluate_state_vector, normalize_local_solution  # noqa: E402
+from experiments._common import (  # noqa: E402
+    extract_communities_from_partitions,
+    load_local_jpm_data,
+    load_upstream_components,
+    split_cardinality_constraint,
+    subset_problem,
+)
+from experiments.config import API_TOKEN, MACHINE_NAME  # noqa: E402
+from experiments.quantum.run_qaoa import (  # noqa: E402
+    QAOAConfig,
+    QiskitQAOAOptimizer,
+)
+
+# 真机侧（本源）—— 仅在 --submit 时真正 import
+SERVICE = BACKEND = CHIP_BACKEND = None
+OPTIONS = None
+SELECTED_PHYSICAL_QUBITS = None
+LAYOUT_METHOD = "default"
+IS_LOCAL = False
+core = qcloud = transpilation = PauliOperator = None
+
+
+def setup_pyqpanda(machine=None, local=False, physical_qubits=None, layout_method="default"):
+    global SERVICE, BACKEND, CHIP_BACKEND, OPTIONS, SELECTED_PHYSICAL_QUBITS, LAYOUT_METHOD
+    global IS_LOCAL, core, qcloud, transpilation, PauliOperator
+    from pyqpanda3 import core as _core, qcloud as _qcloud, transpilation as _tr
+    from pyqpanda3.hamiltonian import PauliOperator as _PO
+    core, qcloud, transpilation, PauliOperator = _core, _qcloud, _tr, _PO
+    IS_LOCAL = local
+    SELECTED_PHYSICAL_QUBITS = sorted(set(int(q) for q in (physical_qubits or []))) or None
+    LAYOUT_METHOD = str(layout_method or "default")
+    if local:
+        BACKEND = core.CPUQVM()          # 本地全振幅模拟器：有 expval_pauli_operator + run/result（验证用）
+        SERVICE = CHIP_BACKEND = None
+        return "CPUQVM(local)"
+    mach = machine or MACHINE_NAME
+    SERVICE = qcloud.QCloudService(api_key=API_TOKEN)
+    BACKEND = SERVICE.backend(mach)
+    try:
+        if SELECTED_PHYSICAL_QUBITS:
+            CHIP_BACKEND = BACKEND.chip_backend(SELECTED_PHYSICAL_QUBITS)
+        else:
+            CHIP_BACKEND = BACKEND.chip_backend()
+    except Exception:
+        CHIP_BACKEND = None
+    options = qcloud.QCloudOptions()
+    options.set_mapping(True); options.set_optimization(True); options.set_amend(True)
+    # NOTE: result-type (integer counts vs platform probs) is NO LONGER controlled by options
+    # in current pyqpanda3 — set_is_prob_counts() is a no-op now. It is selected via
+    # job.result(keys=["probCount"]) in _run_counts(). Kept amend=True (readout calibration).
+    OPTIONS = options
+    return mach
+
+
+def _parse_qubit_list(text):
+    if text is None:
+        return None
+    parts = [p.strip() for p in str(text).replace(";", ",").split(",")]
+    vals = [int(p) for p in parts if p]
+    return sorted(set(vals)) or None
+
+
+# ============================ pyqpanda3 warm-start QAOA 线路 ============================
+
+def _rzz(prog, i, j, angle):
+    """RZZ(angle) on logical qubits i,j。VERIFY: core.RZZ 是否存在；否则用 CNOT·RZ·CNOT 分解。"""
+    if hasattr(core, "RZZ"):
+        prog << core.RZZ(i, j, angle)          # VERIFY: 参数顺序/角度约定
+    else:
+        prog << core.CNOT(i, j) << core.RZ(j, angle) << core.CNOT(i, j)
+
+
+def _u3_via_x1(prog, q, theta, phi, lam):
+    """Decompose U3(theta, phi, lam) into the X1/RZ basis accepted by to_instruction().
+
+    QPanda3's cloud path currently accepts X1/RZ/CZ at the QProg level. X1 is the
+    fixed pi/2 X-rotation used by the backend instruction generator.
+    """
+    prog << core.RZ(q, float(phi + math.pi))
+    prog << core.X1(q)
+    prog << core.RZ(q, float(theta + math.pi))
+    prog << core.X1(q)
+    if abs(float(lam)) > 1e-12:
+        prog << core.RZ(q, float(lam))
+
+
+def _ry_via_x1(prog, q, theta):
+    _u3_via_x1(prog, q, theta, 0.0, 0.0)
+
+
+def _h_via_x1(prog, q):
+    _u3_via_x1(prog, q, math.pi / 2.0, 0.0, math.pi)
+
+
+def _cnot_via_cz(prog, control, target):
+    _h_via_x1(prog, target)
+    prog << core.CZ(control, target)
+    _h_via_x1(prog, target)
+
+
+def _rzz_via_native(prog, i, j, angle):
+    _cnot_via_cz(prog, i, j)
+    prog << core.RZ(j, float(angle))
+    _cnot_via_cz(prog, i, j)
+
+
+def build_qaoa_prog(h, J, theta, p, ws_theta, n, var_labels):
+    """与 QiskitQAOAOptimizer 同构的 warm-start ansatz：RY 初态 + RZ/RZZ cost + RY-RZ-RY mixer。
+
+    ws_theta[q] = 2·arcsin(√c_q)；为 None 时退化为 H 初态 + RX mixer。
+    h/J 的键是 bqm 变量标签，经 var_labels 映射为 qubit 位置 0..n-1。
+    """
+    l2p = {lbl: q for q, lbl in enumerate(var_labels)}
+    prog = core.QProg()
+    gammas, betas = theta[:p], theta[p:]
+    for q in range(n):
+        if ws_theta is not None:
+            _ry_via_x1(prog, q, float(ws_theta[q]))
+        else:
+            _h_via_x1(prog, q)
+    for layer in range(p):
+        g, b = float(gammas[layer]), float(betas[layer])
+        for i, c in h.items():
+            prog << core.RZ(l2p[i], 2.0 * g * float(c))
+        for (i, j), c in J.items():
+            _rzz_via_native(prog, l2p[i], l2p[j], 2.0 * g * float(c))
+        for q in range(n):
+            if ws_theta is not None:
+                _ry_via_x1(prog, q, -float(ws_theta[q]))
+                prog << core.RZ(q, 2.0 * b)
+                _ry_via_x1(prog, q, float(ws_theta[q]))
+            else:
+                _u3_via_x1(prog, q, 2.0 * b, -math.pi / 2.0, math.pi / 2.0)
+    return prog
+
+
+def make_hamiltonian(h, J, var_labels):
+    """Σh_i Z_i + ΣJ_ij Z_iZ_j 的 PauliOperator（不含常数项；offset 由调用方经典加）。"""
+    l2p = {lbl: q for q, lbl in enumerate(var_labels)}
+    terms = {}
+    for i, c in h.items():
+        terms[f"Z{l2p[i]}"] = float(c)
+    for (i, j), c in J.items():
+        terms[f"Z{l2p[i]} Z{l2p[j]}"] = float(c)
+    try:
+        return PauliOperator(terms), True
+    except Exception:
+        return terms, False  # 回退：返回单项 dict，由调用方逐项 expval 求和
+
+
+def _expval(prog, op):
+    """CPUQVM: expval_pauli_operator(prog, op)；QPU: expval_pauli_operator(prog, op, options)。"""
+    try:
+        return float(BACKEND.expval_pauli_operator(prog, op))
+    except TypeError:
+        return float(BACKEND.expval_pauli_operator(prog, op, OPTIONS))
+
+
+def _status_name(status):
+    return getattr(status, "name", str(status))
+
+
+def _safe_call(obj, method_name, default=None):
+    method = getattr(obj, method_name, None)
+    if method is None:
+        return default
+    try:
+        return method()
+    except Exception:
+        return default
+
+
+def _parse_origin_payload(payload):
+    if not payload:
+        return None
+    if isinstance(payload, dict):
+        return payload
+    if isinstance(payload, str):
+        try:
+            return json.loads(payload)
+        except Exception:
+            return None
+    return None
+
+
+def _decode_taskresult_key(key, width):
+    if isinstance(key, str) and key.startswith(("0x", "0X")):
+        return format(int(key, 16), f"0{width}b")
+    key = str(key)
+    if set(key) <= {"0", "1"}:
+        return key.rjust(width, "0")
+    return None
+
+
+def _normalize_count_keys(counts, n):
+    """Normalize count keys to fixed-width-n binary strings.
+
+    The QPU probCount channel returns HEX keys (e.g. '0x3'); the local CPUQVM and
+    the taskResult fallback return binary strings. Route both through the hex-aware
+    decoder so downstream width/decode logic is uniform.
+    """
+    out = {}
+    for k, v in counts.items():
+        b = _decode_taskresult_key(k, n)
+        if b is not None:
+            out[b] = out.get(b, 0) + v
+    return out
+
+
+def _taskresult_distribution(origin_data, width):
+    payload = _parse_origin_payload(origin_data)
+    obj = payload.get("obj", {}) if isinstance(payload, dict) else {}
+    task_result = obj.get("taskResult", [])
+    if not task_result:
+        return {}, None
+    entry = _parse_origin_payload(task_result[0])
+    if not isinstance(entry, dict):
+        return {}, None
+    keys = entry.get("key", [])
+    values = entry.get("value", [])
+    dist = {}
+    for key, value in zip(keys, values):
+        bits = _decode_taskresult_key(key, width)
+        if bits is None:
+            continue
+        dist[bits] = float(value)
+    return dist, entry
+
+
+def _transpile_prog_for_chip(prog):
+    if CHIP_BACKEND is None:
+        return prog, False
+    init_mapping = {}
+    use_transpile = bool(SELECTED_PHYSICAL_QUBITS) or LAYOUT_METHOD != "default"
+    if not use_transpile:
+        try:
+            prog.to_instruction(CHIP_BACKEND, 1, False, False)
+            return prog, False
+        except Exception:
+            use_transpile = True
+    layout_method = LAYOUT_METHOD if LAYOUT_METHOD != "default" else "default"
+    mapped = transpilation.Transpiler().transpile(prog, CHIP_BACKEND, init_mapping, 2, layout_method)
+    return mapped, True
+
+
+def _run_counts(prog, shots, n, poll_interval_s=3, max_polls=20):
+    """取 counts，并附带真机返回链路调试信息。"""
+    if IS_LOCAL:
+        BACKEND.run(prog, shots=shots)
+        result = BACKEND.result()
+        return result.get_counts(), {
+            "backend_mode": "local",
+            "counts_source": "result.get_counts",
+            "decode_source": "counts",
+            "distribution_kind": "raw_counts",
+        }
+    if CHIP_BACKEND is not None:
+        try:
+            compiled_prog, transpile_used = _transpile_prog_for_chip(prog)
+            instr = compiled_prog.to_instruction(CHIP_BACKEND, 1, False, False)
+        except Exception:
+            mapped = transpilation.Transpiler().transpile(prog, CHIP_BACKEND, {}, 2, LAYOUT_METHOD)
+            instr = mapped.to_instruction(CHIP_BACKEND, 1, False, False)
+            transpile_used = True
+    else:
+        instr = prog.to_instruction()
+        transpile_used = False
+    job = BACKEND.run_instruction([instr], shots, OPTIONS)
+    job_id = _safe_call(job, "job_id")
+    status_trace = []
+    final_status = None
+    for _ in range(max_polls):
+        final_status = _status_name(_safe_call(job, "status", "UNKNOWN"))
+        status_trace.append(final_status)
+        if final_status in {"FINISHED", "FAILED"}:
+            break
+        if poll_interval_s > 0:
+            time.sleep(poll_interval_s)
+    try:
+        res = job.result(keys=["probCount"])   # current pyqpanda3: result-type is selected HERE, not via options. "probCount" => integer per-shot counts.
+    except Exception as _e:
+        print(f"[warn] job.result(keys=['probCount']) unsupported on this backend ({type(_e).__name__}: {_e}); falling back to result() (will likely hit the taskResult/platform-prob fallback). If so, switch BACKEND.run_instruction([...]) to BACKEND.run(prog, shots, OPTIONS).")
+        res = job.result()
+    counts_list = _safe_call(res, "get_counts_list")
+    counts = (counts_list or [_safe_call(res, "get_counts", {})])[0] or {}
+    origin_data = _safe_call(res, "origin_data")
+    taskresult_dist, taskresult_entry = ({}, None)
+    decode_source = "counts"
+    distribution_kind = "raw_counts"
+    if not counts:
+        taskresult_dist, taskresult_entry = _taskresult_distribution(origin_data, n)
+        if taskresult_dist:
+            counts = taskresult_dist
+            decode_source = "taskResult"
+            distribution_kind = "platform_probs"
+    meta = {
+        "backend_mode": "qpu",
+        "job_id": job_id,
+        "status_trace": status_trace,
+        "final_status": final_status or _status_name(_safe_call(job, "status", "UNKNOWN")),
+        "transpile_used": transpile_used,
+        "timing_info": _safe_call(res, "timing_info"),
+        "error_message": _safe_call(res, "error_message"),
+        "origin_data": origin_data,
+        "counts_source": "get_counts_list" if counts_list else "get_counts",
+        "decode_source": decode_source,
+        "distribution_kind": distribution_kind,
+        "distribution_total": float(sum(counts.values())) if counts else 0.0,
+        "taskResult_entry": taskresult_entry,
+        "selected_physical_qubits": SELECTED_PHYSICAL_QUBITS,
+        "layout_method": LAYOUT_METHOD,
+    }
+    return counts, meta
+
+
+# ============================ sim 侧（理想参考） ============================
+
+def run_sim(get_model, to_cqm, adjusted, sub, K, q_eff, cfg, n):
+    model, weights = get_model(adjusted, sub, budget=K, risk_factor=q_eff)
+    label_of_Cpos = [weights[j].name for j in range(n)]
+    ws = None
+    if cfg.warmstart:
+        c = _relax(adjusted, sub, K, q_eff)
+        ws = {label_of_Cpos[j]: float(c[j]) for j in range(n)}
+    opt = QiskitQAOAOptimizer(cfg, warmstart_c=ws)
+    sim_cand, _, _ = opt(model, weights)
+    sim_cand = normalize_local_solution(sim_cand, n, K)
+    bqm, _ = dimod.cqm_to_bqm(to_cqm(model))
+    h, J, offset = bqm.to_ising()
+    var_labels = list(bqm.variables)
+    # warm-start θ（按 var_labels 序），供 hw 复用；plain QAOA 时为 None。
+    ws_theta_hw = None
+    if ws is not None:
+        ws_theta_hw = np.array([
+            2.0 * np.arcsin(np.sqrt(min(1.0, max(0.0, float(ws.get(lbl, 0.5))))))
+            for lbl in var_labels
+        ])
+    E_sim = float(np.dot(opt.last_probs, opt.last_energies))
+    return dict(h=h, J=J, offset=offset, var_labels=var_labels, theta=opt.last_theta,
+                ws_theta_hw=ws_theta_hw, sim_cand=sim_cand, E_sim=E_sim,
+                p=cfg.p, n=n, model=model, weights=weights, bqm=bqm)
+
+
+def _relax(adjusted, sub, K, q_eff):
+    n = len(adjusted)
+    res = minimize(lambda x: q_eff * (x @ sub @ x) - adjusted @ x, np.full(n, K / n),
+                   method="SLSQP", bounds=[(0.0, 1.0)] * n,
+                   constraints=[{"type": "eq", "fun": lambda x: np.sum(x) - K}],
+                   options={"maxiter": 200, "ftol": 1e-9})
+    return np.clip(res.x, 0.0, 1.0)
+
+
+# ============================ hw 侧 ============================
+
+def hw_energy(prog, h, J, offset, var_labels):
+    # pyqpanda's Pauli-Z expval uses |0> -> +1, |1> -> -1, while dimod's
+    # Ising convention here uses s = 2x - 1. Flip the linear terms so the
+    # expval-based diagnostic energy matches the simulator-side Ising scale.
+    h_fixed = {label: -float(coeff) for label, coeff in h.items()}
+    op, ok = make_hamiltonian(h_fixed, J, var_labels)
+    if ok:
+        return float(offset) + _expval(prog, op)
+    val = float(offset)  # 回退：逐项 expval 求和
+    for spec, c in op.items():
+        val += c * _expval(prog, PauliOperator({spec: 1.0}))
+    return val
+
+
+def _decode_counts_bitstring(bits, n, width):
+    bits = bits.rjust(width, "0")
+    return np.array([int(bits[width - 1 - q]) for q in range(n)], dtype=int)
+
+
+def _ising_energy_from_bits(x_bits, h, J, offset, var_labels):
+    label_to_pos = {label: pos for pos, label in enumerate(var_labels)}
+    # Keep the bit-to-spin convention aligned with the simulator-side QAOA path.
+    spins = 2 * np.asarray(x_bits, dtype=int) - 1
+    val = float(offset)
+    for i, coeff in h.items():
+        val += float(coeff) * float(spins[label_to_pos[i]])
+    for (i, j), coeff in J.items():
+        val += float(coeff) * float(spins[label_to_pos[i]] * spins[label_to_pos[j]])
+    return val
+
+
+def hw_counts_energy_and_sample(prog, n, K, shots, adjusted, sub, q_eff, h, J, offset, var_labels):
+    """Single measurement pass for diagonal cost Hamiltonians.
+
+    The local cost used here is diagonal in the computational basis (Z/ZZ only), so
+    one batch of computational-basis counts is sufficient to:
+    1) estimate the hardware energy E_hw by Monte Carlo averaging, and
+    2) choose the best feasible sampled candidate for the CAF feedback step.
+    """
+    prog << core.measure(list(range(n)), list(range(n)))
+    counts, meta = _run_counts(prog, shots, n)
+    counts = _normalize_count_keys(counts, n)
+    width = max((len(k) for k in counts), default=n)
+    total = sum(counts.values()) or 1
+
+    best_x, best_local_e = None, None
+    energy_acc = 0.0
+    for bits, freq in counts.items():
+        x_bits = _decode_counts_bitstring(bits, n, width)
+        energy_acc += float(freq) * _ising_energy_from_bits(x_bits, h, J, offset, var_labels)
+        if int(x_bits.sum()) != K:
+            continue
+        local_e = q_eff * (x_bits @ sub @ x_bits) - adjusted @ x_bits
+        if best_local_e is None or local_e < best_local_e:
+            best_local_e, best_x = float(local_e), x_bits
+
+    return energy_acc / float(total), best_x, counts, meta
+
+
+def hw_sample(prog, n, K, shots, adjusted, sub, q_eff):
+    """取 counts → 在【可行】样本里按局部目标取最优 → 返回 C 序 bitstring。
+
+    比特序（已由 E006 在 CPUQVM 上确认）：counts 比特串右起第 k 位 = qubit k。
+    采样前需补 measure 门（expval 不需要、但 run/counts 需要）。
+    """
+    prog << core.measure(list(range(n)), list(range(n)))   # 补测量
+    counts, meta = _run_counts(prog, shots, n)
+    counts = _normalize_count_keys(counts, n)
+    L = max(len(k) for k in counts) if counts else n
+    best_x, best_e = None, None
+    for bits, _ in counts.items():
+        bits = bits.rjust(L, "0")                      # 左补零对齐
+        b = np.array([int(bits[L - 1 - q]) for q in range(n)], dtype=int)  # 右起第 q 位 = qubit q
+        if int(b.sum()) != K:                          # 仅留满足基数的可行样本
+            continue
+        e = q_eff * (b @ sub @ b) - adjusted @ b
+        if best_e is None or e < best_e:
+            best_e, best_x = e, b
+    return best_x, counts, meta
+
+
+# ============================ driver ============================
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--jpm-repo",
+        type=Path,
+        default=None,
+        help="Optional override path to another dcmppln checkout. Defaults to the vendored copy.",
+    )
+    ap.add_argument("--data-dir", type=Path, default=CAF_ROOT / "data" / "russell3000_subset")
+    ap.add_argument("--out-dir", type=Path, default=HARDWARE_RESULTS_ROOT)
+    ap.add_argument("--n-assets", type=int, default=40, help="冻结快照时的资产子集规模")
+    ap.add_argument("--subset-seed", type=int, default=1234, help="冻结快照时的资产子集随机种子")
+    ap.add_argument("--community", type=int, default=2, help="社区 idx（S0 选定 #2）")
+    ap.add_argument("--qaoa-p", type=int, default=2)
+    ap.add_argument("--qaoa-restarts", type=int, default=6)
+    ap.add_argument("--qaoa-maxiter", type=int, default=80)
+    ap.add_argument("--base-seed", type=int, default=42)
+    ap.add_argument("--shots", type=int, default=4000)
+    ap.add_argument("--submit", action="store_true", help="真正提交真机（默认 dry-run，只转译）")
+    ap.add_argument("--machine", default=None, help="后端覆盖：WK_C180(真机) / full_amplitude(模拟器,先跑) / ...（默认 config.MACHINE_NAME）")
+    ap.add_argument("--local", action="store_true", help="用本地 CPUQVM 验证（不花配额；应与 sim 完全一致 → 证明线路构造正确）")
+    ap.add_argument("--physical-qubits", type=str, default=None, help="逗号分隔的物理比特子集，例如 12,13,14,15,16,17,18")
+    ap.add_argument("--layout-method", choices=["default", "fidelity"], default="default",
+                    help="转译布局策略；若给定物理比特子集，fidelity 会在子集中再做保真度感知布局。")
+    ap.add_argument("--tau", type=float, default=0.7, help="事前判据 ΔO_hw/ΔO_sim 阈值")
+    ap.add_argument(
+        "--no-warmstart",
+        action="store_true",
+        help="关闭 Egger-style warm-start，改用 plain QAOA（H 初态 + RX mixer）。",
+    )
+    args = ap.parse_args()
+    physical_qubits = _parse_qubit_list(args.physical_qubits)
+    mach = setup_pyqpanda(args.machine, local=args.local, physical_qubits=physical_qubits, layout_method=args.layout_method)
+    print(f"后端: {mach}")
+    if physical_qubits:
+        print(f"物理比特子集: {physical_qubits}  [layout={args.layout_method}]")
+
+    Clustering, Denoiser, SimulatedAnnealingDwave, Pipeline, get_model, rebal = load_upstream_components(args.jpm_repo)
+    to_cqm = QiskitQAOAOptimizer._docplex_model_to_cqm
+    q = 0.5
+
+    # ---- 冻结 iteration-0 快照（与 S0 同）----
+    cov_df, corr_df, ret_s = load_local_jpm_data(args.data_dir)
+    cov_df, corr_df, ret_s = subset_problem(cov_df, corr_df, ret_s, args.n_assets, args.subset_seed)
+    cardinality = len(ret_s) // 2
+    np.random.seed(args.base_seed); random.seed(args.base_seed)
+    pipe = Pipeline(corr_df.values, cov_df.values, ret_s.values,
+                    denoiser=Denoiser(active=True, q=0.5, q_fit=True),
+                    cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
+                    optimize_func=SimulatedAnnealingDwave(num_reads=200, seed=args.base_seed))
+    pr = pipe.run(run_optimizer=True, risk_rebalancing=True, cluster_on_correlation=True,
+                  optimize_on_correlation=False, input_risk_factor=q)
+    communities = extract_communities_from_partitions(pipe.__state__["result"]["partitions"])
+    subcard = split_cardinality_constraint([len(c) for c in communities], cardinality)
+    q_eff = rebal(q, cov_df.values, ret_s.values, pipe.__state__["result"]["partitions"])
+    static_sel = np.where(np.asarray(pr["recombined_solution"]).astype(np.int64) == 1)[0].tolist()
+    cov = cov_df.values; ret = ret_s.values
+    current_state = np.zeros(cov.shape[0], dtype=int); current_state[static_sel] = 1
+    v = cov @ current_state
+    base_obj = float(evaluate_state_vector(current_state, cov_df, ret_s, risk_factor=q)["objective"])
+
+    ci = args.community
+    C = communities[ci]; K_C = int(subcard[ci]); n = len(C)
+    sub = cov[np.ix_(C, C)]; x_C = current_state[C]
+    adjusted = ret[C] - 2.0 * q_eff * (v[C] - sub @ x_C)
+    print(f"社区 #{ci}: n={n}, K={K_C}")
+
+    # ---- sim QAOA（理想参考 + 共享 θ*）----
+    cfg = QAOAConfig(p=args.qaoa_p, restarts=args.qaoa_restarts, maxiter=args.qaoa_maxiter,
+                     seed=args.base_seed, optimizer="COBYLA", shots=args.shots, decode="shots",
+                     warmstart=(not args.no_warmstart))
+    sim = run_sim(get_model, to_cqm, adjusted, sub, K_C, q_eff, cfg, n)
+
+    def global_dO(cand_Corder):
+        st = current_state.copy(); st[C] = np.asarray(cand_Corder, dtype=int)
+        return float(evaluate_state_vector(st, cov_df, ret_s, risk_factor=q)["objective"] - base_obj)
+
+    dO_sim = global_dO(sim["sim_cand"]); acc_sim = dO_sim <= -1e-5
+    print(f"[sim] E_sim={sim['E_sim']:.6f}  ΔO_sim={dO_sim:+.6f}  accepted={acc_sim}  θ*={np.round(sim['theta'],4).tolist()}")
+
+    record = {"community": ci, "n": n, "K": K_C, "p": args.qaoa_p,
+              "n_assets": args.n_assets, "subset_seed": args.subset_seed,
+              "warmstart": bool(cfg.warmstart),
+              "physical_qubits": physical_qubits,
+              "layout_method": args.layout_method,
+              "theta_star": sim["theta"].tolist(),
+              "E_sim": sim["E_sim"], "dO_sim": dO_sim, "accepted_sim": bool(acc_sim)}
+
+    # ---- hw 侧 ----
+    hw_prog = build_qaoa_prog(sim["h"], sim["J"], sim["theta"], sim["p"], sim["ws_theta_hw"], n, sim["var_labels"])
+    run_hw = args.submit or args.local
+    if not run_hw:
+        if CHIP_BACKEND is not None:
+            mapped, _ = _transpile_prog_for_chip(hw_prog)
+            ops = mapped.count_ops() if hasattr(mapped, "count_ops") else "?"
+        else:
+            ops = "(无 chip_backend，跳过转译/门统计)"
+        print(f"[dry-run] 线路已构（不运行）。原生门统计: {ops}")
+        print("加 --local（CPUQVM 验证）或 --submit（真机 WK_C180）运行。")
+        record["mode"] = "dry_run"; record["native_ops"] = str(ops)
+    else:
+        if args.local:
+            E_hw = hw_energy(hw_prog, sim["h"], sim["J"], sim["offset"], sim["var_labels"])
+            hw_cand, counts, qpu_debug = hw_sample(hw_prog, n, K_C, args.shots, adjusted, sub, q_eff)
+        else:
+            E_hw, hw_cand, counts, qpu_debug = hw_counts_energy_and_sample(
+                hw_prog,
+                n,
+                K_C,
+                args.shots,
+                adjusted,
+                sub,
+                q_eff,
+                sim["h"],
+                sim["J"],
+                sim["offset"],
+                sim["var_labels"],
+            )
+        fallback_used = hw_cand is None
+        if fallback_used:
+            print("[hw] 无可行样本（基数未满足）→ 记为硬件失败，不再把全 0 回退误记为成功更新。")
+            hw_cand = np.zeros(n, dtype=int)
+            dO_hw = None
+            acc_hw = False
+            hamming = None
+            ratio = float("nan")
+        else:
+            dO_hw = global_dO(hw_cand)
+            acc_hw = dO_hw <= -1e-5
+            hamming = int(np.sum(hw_cand != sim["sim_cand"]))
+            ratio = (dO_hw / dO_sim) if dO_sim != 0 else float("nan")
+        tag = "LOCAL(CPUQVM,无噪声)" if args.local else f"QPU({mach})"
+        crit = bool((not fallback_used) and acc_hw and acc_sim and dO_hw < 0 and ratio >= args.tau)
+        dO_text = "NA(no feasible sample)" if dO_hw is None else f"{dO_hw:+.6f}"
+        ham_text = "NA" if hamming is None else str(hamming)
+        ratio_text = "NA" if fallback_used else f"{ratio:.3f}"
+        print(f"[hw-{tag}] E_hw={E_hw:.6f} (ΔE={E_hw-sim['E_sim']:+.2e})  ΔO_hw={dO_text}  accepted={acc_hw}  Hamming(hw,sim)={ham_text}  ΔO_hw/ΔO_sim={ratio_text}")
+        print(f"事前判据 (τ={args.tau}): {'PASS ✓' if crit else 'FAIL'}")
+        record.update({"mode": "local" if args.local else "submit", "E_hw": E_hw, "dO_hw": dO_hw,
+                       "accepted_hw": bool(acc_hw), "hamming_hw_sim": hamming, "ratio_dO": ratio,
+                       "fallback_used": bool(fallback_used),
+                       "criterion_pass": crit, "hw_candidate": hw_cand.tolist(),
+                       "counts_total": int(sum(counts.values())) if qpu_debug.get("distribution_kind") == "raw_counts" else 0,
+                       "distribution_total": float(sum(counts.values())),
+                       "counts_distinct": int(len(counts)),
+                       "counts_full": counts, "qpu_debug": qpu_debug})
+
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out = args.out_dir / f"HW_qaoa_{('submit' if args.submit else 'dryrun')}_{ts}.json"
+    out.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"已保存: {out}")
+
+
+if __name__ == "__main__":
+    main()

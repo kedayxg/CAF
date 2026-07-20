@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "caf-optimizer"
+version = "0.1.0"
+description = "Context-Aware Folding (CAF) for decomposition-based portfolio optimization"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+authors = [
+  { name = "CAF Contributors" }
+]
+dependencies = [
+  "numpy==2.4.6",
+  "pandas==3.0.3",
+  "scipy==1.17.1",
+  "matplotlib==3.10.7",
+  "seaborn==0.13.2",
+  "scikit-learn==1.9.0",
+  "dimod==0.12.22",
+  "dwave-neal==0.6.0",
+  "dwave-samplers==1.7.0",
+  "docplex==2.32.264",
+  "memory_profiler==0.61.0"
+]
+
+[project.optional-dependencies]
+quantum = [
+  "qiskit==2.5.0"
+]
+gurobi = [
+  "gurobipy==13.0.2"
+]
+dev = [
+  "pytest>=8.0"
+]
+
+[tool.setuptools.packages.find]
+include = ["caf_core*", "dcmppln*"]
+namespaces = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

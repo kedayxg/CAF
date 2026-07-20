@@ -1,0 +1,23 @@
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.17.1
+matplotlib==3.10.7
+seaborn==0.13.2
+scikit-learn==1.9.0
+
+# Core optimization / classical decomposition tooling
+dimod==0.12.22
+dwave-neal==0.6.0
+dwave-samplers==1.7.0
+docplex==2.32.264
+memory_profiler==0.61.0
+
+# Quantum compatibility experiments
+qiskit==2.5.0
+
+# Optional local exact-solver backend used in some validation scripts
+gurobipy==13.0.2
+
+# `dcmppln` is vendored in-repo under `dcmppln/`; no external install is required.
+# Optional hardware backend dependency used only by experiments/quantum/run_hardware_qaoa.py
+# pyqpanda3 is not listed here because its installation path is backend-specific.
