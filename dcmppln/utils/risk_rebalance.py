@@ -3,40 +3,52 @@
 # // Copyright 2024: Amazon Web Services, Inc. - Contributions from JPMC
 #
 ###############################################################################
+from collections.abc import Mapping
+
 import numpy as np
 
+
 def rebalancing_risk_factor(risk_factor, full_covariance, full_avg_return, communities):
+    """Balance risk using sums of the norms of the actual community blocks.
 
-    #### we have the full covariance matrix and the full average return vector, and the communities
+    ``communities`` is either one label per asset or a mapping from arbitrary
+    community labels to disjoint asset-index sequences covering all assets.
+    Labels identify groups; they are never interpreted as asset indices.
+    """
+    covariance = np.asarray(full_covariance, dtype=float)
+    returns = np.asarray(full_avg_return, dtype=float)
+    if returns.ndim != 1 or covariance.shape != (len(returns), len(returns)):
+        raise ValueError("Covariance and returns must describe the same assets")
 
-    balanced_risk_factor = risk_factor
-
-    ### calculate norm of the covariance matrix, and the norm of the average return vector
-    cov_norm = np.linalg.norm(full_covariance)
-    avg_return_norm = np.linalg.norm(full_avg_return)
-
-    ### calculate the number of the masked covariance that only takes blocks corresponding to the communities
-    num_communities = len(communities)
-
-    if type(communities) == dict:
-        pass
+    if isinstance(communities, Mapping):
+        groups = []
+        for indices in communities.values():
+            indices = np.asarray(indices)
+            if indices.ndim != 1 or not np.issubdtype(indices.dtype, np.integer):
+                raise ValueError("Community indices must be one-dimensional integers")
+            groups.append(indices.astype(int, copy=False))
+        all_indices = np.concatenate(groups) if groups else np.array([], dtype=int)
+        if not np.array_equal(np.sort(all_indices), np.arange(len(returns))):
+            raise ValueError("Communities must cover every asset exactly once")
     else:
-        communities = {k: v for k, v in enumerate(communities)}
+        labels = np.asarray(communities)
+        if labels.ndim != 1 or len(labels) != len(returns):
+            raise ValueError("Provide one community label per asset")
+        groups = [np.flatnonzero(labels == label) for label in np.unique(labels)]
 
-    community_cov_norm = 0
-    community_avg_return_norm = 0
-    
-    for community_idx, community in communities.items():
-        community = np.array([community]).astype(int)
-        community_covariance = full_covariance[np.ix_(community, community)]
-        community_avg_return = full_avg_return[community]
+    cov_norm = np.linalg.norm(covariance)
+    avg_return_norm = np.linalg.norm(returns)
+    # A zero risk coefficient, risk matrix, or return vector needs no rescaling.
+    if risk_factor == 0 or cov_norm == 0 or avg_return_norm == 0:
+        return risk_factor
 
-        ### calculate the norm of the covariance matrix and the norm of the average return vector
-        community_cov_norm += np.linalg.norm(community_covariance)
-        community_avg_return_norm += np.linalg.norm(community_avg_return)
-        
+    community_cov_norm = sum(
+        np.linalg.norm(covariance[np.ix_(indices, indices)]) for indices in groups
+    )
+    community_avg_return_norm = sum(np.linalg.norm(returns[indices]) for indices in groups)
+    if community_cov_norm == 0:
+        raise ValueError("Cannot rebalance risk with zero within-community covariance")
 
-    ### add the ratio of the norms to the balanced risk factor
-    balanced_risk_factor *= (cov_norm/community_cov_norm)*(community_avg_return_norm/avg_return_norm)   
-
-    return balanced_risk_factor
+    return risk_factor * (cov_norm / community_cov_norm) * (
+        community_avg_return_norm / avg_return_norm
+    )

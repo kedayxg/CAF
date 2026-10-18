@@ -12,7 +12,8 @@ caf_root = current_dir.parent.parent
 if str(caf_root) not in sys.path:
     sys.path.insert(0, str(caf_root))
 
-from caf_core import evaluate_portfolio, run_caf_pipeline
+from caf_core import __version__ as caf_version, evaluate_portfolio, run_caf_pipeline
+from experiments.classical.run_benchmark import validate_portfolio_cardinality
 from experiments._common import (
     BUNDLED_DATA_DIR as bundled_data_dir,
     extract_communities_from_partitions,
@@ -46,7 +47,12 @@ def choose_solver_factories(solver_name, sa_num_reads, SimulatedAnnealingDwave, 
     raise ValueError(f"Unsupported solver: {solver_name}. Supported: sa, gurobi")
 
 
-def aggregate(records):
+def aggregate(records, cardinality):
+    for record in records:
+        for method in ("static", "caf"):
+            validate_portfolio_cardinality(
+                record[method]["weights"], cardinality, f"{method} run {record['run_idx']}"
+            )
     arr_obj_static = np.asarray([r["static"]["objective"] for r in records], dtype=float)
     arr_obj_caf = np.asarray([r["caf"]["objective"] for r in records], dtype=float)
     arr_risk_static = np.asarray([r["static"]["risk"] for r in records], dtype=float)
@@ -287,7 +293,6 @@ def main():
                             optimize_on_correlation=False,
                             input_risk_factor=args.risk_factor,
                         )
-                        cardinality_divider = max(1, int(round(n_assets / cardinality)))
                         pipeline_result = pipeline.optimize_and_score(
                             matrix_to_cluster=C2,
                             matrix_to_optimize=cov.values,
@@ -302,7 +307,7 @@ def main():
                             denoise_time=0.0,
                             clustering_time=0.0,
                             risk_rebalancing=False,
-                            cardinality_divider=cardinality_divider,
+                            cardinality=cardinality,
                         )
                     else:
                         pipeline_result = pipeline.run(
@@ -318,9 +323,9 @@ def main():
                     communities = extract_communities_from_partitions(partitions)
                     subproblem_cardinalities = split_cardinality_constraint([len(c) for c in communities], cardinality)
                     eff_risk = args.risk_factor
-                    static_selected = np.where(
-                        np.asarray(pipeline_result["recombined_solution"]).astype(np.int64) == 1
-                    )[0].tolist()
+                    static_selected = validate_portfolio_cardinality(
+                        pipeline_result["recombined_solution"], cardinality, f"JPM run {run_idx}"
+                    )
                     static_metrics = evaluate_portfolio(static_selected, cov, ret, args.risk_factor)
 
                     t1 = perf_counter()
@@ -341,11 +346,16 @@ def main():
                         seed=run_seed,
                     )
                     caf_time = perf_counter() - t1
+                    caf_selected = validate_portfolio_cardinality(
+                        caf_res["metrics"]["weights"], cardinality, f"CAF run {run_idx}"
+                    )
 
                     run_records.append(
                         {
                             "run_idx": run_idx,
                             "seed": run_seed,
+                            "static_cardinality": len(static_selected),
+                            "caf_cardinality": len(caf_selected),
                             "static": static_metrics,
                             "caf": caf_res["metrics"],
                             "static_time_sec": static_time,
@@ -353,7 +363,7 @@ def main():
                         }
                     )
 
-                summary = aggregate(run_records)
+                summary = aggregate(run_records, cardinality)
                 print(
                     f"   Objective improvement (CAF vs JPM Pipeline): "
                     f"{summary['delta_pct']['objective_improvement_mean_pct']:.3f}% "
@@ -382,6 +392,7 @@ def main():
 
     summary = {
         "config": {
+            "caf_version": caf_version,
             "runs": args.runs,
             "sizes": sizes,
             "solvers": solvers,

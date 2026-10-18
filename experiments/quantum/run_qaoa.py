@@ -21,6 +21,7 @@ if str(caf_root) not in sys.path:
     sys.path.insert(0, str(caf_root))
 
 from caf_core import (
+    __version__,
     attach_local_problem_metadata,
     evaluate_portfolio,
     normalize_local_solution,
@@ -82,7 +83,7 @@ class QAOAConfig:
     seed: int = 123
     optimizer: str = "COBYLA"
     shots: int = 4000
-    decode: str = "shots"  # "shots" = sample N shots, return lowest-energy FEASIBLE sampled state (hardware-aligned); "argmax_prob" = legacy highest-probability feasible (reproduces earlier Table III)
+    decode: str = "shots"  # "shots": lowest-energy feasible sample; "argmax_prob": highest-probability feasible state
     warmstart: bool = False  # Egger warm-start: init from continuous relaxation, mixer RY(θ)RZ(2β)RY(-θ)
 
 
@@ -96,6 +97,8 @@ class QiskitQAOAOptimizer:
         self.config = config
         self.shots = int(config.shots)
         self.decode = str(config.decode)
+        if self.decode not in {"shots", "argmax_prob"}:
+            raise ValueError(f"Unsupported QAOA decoding mode: {self.decode}")
         self.warmstart_c = warmstart_c  # dict {var_label: float in [0,1]} for Egger warm-start, or None
         self.last_theta = None       # optimized θ*, exposed for hardware-in-the-loop (shared-θ*) use
         self.last_probs = None
@@ -226,6 +229,14 @@ class QiskitQAOAOptimizer:
             for layer in range(self.config.p):
                 gamma = float(gammas[layer])
                 beta = float(betas[layer])
+                # Preserve the historical positive-RZ convention. With s=2x-1,
+                # the direct cost has -h*Z, whereas this circuit has +h*Z.
+                # For H|0> initialization and X mixers the two costs are
+                # conjugate by P=X^n. Shifting only the last beta by pi/2
+                # removes P (up to global phase), so unrestricted parameters
+                # span the same output distributions at every depth. This
+                # argument does not apply directly to fixed warm-start states
+                # and their tilted mixers; that mode needs separate validation.
                 for i, coeff in h.items():
                     qc.rz(2.0 * gamma * float(coeff), label_to_pos[i])
                 for (i, j), coeff in J.items():
@@ -290,10 +301,9 @@ class QiskitQAOAOptimizer:
             the lowest-energy FEASIBLE sampled state. A good state must carry
             enough probability to be sampled -- this preserves the QAOA-quality
             signal and matches the real-hardware protocol (best feasible sample).
-        decode="argmax_prob" (legacy): return the highest-probability feasible
-            state regardless of its objective. Reproduces earlier Table III
-            numbers; can systematically miss the optimum when the QAOA peak sits
-            on a worse feasible state.
+        decode="argmax_prob": return the highest-probability feasible state
+            regardless of its objective. The decoding mode is an explicit
+            experiment setting; neither mode alone identifies a published run.
         """
         rng = np.random.default_rng(int(self.config.seed) + 7)
         if self.decode == "argmax_prob":
@@ -320,16 +330,57 @@ class SQAOptimizer:
     Intended as an annealing-style reference backend.
     """
 
-    def __init__(self, num_reads=20, num_sweeps=1000, seed=None):
+    def __init__(self, num_reads=20, num_sweeps=1000, seed=None, *, inverse_temperature=5.0, transverse_field=1.0):
         self.num_reads = int(num_reads)
         self.num_sweeps = int(num_sweeps)
         self.seed = None if seed is None else int(seed)
+        self.inverse_temperature = float(inverse_temperature)
+        self.transverse_field = float(transverse_field)
+        if self.num_reads < 1 or self.num_sweeps < 2:
+            raise ValueError("SQA requires num_reads>=1 and num_sweeps>=2")
+        if not np.isfinite(self.inverse_temperature) or self.inverse_temperature <= 0:
+            raise ValueError("SQA inverse_temperature must be finite and positive")
+        if not np.isfinite(self.transverse_field) or self.transverse_field <= 0:
+            raise ValueError("SQA transverse_field must be finite and positive")
+        self.last_schedule = None
         self.params = {
             "name": "SQAOptimizer",
             "num_reads": self.num_reads,
             "num_sweeps": self.num_sweeps,
             "seed": self.seed,
+            "schedule": "linear_normalized",
+            "schedule_version": 1,
+            "inverse_temperature": self.inverse_temperature,
+            "transverse_field": self.transverse_field,
+            "ising_scale": "max_i(abs(h_i) + sum_j(abs(J_ij))), or 1 for a zero BQM",
+            "Hp_field": "inverse_temperature * s / ising_scale",
+            "Hd_field": "inverse_temperature * transverse_field * (1-s)",
+            "Gamma": 1.0,
         }
+
+    def _annealing_schedule(self, bqm):
+        """Return beta-scaled fields for H(s)=s*H_problem-(1-s)*field*sum(X).
+
+        For local Ising scale L, the physical inverse temperature is
+        inverse_temperature/L and the initial transverse field is
+        transverse_field*L. This keeps the schedule meaningful when CQM
+        penalties change the BQM's coefficient magnitude.
+        Ocean 1.7.0 takes beta-scaled Hp_field/Hd_field arrays; Gamma alone
+        leaves Hd_field at its all-zero default and does not enable SQA.
+        """
+        h, J, _ = bqm.to_ising()
+        local_scales = {label: abs(float(value)) for label, value in h.items()}
+        for (i, j), value in J.items():
+            local_scales[i] += abs(float(value))
+            local_scales[j] += abs(float(value))
+        scale = max(local_scales.values(), default=0.0) or 1.0
+        if not np.isfinite(scale):
+            raise ValueError("SQA requires finite BQM coefficients")
+        s = np.linspace(0.0, 1.0, self.num_sweeps)
+        hp = self.inverse_temperature * s / scale
+        hd = self.inverse_temperature * self.transverse_field * (1.0 - s)
+        self.last_schedule = {"ising_scale": scale, "Hp_field": hp.tolist(), "Hd_field": hd.tolist()}
+        return hp, hd
 
     def __call__(self, model, weights=None, unique_identifier=None, log_best_feasible=False):
         del unique_identifier, log_best_feasible
@@ -358,9 +409,14 @@ class SQAOptimizer:
             return np.array([]), 0.0, 0.0
 
         sampler = PathIntegralAnnealingSampler()
+        hp_field, hd_field = self._annealing_schedule(bqm)
         sample_kwargs = {
             "num_reads": self.num_reads,
             "num_sweeps": self.num_sweeps,
+            "beta_schedule_type": "custom",
+            "Hp_field": hp_field,
+            "Hd_field": hd_field,
+            "Gamma": 1.0,
         }
         if self.seed is not None:
             sample_kwargs["seed"] = self.seed
@@ -596,6 +652,10 @@ def parse_args():
     parser.add_argument("--qaoa-restarts", type=int, default=6, help="Random restarts for QAOA parameter search.")
     parser.add_argument("--qaoa-maxiter", type=int, default=80, help="Max COBYLA iterations per restart.")
     parser.add_argument(
+        "--qaoa-decode", choices=("shots", "argmax_prob"), default="shots",
+        help="Decode the lowest-energy feasible shot sample or the highest-probability feasible state.",
+    )
+    parser.add_argument(
         "--qaoa-optimizer",
         type=str,
         default="COBYLA",
@@ -784,6 +844,10 @@ def run_reference_backend(
         max_workers=max_workers,
     )
     summary = aggregate_results(records)
+    summary["caf_version"] = __version__
+    # Save the schedule law and defaults, including the actual first-run seed.
+    # CAF may adapt num_reads; its per-proposal budget is in the diagnostics.
+    summary["default_optimizer_parameters"] = optimizer_factory(int(base_seed) + int(seed_offset) + 1000).params
     return summary, records
 
 
@@ -815,6 +879,7 @@ def main():
         maxiter=int(args.qaoa_maxiter),
         seed=int(args.base_seed),
         optimizer=str(args.qaoa_optimizer),
+        decode=str(args.qaoa_decode),
         warmstart=bool(args.warmstart),
     )
     static_qaoa_p = int(args.static_qaoa_p) if args.static_qaoa_p is not None else int(qaoa_cfg.p)
@@ -827,6 +892,7 @@ def main():
             maxiter=qaoa_cfg.maxiter,
             seed=int(seed),
             optimizer=qaoa_cfg.optimizer,
+            decode=qaoa_cfg.decode,
             warmstart=qaoa_cfg.warmstart,
         )
         return QiskitQAOAOptimizer(cfg)
@@ -838,6 +904,7 @@ def main():
             maxiter=qaoa_cfg.maxiter,
             seed=int(seed),
             optimizer=qaoa_cfg.optimizer,
+            decode=qaoa_cfg.decode,
             warmstart=qaoa_cfg.warmstart,
         )
         return QiskitQAOAOptimizer(cfg)
@@ -933,6 +1000,7 @@ def main():
 
     summary = {
         "config": {
+            "caf_version": __version__,
             "runs": int(args.runs),
             "n_assets": int(args.n_assets),
             "cardinality": int(cardinality),
@@ -942,15 +1010,20 @@ def main():
             "max_workers": None if args.max_workers is None else int(args.max_workers),
             "subset_seed": int(args.subset_seed),
             "base_seed": int(args.base_seed),
+            "qaoa_decode": qaoa_cfg.decode,
             "qaoa": {
                 "p": int(qaoa_cfg.p),
+                "static_p": int(static_qaoa_p),
                 "restarts": int(qaoa_cfg.restarts),
                 "maxiter": int(qaoa_cfg.maxiter),
                 "optimizer": str(qaoa_cfg.optimizer),
+                "shots": int(qaoa_cfg.shots),
+                "decode": qaoa_cfg.decode,
                 "warmstart": bool(qaoa_cfg.warmstart),
             },
             "include_sa_reference": bool(args.include_sa_reference),
             "include_sqa_reference": bool(args.include_sqa_reference),
+            "sqa": None if sqa_summary is None else sqa_summary["default_optimizer_parameters"],
         },
         "qaoa": {"summary": qaoa_summary, "records": qaoa_records},
         "sa_reference": None if sa_summary is None else {"summary": sa_summary, "records": sa_records},

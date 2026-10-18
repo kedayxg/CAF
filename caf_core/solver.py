@@ -13,6 +13,7 @@ The implementation supports two update modes:
 import inspect
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from numbers import Integral
 from time import perf_counter
 
 import numpy as np
@@ -131,6 +132,70 @@ def evaluate_state_vector(state_vector, covariance_matrix, expected_returns, ris
     )
 
 
+def _prepare_feasible_initial_state(
+    dimension,
+    communities,
+    subproblem_cardinalities,
+    initial_selected_indices,
+    covariance_values,
+    returns_values,
+    risk_factor,
+):
+    """Validate a partition and start monotone updates from a feasible state."""
+    def index_array(values, name):
+        indices = np.asarray(values)
+        if indices.ndim != 1 or (
+            indices.size and not np.issubdtype(indices.dtype, np.integer)
+        ):
+            raise ValueError(f"{name} must be a one-dimensional sequence of integer indices")
+        indices = indices.astype(int)
+        if np.any(indices < 0) or np.any(indices >= dimension):
+            raise ValueError(f"{name} contains an asset index outside [0, {dimension})")
+        if np.unique(indices).size != indices.size:
+            raise ValueError(f"{name} contains duplicate asset indices")
+        return indices
+
+    communities = [
+        index_array(community, f"communities[{pos}]")
+        for pos, community in enumerate(communities)
+    ]
+    cards = list(subproblem_cardinalities)
+    if len(communities) != len(cards):
+        raise ValueError("communities and subproblem_cardinalities must have equal lengths")
+    for pos, (community, card) in enumerate(zip(communities, cards)):
+        if isinstance(card, (bool, np.bool_)) or not isinstance(card, Integral):
+            raise ValueError(f"subproblem_cardinalities[{pos}] must be an integer")
+        if not 0 <= card <= len(community):
+            raise ValueError(
+                f"subproblem_cardinalities[{pos}] must be between 0 and its community size"
+            )
+    partition_indices = np.concatenate(communities) if communities else np.array([], dtype=int)
+    if (
+        partition_indices.size != dimension
+        or np.unique(partition_indices).size != dimension
+    ):
+        raise ValueError("communities must partition all asset indices exactly once")
+
+    state = np.zeros(dimension, dtype=int)
+    if initial_selected_indices is not None:
+        selected = index_array(initial_selected_indices, "initial_selected_indices")
+        state[selected] = 1
+        for pos, (community, card) in enumerate(zip(communities, cards)):
+            if int(state[community].sum()) != card:
+                raise ValueError(
+                    "initial_selected_indices must satisfy every community cardinality "
+                    f"(community {pos} requires {card})"
+                )
+    else:
+        # Rank by each asset's standalone objective. This deterministic feasible
+        # starting point does not consume optimizer calls or alter their seeds.
+        scores = returns_values - risk_factor * np.diag(covariance_values)
+        for community, card in zip(communities, cards):
+            order = np.argsort(-scores[community], kind="mergesort")
+            state[community[order[:card]]] = 1
+    return communities, cards, state
+
+
 def run_caf_pipeline(
     covariance_matrix,
     expected_returns,
@@ -159,7 +224,9 @@ def run_caf_pipeline(
         optimizer_factory: Produces a callable optimizer for the local model.
         risk_factor: Global portfolio risk-aversion coefficient.
         effective_risk_factor: Optional risk factor used inside local proposals.
-        initial_selected_indices: Optional warm-start selection.
+        initial_selected_indices: Optional warm-start selection, which must satisfy
+            every community cardinality. When omitted, initialize each community
+            with its best standalone asset scores (return minus risk-weighted variance).
         iterations: Maximum CAF outer iterations.
         use_incremental: Whether to use cached incremental objective updates.
         patience: Early-stopping patience in outer iterations.
@@ -187,9 +254,15 @@ def run_caf_pipeline(
     covariance_values = _to_numpy_values(covariance_matrix)
     returns_values = _to_numpy_values(expected_returns)
 
-    current_state = np.zeros(dimension, dtype=int)
-    if initial_selected_indices is not None:
-        current_state[initial_selected_indices] = 1
+    communities, subproblem_cardinalities, current_state = _prepare_feasible_initial_state(
+        dimension,
+        communities,
+        subproblem_cardinalities,
+        initial_selected_indices,
+        covariance_values,
+        returns_values,
+        risk_factor,
+    )
 
     current_metrics = evaluate_state_vector(
         current_state,

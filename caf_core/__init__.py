@@ -6,7 +6,7 @@ from .solver import (
     _normalize_local_solution,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 attach_local_problem_metadata = _attach_local_problem_metadata
 normalize_local_solution = _normalize_local_solution

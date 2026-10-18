@@ -33,8 +33,9 @@ for p in (str(CAF_ROOT),):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from caf_core import evaluate_state_vector, normalize_local_solution  # noqa: E402
+from caf_core import __version__, evaluate_state_vector, normalize_local_solution  # noqa: E402
 from experiments._common import (  # noqa: E402
+    BUNDLED_DATA_DIR,
     extract_communities_from_partitions,
     load_local_jpm_data,
     load_upstream_components,
@@ -71,7 +72,7 @@ def solve_local(get_model, to_cqm, adjusted, sub_cov, K, q_eff, cfg):
     """Run one local QAOA solve and return exact/simulated candidates in community order.
 
     `exact` is the feasible state with minimum BQM energy found by exhaustive search.
-    `sim` is the best feasible candidate decoded from QAOA shots on the same BQM.
+    `sim` uses the explicit cfg.decode protocol on the same BQM.
     When `cfg.warmstart=True`, Egger-style warm-start is initialized from the
     continuous relaxation.
     """
@@ -112,7 +113,7 @@ def main():
         default=None,
         help="Optional override path to another dcmppln checkout. Defaults to the vendored copy.",
     )
-    ap.add_argument("--data-dir", type=Path, default=SNAPSHOT_ROOT / "data" / "russell3000_subset")
+    ap.add_argument("--data-dir", type=Path, default=BUNDLED_DATA_DIR)
     ap.add_argument("--out-dir", type=Path, default=HARDWARE_RESULTS_ROOT)
     ap.add_argument("--n-assets", type=int, default=40)
     ap.add_argument("--subset-seed", type=int, default=1234)
@@ -121,6 +122,7 @@ def main():
     ap.add_argument("--qaoa-p", type=int, default=2)
     ap.add_argument("--qaoa-restarts", type=int, default=6)
     ap.add_argument("--qaoa-maxiter", type=int, default=80)
+    ap.add_argument("--qaoa-decode", choices=("shots", "argmax_prob"), default="shots")
     ap.add_argument("--num-reads", type=int, default=200)
     ap.add_argument("--warmstart", action="store_true", help="Enable Egger-style warm-start QAOA from the continuous relaxation.")
     args = ap.parse_args()
@@ -154,7 +156,7 @@ def main():
     print("Community sizes:", sizes)
 
     cfg = QAOAConfig(p=args.qaoa_p, restarts=args.qaoa_restarts, maxiter=args.qaoa_maxiter,
-                     seed=args.base_seed, optimizer="COBYLA", shots=4000, decode="shots",
+                     seed=args.base_seed, optimizer="COBYLA", shots=4000, decode=args.qaoa_decode,
                      warmstart=args.warmstart)
 
     # ---- Scan all communities with n<=16: injected/non-injected exact + sim_qaoa from the same QAOA setup ----
@@ -222,6 +224,8 @@ def main():
     args.out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     snap = {"base_seed": args.base_seed, "n_assets": args.n_assets, "q_eff": float(q_eff),
+            "config": {"caf_version": __version__, "qaoa_decode": cfg.decode, "qaoa": vars(cfg)},
+            "qaoa_decode": cfg.decode,
             "community_sizes": sizes, "selected": int(ci), "n_local": n, "k_local": K_C,
             "current_state": current_state.tolist(), "base_objective": base_obj,
             "scan": scan, "rows": rows}

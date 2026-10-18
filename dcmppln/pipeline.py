@@ -102,7 +102,7 @@ class Pipeline:
                 clustering_process_time,
                 denoise_time,
                 clustering_time,
-                risk_rebalancing=False,
+                risk_rebalancing=risk_rebalancing,
                 cardinality_divider=2,
             )
         return C_2, partitions
@@ -123,7 +123,9 @@ class Pipeline:
         clustering_time,
         risk_rebalancing=False,
         cardinality_divider=2,
+        cardinality=None,
     ):
+        """Optimize at an exact cardinality, or use the legacy size divider."""
         (
             obj_after_clustering,
             full_recombined_soln,
@@ -133,7 +135,11 @@ class Pipeline:
             self.returns,
             matrix_to_optimize,
             partitions,
-            card_=len(self.returns) // cardinality_divider,
+            card_=(
+                len(self.returns) // cardinality_divider
+                if cardinality is None
+                else cardinality
+            ),
             input_risk_factor=risk_factor,
             return_time=True,
             filtering_method=self.filter_func,
@@ -159,6 +165,11 @@ class Pipeline:
             "problem_parameters": {
                 "problem_size": len(self.returns),
                 "cardinality_divider": cardinality_divider,
+                "cardinality": (
+                    len(self.returns) // cardinality_divider
+                    if cardinality is None
+                    else cardinality
+                ),
                 "input_risk_factor": risk_factor,
                 "cluster_on_correlation": cluster_on_correlation,
                 "optimize_on_correlation": optimize_on_correlation,

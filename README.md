@@ -9,6 +9,21 @@ This repository is the public code release accompanying the CAF paper. It contai
 - the bundled benchmark inputs in `data/russell3000_subset/`
 - a vendored copy of JPMorgan's `dcmppln` dependency used by the default reproduction path
 
+## Maintenance versions and archived experiments
+
+Version 0.1.1 prepares a corrected development and experiment workflow. The
+pre-maintenance repository snapshot is commit
+`356c1852c65a185b05aed040052c5c3f750991bd`; it remains available in Git history.
+This snapshot is an archive reference, not a verification of which commit
+generated any published table. Use the original experiment archive and its
+recorded commands when reproducing published numbers.
+
+The maintenance release does not revise the paper or replace historical results.
+Corrections to community detection, exact-cardinality comparisons, statistical
+tests, and the SQA schedule can change numerical outputs. New runs must identify
+their code version and protocol. See [CHANGELOG.md](CHANGELOG.md) and
+[the maintenance protocol notes](docs/maintenance-0.1.1.md) for details.
+
 ## Repository layout
 
 ```text
@@ -73,6 +88,13 @@ conda run -n caf python3 tests/test_smoke.py
 ```
 
 This check is intended to catch broken imports or packaging issues quickly before rerunning the paper-scale experiments.
+
+Run the regression suite with the development dependencies installed:
+
+```bash
+pip install -e ".[dev,quantum,gurobi]"
+python -m pytest -q
+```
 
 ## Using CAF with your own solver or data
 
@@ -165,12 +187,19 @@ print(result["metrics"])
   - a binary vector of local length, or
   - a list of selected local indices.
 - CAF normalizes the local output to an exact-cardinality binary decision before the global acceptance step.
+- CAF constructs a deterministic feasible initial selection if no warm start is
+  provided. Communities must partition the asset indices, and an explicit warm
+  start must satisfy each community's cardinality.
 
 ### Changing the upstream decomposition
 
 CAF does not require the bundled `dcmppln` pipeline. If you already have your own preprocessing or clustering workflow, you can pass its output directly through `communities` and `subproblem_cardinalities`. The vendored `dcmppln` code is included only because it is the default path used in the paper reproduction.
 
-## Reproducing the paper
+## Experiment workflows
+
+These commands run the maintained experiment protocols. For exact reproduction
+of an archived paper result, use its recorded code commit, parameters, decoding
+mode, and raw inputs as described in the maintenance notes above.
 
 ### Table I: large-scale SA benchmark
 

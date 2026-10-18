@@ -11,6 +11,7 @@ caf_root = current_dir.parent.parent
 if str(caf_root) not in sys.path:
     sys.path.insert(0, str(caf_root))
 
+from caf_core import __version__
 from experiments.quantum.run_qaoa import (
     SAOptimizer,
     QAOAConfig,
@@ -91,6 +92,7 @@ def write_backend_csv(rows, csv_path):
         "backend",
         "p",
         "optimizer",
+        "decode",
         "runs",
         "wins",
         "win_rate_pct",
@@ -113,6 +115,7 @@ def write_backend_csv(rows, csv_path):
                     "backend": row["backend"],
                     "p": row.get("p"),
                     "optimizer": row.get("optimizer"),
+                    "decode": row.get("decode"),
                     "runs": summary["total_runs"],
                     "wins": summary["wins"],
                     "win_rate_pct": 100.0 * summary["wins"] / max(1, summary["total_runs"]),
@@ -160,6 +163,10 @@ def parse_args():
     parser.add_argument("--p-values", type=str, default="1,2", help="Comma-separated QAOA depth list.")
     parser.add_argument("--qaoa-restarts", type=int, default=6, help="Random restarts for QAOA parameter search.")
     parser.add_argument("--qaoa-maxiter", type=int, default=80, help="Max iterations per QAOA restart.")
+    parser.add_argument(
+        "--qaoa-decode", choices=("shots", "argmax_prob"), default="shots",
+        help="Decode the lowest-energy feasible shot sample or the highest-probability feasible state.",
+    )
     parser.add_argument(
         "--qaoa-optimizer",
         type=str,
@@ -218,6 +225,7 @@ def main():
                 maxiter=int(args.qaoa_maxiter),
                 seed=int(args.base_seed),
                 optimizer=str(args.qaoa_optimizer),
+                decode=str(args.qaoa_decode),
                 warmstart=bool(args.warmstart),
             )
 
@@ -229,6 +237,7 @@ def main():
                     maxiter=qaoa_cfg.maxiter,
                     seed=int(seed),
                     optimizer=qaoa_cfg.optimizer,
+                    decode=qaoa_cfg.decode,
                     warmstart=qaoa_cfg.warmstart,
                 )
                 return QiskitQAOAOptimizer(cfg)
@@ -260,6 +269,7 @@ def main():
                     "backend": f"QAOA-p{depth}",
                     "p": int(depth),
                     "optimizer": qaoa_cfg.optimizer,
+                    "decode": qaoa_cfg.decode,
                     "summary": summary,
                     "records": records,
                 }
@@ -269,6 +279,7 @@ def main():
                     "backend": f"QAOA-p{depth}",
                     "p": int(depth),
                     "optimizer": qaoa_cfg.optimizer,
+                    "decode": qaoa_cfg.decode,
                     "summary": summary,
                 }
             )
@@ -341,6 +352,7 @@ def main():
 
     summary = {
         "config": {
+            "caf_version": __version__,
             "runs": int(args.runs),
             "n_assets": int(args.n_assets),
             "cardinality": int(cardinality),
@@ -354,9 +366,12 @@ def main():
             "qaoa_restarts": int(args.qaoa_restarts),
             "qaoa_maxiter": int(args.qaoa_maxiter),
             "qaoa_optimizer": str(args.qaoa_optimizer),
+            "qaoa_shots": int(QAOAConfig().shots),
+            "qaoa_decode": str(args.qaoa_decode),
             "warmstart": bool(args.warmstart),
             "include_sa_reference": bool(args.include_sa_reference),
             "include_sqa_reference": bool(args.include_sqa_reference),
+            "sqa": None if sqa_reference is None else sqa_reference["summary"]["default_optimizer_parameters"],
         },
         "community_sizes": [int(x) for x in community_sizes],
         "qaoa_depth_sweep": qaoa_rows,

@@ -13,7 +13,7 @@ caf_root = current_dir.parent.parent
 if str(caf_root) not in sys.path:
     sys.path.insert(0, str(caf_root))
 
-from caf_core import evaluate_portfolio, run_caf_pipeline
+from caf_core import __version__ as caf_version, evaluate_portfolio, run_caf_pipeline
 from experiments._common import (
     BUNDLED_DATA_DIR as bundled_data_dir,
     extract_communities_from_partitions,
@@ -72,6 +72,44 @@ def sign_test_two_sided(num_better: int, num_total: int) -> float:
         tail += math.comb(num_total, i)
     p = min(1.0, 2.0 * tail / (2.0 ** num_total))
     return float(p)
+
+
+def paired_objective_sign_test(baseline, candidate, *, rtol=1e-9, atol=1e-12):
+    """Compare paired objectives, excluding numerical ties from the sign test."""
+    baseline = np.asarray(baseline, dtype=float)
+    candidate = np.asarray(candidate, dtype=float)
+    if baseline.ndim != 1 or baseline.shape != candidate.shape:
+        raise ValueError("Paired objectives must be one-dimensional arrays of equal length")
+    if not (np.all(np.isfinite(baseline)) and np.all(np.isfinite(candidate))):
+        raise ValueError("Paired objectives must be finite")
+    difference = baseline - candidate
+    tolerance = atol + rtol * np.maximum(np.abs(baseline), np.abs(candidate))
+    wins = int(np.sum(difference > tolerance))
+    losses = int(np.sum(difference < -tolerance))
+    ties = int(baseline.size - wins - losses)
+    return {
+        "wins": wins,
+        "losses": losses,
+        "ties": ties,
+        "non_tied_runs": wins + losses,
+        "pvalue": sign_test_two_sided(wins, wins + losses),
+    }
+
+
+def validate_portfolio_cardinality(weights, cardinality, name):
+    """Reject infeasible portfolios before they can enter comparison statistics."""
+    weights = np.asarray(weights, dtype=float)
+    if weights.ndim != 1 or not np.all(np.isfinite(weights)):
+        raise ValueError(f"{name}: expected a finite one-dimensional binary portfolio")
+    binary = np.isclose(weights, 0.0, rtol=0.0, atol=1e-8) | np.isclose(
+        weights, 1.0, rtol=0.0, atol=1e-8
+    )
+    if not np.all(binary):
+        raise ValueError(f"{name}: portfolio contains non-binary weights")
+    selected = np.flatnonzero(np.isclose(weights, 1.0, rtol=0.0, atol=1e-8)).tolist()
+    if len(selected) != cardinality:
+        raise ValueError(f"{name}: expected K={cardinality}, got {len(selected)} selected assets")
+    return selected
 
 
 def bootstrap_ci_mean(values: np.ndarray, n_boot: int = 5000, alpha: float = 0.05, seed: int = 42):
@@ -492,14 +530,17 @@ def main():
             correlation_matrix.values, covariance_matrix.values, expected_returns.values,
             denoiser=Denoiser(active=True, q=0.5, q_fit=True),
             cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
-            optimize_func=SimulatedAnnealingDwave(num_reads=num_reads),
+            optimize_func=SimulatedAnnealingDwave(num_reads=num_reads, seed=run_seed),
         )
-        pipeline_result = pipeline.run(run_optimizer=True, risk_rebalancing=True, cluster_on_correlation=True, optimize_on_correlation=False, input_risk_factor=risk_factor)
+        # Both methods optimize the same q; the legacy Pipeline ignored this flag.
+        pipeline_result = pipeline.run(run_optimizer=True, risk_rebalancing=False, cluster_on_correlation=True, optimize_on_correlation=False, input_risk_factor=risk_factor)
         
         communities = extract_communities_from_partitions(pipeline.__state__["result"]["partitions"])
         subproblem_cardinalities = split_cardinality_constraint([len(c) for c in communities], cardinality)
         effective_risk_factor = risk_factor
-        jpm_selected = np.where(np.asarray(pipeline_result["recombined_solution"]).astype(np.int64) == 1)[0].tolist()
+        jpm_selected = validate_portfolio_cardinality(
+            pipeline_result["recombined_solution"], cardinality, f"JPM run {run_idx}"
+        )
         
         jpm_res = {"metrics": evaluate_portfolio(jpm_selected, covariance_matrix, expected_returns, risk_factor), "timing": {"total_seconds": perf_counter() - t0_jpm}}
         jpm_results_list.append(jpm_res)
@@ -516,6 +557,7 @@ def main():
             initial_selected_indices=jpm_selected,
             iterations=iterations, patience=patience, use_incremental=True, seed=run_seed
         )
+        validate_portfolio_cardinality(caf_res["metrics"]["weights"], cardinality, f"CAF run {run_idx}")
         caf_results_list.append(caf_res)
 
         # 3. CAF static ablation (same initialization, no incremental context caching)
@@ -534,6 +576,9 @@ def main():
             use_incremental=False,
             seed=run_seed,
         )
+        validate_portfolio_cardinality(
+            caf_static_res["metrics"]["weights"], cardinality, f"CAF static run {run_idx}"
+        )
         caf_static_results_list.append(caf_static_res)
         
         caf_histories.append(caf_res["history"])
@@ -549,6 +594,7 @@ def main():
             {
                 "run_idx": run_idx,
                 "seed": run_seed,
+                "cardinality": cardinality,
                 "community_sizes": [int(len(c)) for c in communities],
                 "subproblem_cardinalities": [int(k) for k in subproblem_cardinalities],
                 "jpm": jpm_res,
@@ -608,12 +654,41 @@ def main():
             delta_obj_vals = []
             delta_risk_vals = []
             delta_ret_vals = []
+            q_run_records = []
             for run_idx in range(num_runs):
                 q_seed = int(args.base_seed + 10000 + q_idx * 100 + run_idx)
                 np.random.seed(q_seed)
                 random.seed(q_seed)
                 run_ctx = run_contexts[run_idx]
-                run_jpm_selected = run_ctx["jpm_selected"]
+                # Reoptimize the baseline at this q on exactly the same partition.
+                # Re-scoring a portfolio optimized at the main q would mix a change
+                # in the objective with the benefit of the CAF refinement.
+                q_pipeline = Pipeline(
+                    correlation_matrix.values,
+                    covariance_matrix.values,
+                    expected_returns.values,
+                    optimize_func=SimulatedAnnealingDwave(num_reads=num_reads, seed=q_seed),
+                )
+                q_pipeline_result = q_pipeline.optimize_and_score(
+                    matrix_to_cluster=correlation_matrix.values,
+                    matrix_to_optimize=covariance_matrix.values,
+                    partitions=np.asarray(run_ctx["partitions"]).copy(),
+                    risk_factor=q_val,
+                    unique_identifier_base=f"q_sweep_{q_idx}_{run_idx}",
+                    log_best_feasible=False,
+                    cluster_on_correlation=True,
+                    optimize_on_correlation=False,
+                    denoise_process_time=0.0,
+                    clustering_process_time=0.0,
+                    denoise_time=0.0,
+                    clustering_time=0.0,
+                    risk_rebalancing=False,
+                    cardinality=cardinality,
+                )
+                run_jpm_selected = validate_portfolio_cardinality(
+                    q_pipeline_result["recombined_solution"], cardinality,
+                    f"JPM q={q_val} run {run_idx}",
+                )
                 jpm_q_metrics = evaluate_portfolio(run_jpm_selected, covariance_matrix, expected_returns, q_val)
                 caf_q_res = run_caf_pipeline(
                     covariance_matrix,
@@ -631,6 +706,14 @@ def main():
                     seed=q_seed,
                 )
                 caf_q = caf_q_res["metrics"]
+                validate_portfolio_cardinality(caf_q["weights"], cardinality, f"CAF q={q_val} run {run_idx}")
+                q_run_records.append({
+                    "run_idx": run_idx,
+                    "seed": q_seed,
+                    "cardinality": cardinality,
+                    "jpm": jpm_q_metrics,
+                    "caf": caf_q,
+                })
                 delta_obj_vals.append(((caf_q["objective"] - jpm_q_metrics["objective"]) / abs(jpm_q_metrics["objective"])) * 100)
                 delta_risk_vals.append(((caf_q["risk"] - jpm_q_metrics["risk"]) / abs(jpm_q_metrics["risk"])) * 100)
                 delta_ret_vals.append(((caf_q["expected_return"] - jpm_q_metrics["expected_return"]) / max(abs(jpm_q_metrics["expected_return"]), 1e-12)) * 100)
@@ -643,13 +726,18 @@ def main():
                     "delta_risk_std": float(np.std(delta_risk_vals)),
                     "delta_ret_pct": float(np.mean(delta_ret_vals)),
                     "delta_ret_std": float(np.std(delta_ret_vals)),
+                    "run_records": q_run_records,
                 }
             )
             partial_summary = {
                 "config": {
+                    "caf_version": caf_version,
                     "base_seed": int(args.base_seed),
                     "run_seeds": run_seeds,
                     "runs": int(num_runs),
+                    "cardinality": cardinality,
+                    "risk_rebalancing": False,
+                    "q_sweep_baseline": "reoptimized_at_each_q_on_fixed_partition",
                     "data_prefix": args.data_prefix,
                     "risk_factor": float(risk_factor),
                     "q_values": q_values,
@@ -696,11 +784,14 @@ def main():
     jpm_objs = np.asarray([r["metrics"]["objective"] for r in jpm_results_list], dtype=float)
     caf_objs = np.asarray([r["metrics"]["objective"] for r in caf_results_list], dtype=float)
     rel_impr = ((jpm_objs - caf_objs) / np.abs(jpm_objs)) * 100.0
-    wins = int(np.sum(caf_objs < jpm_objs))
-    p_sign = sign_test_two_sided(wins, num_runs)
+    sign_result = paired_objective_sign_test(jpm_objs, caf_objs)
+    wins = sign_result["wins"]
+    p_sign = sign_result["pvalue"]
     ci_lo, ci_hi = bootstrap_ci_mean(rel_impr, n_boot=5000, alpha=0.05, seed=42)
     print("Paired Statistical Check (CAF vs JPM, objective)")
     print(f"  -> Runs with improvement : {wins}/{num_runs}")
+    print(f"  -> Losses / ties         : {sign_result['losses']} / {sign_result['ties']}")
+    print(f"  -> Non-tied sign pairs   : {sign_result['non_tied_runs']}")
     print(f"  -> Sign test p-value     : {p_sign:.6f}")
     print(f"  -> Mean rel improvement  : {np.mean(rel_impr):.4f}%")
     print(f"  -> 95% bootstrap CI      : [{ci_lo:.4f}%, {ci_hi:.4f}%]\n")
@@ -708,10 +799,16 @@ def main():
     
     summary = {
         "config": {
+            "caf_version": caf_version,
             "base_seed": int(args.base_seed),
             "run_seeds": run_seeds,
             "runs": int(num_runs),
+            "cardinality": cardinality,
+            "risk_rebalancing": False,
+            "q_sweep_baseline": "reoptimized_at_each_q_on_fixed_partition",
             "risk_factor": float(risk_factor),
+            "data_prefix": args.data_prefix,
+            "q_values": q_values,
             "num_reads": int(num_reads),
             "iterations": int(iterations),
             "patience": int(patience),
@@ -722,6 +819,10 @@ def main():
         "caf_static": agg_static,
         "objective_sign_test_pvalue": p_sign,
         "objective_improvement_runs": wins,
+        "objective_loss_runs": sign_result["losses"],
+        "objective_tied_runs": sign_result["ties"],
+        "objective_sign_test_pairs": sign_result["non_tied_runs"],
+        "objective_sign_test_tolerance": {"rtol": 1e-9, "atol": 1e-12},
         "objective_relative_improvement_mean_pct": float(np.mean(rel_impr)),
         "objective_relative_improvement_std_pct": float(np.std(rel_impr)),
         "objective_relative_improvement_ci95_pct": [ci_lo, ci_hi],

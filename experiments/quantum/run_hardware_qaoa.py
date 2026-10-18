@@ -40,7 +40,7 @@ for p in (str(CAF_ROOT), str(_HW)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from caf_core import evaluate_state_vector, normalize_local_solution  # noqa: E402
+from caf_core import __version__ as caf_version, evaluate_state_vector, normalize_local_solution  # noqa: E402
 from experiments._common import (  # noqa: E402
     extract_communities_from_partitions,
     load_local_jpm_data,
@@ -561,7 +561,8 @@ def main():
     dO_sim = global_dO(sim["sim_cand"]); acc_sim = dO_sim <= -1e-5
     print(f"[sim] E_sim={sim['E_sim']:.6f}  ΔO_sim={dO_sim:+.6f}  accepted={acc_sim}  θ*={np.round(sim['theta'],4).tolist()}")
 
-    record = {"community": ci, "n": n, "K": K_C, "p": args.qaoa_p,
+    record = {"caf_version": caf_version, "qaoa_decode": cfg.decode,
+              "community": ci, "n": n, "K": K_C, "p": args.qaoa_p,
               "n_assets": args.n_assets, "subset_seed": args.subset_seed,
               "warmstart": bool(cfg.warmstart),
               "physical_qubits": physical_qubits,

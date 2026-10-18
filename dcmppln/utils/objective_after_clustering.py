@@ -3,6 +3,9 @@
 # // Copyright 2024: Amazon Web Services, Inc. - Contributions from JPMC
 #
 ###############################################################################
+from numbers import Integral
+from typing import Optional
+
 from dcmppln.optimization.portfolio_optimization_runtime import *
 from dcmppln.optimizer import Optimizer, CplexOptimizer
 from dcmppln.utils.utils import (
@@ -26,11 +29,11 @@ def get_model(returns,
     """
     n = len(returns)  # Number of assets
 
-    if not budget:
+    if budget is None:
         budget = n // 2
 
     ## q: Risk factor
-    if not risk_factor:
+    if risk_factor is None:
         risk_factor = 0.5
 
     model, weights = construct_markovitz_model(
@@ -69,7 +72,7 @@ def optimize_and_score(
     full_returns_,
     correlation_,
     partitions_: Union[np.ndarray, list],
-    card_: int = 0,
+    card_: Optional[int] = None,
     input_risk_factor=1,
     return_time=False,
     filtering_method=None,
@@ -118,8 +121,10 @@ def optimize_and_score(
     sorted_communities = sorted(communities_, key=lambda x: x.shape[0], reverse=True)
 
     full_dim = len(partitions_)
-    if not card_:
+    if card_ is None:
         card_ = full_dim // 2
+    if not isinstance(card_, Integral) or not 0 <= card_ <= full_dim:
+        raise ValueError("Cardinality must be an integer between zero and the number of assets")
 
     card_subproblems = split_cardinality_constraint(list(map(len, sorted_communities)), card_)
 

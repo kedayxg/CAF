@@ -51,22 +51,24 @@ def modularity_spectral_optimization(adjacency_matrix, return_communities=False)
         if len(positive_indices) == 0 or len(negative_indices) == 0:
             continue
 
-        partition[positive_indices] = 2**i
-        partition[negative_indices] = (2**i) + 1
         positive_subgraph = current_subgraph[positive_indices]
         negative_subgraph = current_subgraph[negative_indices]
+        # Eigenvector positions are local to the current subgraph.
+        # Each split receives fresh labels, without exponential integer growth.
+        partition[positive_subgraph] = 2 * i + 1
+        partition[negative_subgraph] = 2 * i + 2
 
         subgraphs.append(positive_subgraph)
         subgraphs.append(negative_subgraph)
 
         B_pos = modularity_matrix(
-            adjacency_matrix[positive_indices][:, positive_indices],
-            degree_vector[positive_indices],
+            adjacency_matrix[positive_subgraph][:, positive_subgraph],
+            degree_vector[positive_subgraph],
             total_degree,
         )
         B_neg = modularity_matrix(
-            adjacency_matrix[negative_indices][:, negative_indices],
-            degree_vector[negative_indices],
+            adjacency_matrix[negative_subgraph][:, negative_subgraph],
+            degree_vector[negative_subgraph],
             total_degree,
         )
 
