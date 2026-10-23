@@ -342,7 +342,10 @@ local/global q=0.5 by default. `--local` checks the real pyqpanda3 CPUQVM;
 `ORIGINQ_API_TOKEN` or an optional ignored `experiments/config.py`. Job IDs and
 preparation data are saved before polling. Follow the complete
 [server hardware guide](docs/HARDWARE_RUNBOOK.md), including raw-count validation
-and timeout handling. No fresh QPU results accompany this release.
+and timeout handling. The subsequent [four-community hardware audit](docs/HARDWARE_RESULTS.md)
+includes raw WK_C180 batches, saved-parameter distribution reconstruction and
+exact uniform controls. Two best-of-sample passes do not establish a QAOA
+sampling benefit or full hardware execution of CAF.
 
 ## Reproducibility notes
 

@@ -7,6 +7,8 @@ import shutil
 import subprocess
 import zipfile
 
+from hardware_results_section import load_hardware
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -50,6 +52,14 @@ def main():
             or hashlib.sha256(study_validation_path.read_bytes()).hexdigest()!=study['validation_sha256']
             or hashlib.sha256(json.dumps(study_result['cases'],sort_keys=True).encode()).hexdigest()!=study_validation['summary_sha256']):
         raise SystemExit('Follow-up evidence does not match independent validation')
+    hardware,hardware_validation=load_hardware()
+    binding=evidence.get('hardware_study',{})
+    if (binding.get('results_sha256')!=hashlib.sha256((paper.parent/'docs/hardware-results.json').read_bytes()).hexdigest()
+            or binding.get('validation_sha256')!=hardware['validation_sha256']
+            or binding.get('raw_archive_sha256')!=hardware['raw_archive_sha256']
+            or not hardware_validation['sdk_saved_theta_replayed']
+            or len(hardware_validation['qpu_records'])!=4):
+        raise SystemExit('Frozen hardware evidence does not match the manuscript or full independent audit')
     args.build_dir.mkdir(parents=True,exist_ok=True)
     subprocess.run(["latexmk","-pdf","-interaction=nonstopmode","-halt-on-error",
         f"-outdir={args.build_dir.resolve()}","main.tex"],cwd=paper,check=True)

@@ -1,5 +1,9 @@
 # Current maintenance scope
 
+## 后续收到的真机记录
+
+服务器补充了四个独立冻结社区的WK_C180原始批次，已完成文件指纹、平台原始计数、输入、模型系数、完整矩阵增量和保存参数分布的独立重放。社区2、3通过既定判据；社区0变差提案拒绝，社区1无改善。8比特均匀best-of-4000采样也几乎必然通过相同判据，所以结果限定为候选解码与接受链路的可执行性，不支持QAOA采样优势。云端编译电路和映射没有被保存，不能唯一归因于硬件噪声。详情见[真机独立核验](HARDWARE_RESULTS.md)。此前“没有新QPU记录”的描述属于本次服务器数据到来前的执行阶段，原历史证书不改写。main保留v1，本轮仅更新v2-development的复现材料，论文草稿仍由作者本地保管。
+
 The corrected reproduction default is pinned python-igraph 0.11.9 Newman
 leading-eigenvector modularity splitting. With the default capacity zero it
 infers a natural community count. Positive `max_community_size` uses the same

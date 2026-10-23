@@ -77,7 +77,7 @@ QAOA 使用无噪声精确期望进行参数训练，4000 次采样用于最终�
 
 [完整汇总](revision-results.json) · [独立验证](revision-validation.json) · [原始记录及日志](revision-raw-results.zip) · [修订说明](ARXIV_REVISION.md)
 
-审阅 PDF（作者本地材料，未随代码发布） · 源码包（作者本地材料，未随代码发布）
+论文草稿和投稿材料由作者本地保管；本次代码发布不包含稿件TeX或PDF。新增真机记录见[独立核验报告](HARDWARE_RESULTS.md)。
 
 [冻结代码快照](CAF_v2_code_snapshot.zip) · [代码指纹](code-snapshot-sha256.json) · [采样对照原始结果](sampling-control-results.json)
 

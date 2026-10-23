@@ -1897,6 +1897,19 @@
     "bcd_equal_endpoint_rounds": 15,
     "parallel_faster_single_timings": 6
   },
+  "hardware_study": {
+    "results_sha256": "a5e9f7eb87838c9882a20e9911ba3bdc38d8e53b0c8a9a29c880503991089939",
+    "validation_sha256": "a06b1cb3b720ca3359dfcd2516ab0392d4622dd87fbb74b5f5c913d6b53eee4a",
+    "raw_archive_sha256": "ed8370b658b1d07c760f8f9b6d9003a893fd4a8cdba53e5eb30650b30d0687c8",
+    "source_sha256": "b12e321da54a23d7806df25bf215e98fb3b176030032edd1258e4ca93a96e976",
+    "qpu_batches": 4,
+    "raw_shots": 16000,
+    "criterion_passes": [
+      2,
+      3
+    ],
+    "sdk_saved_theta_replayed": true
+  },
   "manuscript_scope": {
     "purpose": "Implementation correction and revalidation of the existing portfolio coordination study",
     "primary_comparison": "Independent static initialization versus CAF refinement",

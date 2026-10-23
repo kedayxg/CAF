@@ -17,6 +17,7 @@ from experiments.classical.run_benchmark import paired_objective_statistics
 from experiments.quantum.run_qaoa import aggregate_results
 from experiments.revision_protocol import CLASSICAL_CAPACITY, QUANTUM_CAPACITY, PROTOCOL_NAME
 from coordination_study_section import render_section, write_report
+from hardware_results_section import render_hardware
 
 
 def aggregate(records):
@@ -246,6 +247,8 @@ def main():
         r"\subsection{Supplementary Update-Timing and Sensitivity Checks}",
         f"A latest-context sequential-update ablation, following cyclic discrete BCD and sharing CAF's partition, budgets, initialization, local solver and acceptance rule, matches CAF's final objectives in {study_binding['tied']}/{study_binding['complete_cases']} configurations after six matched sweeps. The study covers capacities 75, 100 and 150 on both full panels and three 300-asset subsets per panel. Changing capacity also changes the fixed-budget feasible space. Appendix~\\ref{{app:update-timing}} reports the complete ablation, capacity/subset results and resource measurements; no consistent local CPU speedup is established."]
     output['coordination_study'] = study_binding
+    hardware_main,hardware_appendix,hardware_binding = render_hardware()
+    output['hardware_study'] = hardware_binding
     output['manuscript_scope'] = dict(
         purpose='Implementation correction and revalidation of the existing portfolio coordination study',
         primary_comparison='Independent static initialization versus CAF refinement',
@@ -326,7 +329,7 @@ def main():
     else:
         assert frozen["q_eff"] == .5
         local_convention = "Local solves and global acceptance both use $q=0.5$, without local risk rescaling."
-    text.append(f"On the frozen $N=40$ snapshot (subset seed 1234, static seed 42), the declared small-community selector returns $n={frozen['n_local']},K={frozen['k_local']}$. {local_convention} Without injection the exact update has $\\Delta\\mathcal O={selected['dO_noinject']:.8f}$; with injection it has $\\Delta\\mathcal O={selected['dO_inject']:.8f}$. Warm-start QAOA ($p=2$, six restarts, 80 COBYLA evaluations, 4,000 shots) obtains $\\Delta\\mathcal O={selected['dO_sim']:.8f}$, at Hamming distance {selected['hamming']} from the exact candidate. This is a single controlled local example, not an aggregate equal-effort comparison. No improving $n\\le6$ target satisfied this selection rule; this result is simulator-only.")
+    text.append(f"On the frozen $N=40$ snapshot (subset seed 1234, static seed 42), the declared small-community selector returns $n={frozen['n_local']},K={frozen['k_local']}$. {local_convention} Without injection the exact update has $\\Delta\\mathcal O={selected['dO_noinject']:.8f}$; with injection it has $\\Delta\\mathcal O={selected['dO_inject']:.8f}$. Warm-start QAOA ($p=2$, six restarts, 80 COBYLA evaluations, 4,000 shots) obtains $\\Delta\\mathcal O={selected['dO_sim']:.8f}$, at Hamming distance {selected['hamming']} from the exact candidate. This is a single controlled local example, not an aggregate equal-effort comparison. No improving $n\\le6$ target satisfied this selection rule; a subsequent hardware check of all four communities, including this eight-asset block, is reported below.")
     text.append(r"Here the smallest detected block already has eight assets, so the absence of an $n\le6$ hardware target follows from the partition, rather than from a hardware execution test. The full four-community frozen scan is archived, including communities where injection does not change or improve the selected update.")
     text.append(r"\subsection{Quantum-Simulator Compatibility}")
     text.append(r"We fix the $N=40,K=20$ subset using seed 1234. With capacity 16 the community sizes are 14, 10, 8 and 8. The imposed simulator capacity is part of the protocol; the observed maximum of 14 is instance-specific. Matched plain QAOA uses $p=2$ or $p=3$, six random restarts, up to 80 COBYLA evaluations per restart, 4,000-shot feasible-sample decoding, and no warm start. Static and CAF use the same backend settings within each depth, with at most four CAF iterations and patience two. Seeds are 1042--1061. SQA uses D-Wave's path-integral sampler~\cite{dwave_samplers_docs,martonak2002pimc}, 1,000 sweeps, 20 static reads and CAF's size-adaptive reads, with seeds 31042--31061. We explicitly set the inverse-temperature-scaled transverse sequence $H_d=\mathrm{linspace}(1,0,1000)$ and $\Gamma=1$, retaining the library's geometric longitudinal schedule with automatically computed beta range. This declared schedule is not optimized over alternatives. These are simulation compatibility checks, not evidence of quantum advantage.")
@@ -347,7 +350,8 @@ def main():
                 for d in item['record']['proposal_diagnostics']]
         raw = sum(bool(d.get('raw_candidate_feasible')) for d in diag)
         repaired = sum(bool(d.get('candidate_repaired')) for d in diag)
-        text.append(f"Among the {len(diag)} recorded CAF proposals across these three simulator groups, {raw} are raw feasible candidates and {repaired} require cardinality repair. These counts concern proposal diagnostics, not a newly acquired QPU count archive.")
+        text.append(f"Among the {len(diag)} recorded CAF proposals across these three simulator groups, {raw} are raw feasible candidates and {repaired} require cardinality repair. These are simulator proposal diagnostics; the subsequent hardware study has separate raw-count records.")
+    text.extend(hardware_main)
     text.append(r"\section{Conclusion}")
     g16, g18 = gurobi['summary']['2016'], gurobi['summary']['2018']
     text.append(f"CAF coordinates fixed community subproblems through an external-risk linear bias and sequential global acceptance. In the primary capacity-100 Gurobi runs, objective gains are {g16['gain_pct']:.2f}\\% on 2016 and {g18['gain_pct']:.2f}\\% on 2018. Both initialization and refinement use the same local solver settings. Repeated unshifted local solves leave the respective initial portfolios unchanged; CAF improves them by accounting for external covariance. These are two fixed-instance pipeline runs, not statistical market samples or full-portfolio global-optimality certificates.")
@@ -357,7 +361,8 @@ def main():
     if controls:
         c16, c18 = controls['summary']['2016'], controls['summary']['2018']
         text.append(f"Under matched SA sampling budgets, full CAF performs better than CAF without injection in {c16['caf_wins']}/20 pairs on 2016. On 2018, the ablated variant performs better in all {c18['caf_losses']}/20 pairs. Both retain CAF's full-global objective verification and greedy sequential acceptance and improve their static initializations. This is component-level evidence that injection's additional benefit depends on the instance and heuristic backend; it is not evidence that static decomposition outperforms CAF or that the complete coordination architecture fails. The experiment does not identify a unique cause of the differing trajectories or independently isolate the effect of the shared acceptance mechanism.")
-    text.append(r"The context and exact increment formulas support descent for accepted feasible updates, while the observed benefit depends on partition, fixed budgets, backend and effort. A large relative gain can coexist with a poor static starting point and does not establish a better final solution than a different decomposition. Heuristic stopping does not certify local optimality. The experiments establish refinement behavior and simulator compatibility, not equal-effort superiority, quantum advantage, global optimality or out-of-sample financial performance. Equal-runtime comparisons, budget transfer and new hardware validation remain future work.")
+    text.append(r"In four independent frozen WK\_C180 batches, the two eight-asset candidates meet the declared improvement criterion, while the other proposals are rejected. The hardware distributions differ substantially from their ideal references; an exact uniform-sampling diagnostic shows that the two passes do not establish a QAOA sampling benefit. This supports candidate decoding and guarded acceptance from hardware output, not a complete hardware CAF outer loop.")
+    text.append(r"The context and exact increment formulas support descent for accepted feasible updates, while the observed benefit depends on partition, fixed budgets, backend and effort. A large relative gain can coexist with a poor static starting point and does not establish a better final solution than a different decomposition. Heuristic stopping does not certify local optimality. The experiments establish refinement behavior, simulator compatibility and frozen hardware proposal/acceptance executability, not equal-effort superiority, quantum advantage, global optimality or out-of-sample financial performance. Equal-runtime comparisons, budget transfer, repeated hardware sampling and cloud-compilation diagnostics remain future work.")
     text.append(r"\FloatBarrier\appendices")
     text.extend(study_text)
     text.append(r"\FloatBarrier\section{Unrestricted Newman Reference}")
@@ -379,8 +384,9 @@ def main():
         text.append(f"2018 & Capacity100 & 25 & {stat['static']['objective_mean']:.6f} & {stat['caf']['objective_mean']:.6f} & {stat['objective_relative_improvement_mean_pct']:.3f}"+r"\\")
     text.append(r"\bottomrule\end{tabular}}\end{table}")
     text.append(r"Unrestricted 2018 accepts no improving SA move in twenty trials; that observation is not a local-optimality certificate. The 2016 capacity variant has a larger relative CAF gain but almost the same final objective as unrestricted Newman. The 2018 capacity variant improves its own baseline but has a worse final objective than unrestricted Newman. Thus additional communities do not by themselves establish better financial solutions. The capacity study evaluates coordination when bounded local subproblems are required, while retaining the decomposition cost in the absolute objectives.")
+    text.extend(hardware_appendix)
     text.append(r"\FloatBarrier\section{Historical Hardware Report}")
-    text.append(r"Version 1 reported an $n=5,K=3$ frozen warm-started QAOA update on Origin Wukong 180 (\texttt{WK\_C180}), with reported global change $-1.0536\times10^{-4}$. That target came from the historical partition. Its original raw hardware count archive was not included with the source provided for this revision, and no fresh QPU experiment has been performed. It is recorded here as v1 history, not as independently revalidated hardware evidence for the revised code, the new $n=8$ frozen target or the complete pipeline. The present revised evidence is classical and simulation-based.")
+    text.append(r"Version 1 reported an $n=5,K=3$ frozen warm-started QAOA update on Origin Wukong 180 (\texttt{WK\_C180}), with reported global change $-1.0536\times10^{-4}$. That target came from the historical partition. Its original raw hardware count archive was not included with the source provided for this revision. It is recorded here as v1 history and has not been independently revalidated. The new four-community records validate a separate corrected-partition frozen proposal/acceptance experiment; they do not retrospectively validate the old five-asset target or establish complete hardware execution of CAF.")
     manuscript = ROOT/"manuscript"
     notice = (r"\noindent\textcolor{red}{\textbf{WORKING DRAFT: experimental reruns incomplete.}}\par"
               if incomplete else "")
@@ -398,6 +404,7 @@ def main():
         MainWins=str(main_stats['objective_improvement_runs']), MainTies=str(main_stats['objective_tied_runs']),
         MainCILow=f"{main_ci[0]:.2f}", MainCIHigh=f"{main_ci[1]:.2f}", MainBlockCount=str(len(main_sizes)))
     macro_values['GurobiRevisionSentence'] = f"The primary classical experiment uses Gurobi for both initialization and local refinement, with relative MIP-gap tolerance $10^{{-4}}$. On the fixed 2016 ($N=484$, 15 communities) and 2018 ($N=1397$, 25 communities) panels, CAF improves the objective by {g16['gain_pct']:.2f}\\% and {g18['gain_pct']:.2f}\\%, respectively. Repeated unshifted local solves leave both initial portfolios unchanged. Each panel contributes one fixed-configuration pipeline run, without statistical replication."
+    macro_values['HardwareRevisionSentence'] = 'Four independent WK\\_C180 batches test frozen local proposals. Two eight-asset candidates meet the improvement criterion, but a uniform-sampling diagnostic shows that these passes do not establish a QAOA sampling benefit.'
     if controls:
         c16, c18 = controls['summary']['2016'], controls['summary']['2018']
         macro_values['ControlRevisionSentence'] = f"An injection ablation retains CAF's global verification and greedy sequential acceptance. Under matched SA sampling budgets, full CAF performs better in all {c16['caf_wins']} pairs on 2016, while CAF without injection performs better in all {c18['caf_losses']} pairs on 2018."
@@ -485,7 +492,7 @@ def main():
     report.extend(["", "目标越低越好。完整的规模、稀疏、风险系数、Gurobi、SQA 与 QAOA 数据见机器可读汇总。", "",
         "自然 Newman 结果作为附录对照保留：2016 的最终目标接近容量方案，2018 自然划分的绝对目标更低。跨配置固定预算与采样工作量不同。相对收益不能替代绝对目标比较；100 资产单社区案例不存在跨社区协调。", "",
         "[完整汇总](revision-results.json) · [独立验证](revision-validation.json) · [原始记录及日志](revision-raw-results.zip) · [修订说明](ARXIV_REVISION.md)", "",
-        "[审阅 PDF](../manuscript/CAF_arxiv_revision.pdf) · [源码包](../manuscript/CAF_arxiv_source.zip)", "",
+        "论文草稿和投稿材料由作者本地保管；本次代码发布不包含稿件TeX或PDF。新增真机记录见[独立核验报告](HARDWARE_RESULTS.md)。", "",
         "[冻结代码快照](CAF_v2_code_snapshot.zip) · [代码指纹](code-snapshot-sha256.json) · [采样对照原始结果](sampling-control-results.json)", "",
         "最终上传状态以执行记录为准；本地构建不代表已上传 arXiv。"])
     (ROOT/'docs/REVISION_RESULTS.md').write_text("\n".join(report)+"\n")

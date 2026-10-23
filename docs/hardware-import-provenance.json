@@ -1,0 +1,15 @@
+{
+  "original_filename": "caf-hardware-20261023.tar.gz",
+  "original_tar_sha256": "f79ff03a81fc56bed4f3ad89599674832c1f127eafdb032d74e11eb0cb84ac80",
+  "original_manifest_sha256": "68aa4fd1e7607a877fa49094ed98352e5129a31e1b866bb043048c18eaea79c6",
+  "original_manifest_verified_files": 26,
+  "public_archive": "hardware-raw-results.zip",
+  "public_archive_sha256": "ed8370b658b1d07c760f8f9b6d9003a893fd4a8cdba53e5eb30650b30d0687c8",
+  "excluded_from_public_archive": {
+    "MANUSCRIPT_NOTES_20261023.md": "47bd4742d0ed8130002cef7ac47f4c87a4da2a3598a42af16a81015b54ccaf6b",
+    "REPORT_20261023.md": "a58257af8ec664a81403b640e3e89a00f62516398caabb049821fc088a1d7e37",
+    "ARTIFACT_SHA256_20261023.txt": "68aa4fd1e7607a877fa49094ed98352e5129a31e1b866bb043048c18eaea79c6"
+  },
+  "exclusion_reason": "Author manuscript notes and unreviewed narrative are retained locally; replace the original manifest with a complete public-subset manifest.",
+  "numeric_record_bytes_unchanged": true
+}
