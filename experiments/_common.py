@@ -44,18 +44,6 @@ def load_upstream_components(jpm_repo: Path | None, include_gurobi: bool = False
             "repository; alternatively provide --jpm-repo pointing to another checkout."
         ) from exc
 
-    if jpm_repo is not None:
-        # Historical upstream silently maps unknown method names to its old
-        # spectral routine. Do not label such an override as a Newman revision.
-        try:
-            probe = Clustering(active=False, clustering_method="newman")
-        except (TypeError, ValueError) as exc:
-            raise ImportError("External dcmppln must support clustering_method='newman'; "
-                              "use the maintained checkout for revised experiments") from exc
-        if getattr(probe, "method", None) != "newman":
-            raise ImportError("External dcmppln silently rejected 'newman'; use the maintained "
-                              "checkout, or commit 356c1852 for historical reproduction")
-
     if include_gurobi:
         from dcmppln.optimizer import GurobiOptimizer
 

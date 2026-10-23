@@ -1,49 +1,5 @@
 # CAF: Context-Aware Folding
 
-`main` contains the maintained implementation. The original paper code is
-preserved unchanged on [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1).
-For server installation and the corrected hardware workflow, see the
-[hardware runbook](docs/HARDWARE_RUNBOOK.md). This code release includes
-reproduction tools and evidence; the pending v2 manuscript remains with the authors.
-
-The maintained reproduction path uses python-igraph 0.11.9 Newman's leading-
-eigenvector method (`clustering_method="newman"`). It replaces the upstream
-modified spectral routine, whose recursive indexing and gain-handling defects
-are documented in [the implementation review](docs/SPECTRAL_IMPLEMENTATION_REVIEW.md).
-The historical routine and its `legacy_spectral` / `louvain` selection names
-have been removed. Unsupported method names raise an error.
-Use commit [`356c1852c65a185b05aed040052c5c3f750991bd`](https://github.com/kedayxg/CAF/tree/356c1852c65a185b05aed040052c5c3f750991bd)
-for the immutable historical implementation.
-
-Use `Clustering(max_community_size=100)` for capacity-oriented induced-subgraph
-Newman recursion, or the default `max_community_size=0` for natural communities.
-Both paths call igraph; if an oversized block cannot be split, the capacity
-path raises an error instead of returning a block over the limit.
-
-```python
-from dcmppln.clustering import Clustering
-
-labels, process_seconds, wall_seconds = Clustering(max_community_size=100)(correlation)
-```
-
-The capacity-100 studies cover both [2016](docs/CAPACITY_2016_CAF_STUDY.md)
-and [2018](docs/CAPACITY_2018_CAF_STUDY.md). Reproduce them with
-`python -m experiments.classical.run_capacity_benchmark --year 2016 --capacity 100 --out-dir results/capacity100-2016`
-(use `--year 2018` and a different output directory for that panel).
-
-See [maintenance notes](docs/MAINTENANCE.md) and [the arXiv revision record](docs/ARXIV_REVISION.md)
-for protocol changes and rerun coverage; the [revision results](docs/REVISION_RESULTS.md)
-record the numerical evidence. The corrected
-2016 natural partition has sizes 199, 153 and 132. Twenty paired SA runs yield
-mean objectives 1.540945 (static) and 1.512938 (CAF), a 1.8029% mean paired gain
-with 16 improvements and four ties. These are unrestricted reference results; the arXiv v2 primary experiments
-use the declared capacity constraints below.
-
-The [public-library comparison](docs/LIBRARY_CLUSTERING_STUDY.md) also evaluates
-NetworkX fixed-nine CNM and actual Louvain; `pip install -e ".[clustering]"`
-adds the optional comparison libraries. The [fixed-nine spectral study](docs/FIXED_NINE_STUDY.md)
-uses a separate explicit forced-split constraint; it is not the default Newman method.
-
 **Context-Aware Folding (CAF)** is a hybrid quantum-classical coordination layer for decomposed portfolio optimization. Static decomposition omits cross-cluster covariance during local solves; CAF re-injects this missing global information as a state-dependent linear bias and commits updates under a monotonic acceptance rule.
 
 This repository is the public code release accompanying the CAF paper. It contains:
@@ -56,7 +12,7 @@ This repository is the public code release accompanying the CAF paper. It contai
 ## Repository layout
 
 ```text
-CAF/
+codes_official/
 ├── caf_core/
 ├── data/russell3000_subset/
 ├── dcmppln/
@@ -66,7 +22,6 @@ CAF/
 │   ├── classical/
 │   │   ├── run_benchmark.py
 │   │   ├── run_scaling.py
-│   │   ├── run_capacity_benchmark.py
 │   │   ├── run_sparsity.py
 │   │   └── run_suppression.py
 │   └── quantum/
@@ -210,12 +165,6 @@ print(result["metrics"])
   - a binary vector of local length, or
   - a list of selected local indices.
 - CAF normalizes the local output to an exact-cardinality binary decision before the global acceptance step.
-- If no initial portfolio is supplied, CAF first solves the independent local
-  problems to establish feasibility. A supplied initial portfolio must satisfy
-  every community budget; invalid partitions and portfolios raise `ValueError`.
-- With `return_diagnostics=True`, proposal records distinguish raw backend
-  feasibility from any cardinality repair. A repaired vector is not evidence
-  that a backend actually sampled it.
 
 ### Changing the upstream decomposition
 
@@ -223,68 +172,7 @@ CAF does not require the bundled `dcmppln` pipeline. If you already have your ow
 
 ## Reproducing the paper
 
-The canonical arXiv v2 protocol uses classical community capacity 100 and
-quantum-simulation capacity 16. These are declared benchmark resource scenarios,
-not measured hardware limits. The complete batch has 345 task records, including
-20 fresh SA runs for each historical panel. The current primary classical
-experiment adds one Gurobi pipeline per panel, using Gurobi for both static
-initialization and refinement:
-
-The complete batch requires the quantum and Gurobi extras
-(`pip install -e ".[quantum,gurobi]"`) and a usable local Gurobi license.
-
-```bash
-python -m experiments.run_revision --workers 4 --out-dir revision_results_v2
-python -m experiments.quantum.run_frozen_ablation \
-  --n-assets 40 --max-community-size 16 --qaoa-p 2 \
-  --qaoa-restarts 6 --qaoa-maxiter 80 --warmstart --out-dir revision_frozen_v2
-python manuscript/run_sampling_control.py --results revision_results_v2 \
-  --out-dir sampling_controls_v2 --workers 4
-python manuscript/run_gurobi_main.py --results revision_results_v2 --out-dir gurobi_main_v2
-python manuscript/validate_gurobi_main.py --results gurobi_main_v2 --sa-results revision_results_v2
-python manuscript/run_coordination_study.py --out-dir coordination_study_v2
-python manuscript/validate_coordination_study.py --results coordination_study_v2
-```
-
-The [release provenance](docs/CODE_RELEASE.md) identifies the frozen experimental
-code and retained independent validation. The experiment snapshot passed 96
-tests; the maintained server release adds hardware and Gurobi-adapter regression
-checks. Pending manuscript sources and PDFs are held locally by the authors and
-are not included in this code release. No arXiv submission is performed here.
-
-The primary Gurobi flows improve the objective by 18.47% on 2016 and 5.24% on
-2018. Repeated unshifted solves leave both initial portfolios unchanged. All
-440 local solves reach their requested gap; full-matrix replay validates every
-proposal and commit. Local certificates do not prove full-portfolio optimality.
-This primary emphasis was selected after examining the SA controls; their full
-evidence remains in the manuscript.
-
-In the retained SA experiments, mean paired objective gains are 12.54% on
-2016 and 1.50% on 2018. The additional 40 sampling-matched controls qualify this
-result: Full CAF outperforms its no-injection ablation in all 20 pairs on 2016;
-the ablation outperforms full CAF in all 20 pairs on 2018. Both retain CAF's
-full-global objective verification and greedy sequential acceptance. Both
-improve static initialization. This qualifies the incremental benefit of
-injection in SA, without showing static decomposition superior to CAF or
-independently isolating the shared acceptance mechanism.
-
-The supplementary update-timing ablation and capacity/subset follow-up is complete: 24 configurations
-(22 distinct input/partition/budget configurations) match final CAF/BCD
-objectives after six sweeps. BCD reaches the same endpoint in fewer rounds in
-9 cases and equal rounds in 15. Four-worker CAF is faster in only 6 of 24
-single timings, so no consistent local CPU speedup is established. All 5,320
-local solves and 5,094 proposals pass independent replay. See
-[the full follow-up](docs/COORDINATION_STUDY.md).
-
-The v2 scope is implementation correction and revalidation. BCD remains a
-technical foundation; the latest-context variant is an update-timing ablation.
-The body summarizes the result and the appendix retains all detailed tables.
-See [code release provenance](docs/CODE_RELEASE.md).
-
-The standalone scripts below support additional configurations and exploration;
-exact manuscript numbers come from the canonical batch and its manifests.
-
-### Standalone large-scale SA benchmark
+### Table I: large-scale SA benchmark
 
 ```bash
 python -m experiments.classical.run_benchmark \
@@ -294,7 +182,7 @@ python -m experiments.classical.run_benchmark \
   --out-dir reproduce_outputs/benchmark_2016
 ```
 
-### Standalone scaling and deterministic Gurobi cross-check
+### Table II: scaling and deterministic Gurobi cross-check
 
 ```bash
 python -m experiments.classical.run_scaling \
@@ -304,7 +192,7 @@ python -m experiments.classical.run_scaling \
   --out-dir reproduce_outputs/scaling_main
 ```
 
-### Standalone quantum compatibility on folded subproblems
+### Table III: quantum compatibility on folded subproblems
 
 ```bash
 python -m experiments.quantum.run_sqa \
@@ -325,22 +213,9 @@ python -m experiments.quantum.run_qaoa \
   --out-dir reproduce_outputs/qaoa_p3
 ```
 
-### Frozen simulator study and optional hardware interface
+### Table IV: frozen hardware executability study
 
-Start with the offline community listing and simulator preparation:
-
-```bash
-python -m experiments.quantum.run_hardware_qaoa --list-communities
-python -m experiments.quantum.run_hardware_qaoa --community 3 --prepare-only
-```
-
-The hardware driver now uses the corrected capacity-16 partition and aligned
-local/global q=0.5 by default. `--local` checks the real pyqpanda3 CPUQVM;
-`--submit` explicitly submits a QPU job. Cloud credentials come from
-`ORIGINQ_API_TOKEN` or an optional ignored `experiments/config.py`. Job IDs and
-preparation data are saved before polling. Follow the complete
-[server hardware guide](docs/HARDWARE_RUNBOOK.md), including raw-count validation
-and timeout handling. No fresh QPU results accompany this release.
+`run_hardware_qaoa.py` requires a local `experiments/config.py`. Create it by copying `experiments/config.example.py`, then provide the hardware token through `ORIGINQ_API_TOKEN`.
 
 ## Reproducibility notes
 
@@ -357,8 +232,3 @@ and timeout handling. No fresh QPU results accompany this release.
 ## Acknowledgement
 
 CAF builds on JPMorgan Chase & Co.'s open-source `dcmppln` decomposition pipeline for RMT denoising and community detection. The bundled benchmark instance is derived from the `dcmppln` test data release.
-
-External `--jpm-repo` overrides for revised scripts must support the `newman`
-method. Unpatched historical upstream silently falls back to its old spectral
-routine for unknown method names; the maintained loader rejects that override.
-Use the immutable historical commit for exact legacy reproduction.

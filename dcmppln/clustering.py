@@ -5,13 +5,16 @@
 ###############################################################################
 from dcmppln.utils.utils import get_instance_non_private_attributes
 
+from dcmppln.modularity_maximization.modularity_spectral_optimization import (
+    modularity_spectral_optimization,
+    modularity_spectral_threshold,
+)
+from dcmppln.utils.k_means import k_means_laplacian_threshold
 from dcmppln.utils.utils import timeit
 import numpy as np
-from dcmppln.newman import (newman_partition, capacity_newman_partition,
-                           validate_community_capacity)
 
-clustering_methods = ("newman",)
-default_clustering_method = "newman"
+clustering_methods = ("louvain", "kmeans")
+default_clustering_method = "louvain"
 
 
 class Clustering:
@@ -20,50 +23,71 @@ class Clustering:
         self,
         max_community_size=0,
         active=True,
-        clustering_method="newman",
+        clustering_method="louvain",
         take_absolute_value=True,
         cluster_on_correlation=True,
-        seed=42,
     ):
         """
-        Community detection uses only igraph Newman's leading-eigenvector method.
+        Supported clustering methods: louvain, kmeans,
         take_absolute_value: flag to take absolute value of the matrix before clustering
         cluster_on_correlation: if True, cluster on (denoised) correlation else cluster on covariance
 
-        :param max_community_size: 0 for natural Newman; positive integer for
-            induced-subgraph recursion, stopping when each block fits. Raise
-            RuntimeError if an oversized block cannot be split by igraph.
+        :param max_community_size: threshold for the biggest community size, 0 drops any constraint
         :param active: bool to activate or deactivate the component, if deactivated other parameters are meaningless
-        :param clustering_method: newman; other method names are rejected
+        :param clustering_method: select method from ["louvain", "kmeans"], default to louvain
         :param take_absolute_value: bool to apply abs to matrix before sending it to the clustering method
         :param cluster_on_correlation: bool to cluster on correlation otherwise cluster on covariance
         """
         if clustering_method not in clustering_methods:
-            raise ValueError(f"Unknown clustering method: {clustering_method}; only 'newman' is supported")
+            clustering_method = "louvain"
 
         self.method = clustering_method
         self.active = active
         self.take_absolute_value = take_absolute_value
-        self.max_community_size = validate_community_capacity(max_community_size)
+        self.max_community_size = max_community_size
         self.cluster_on_correlation = cluster_on_correlation
-        self.seed = int(seed)
 
         self.params = get_instance_non_private_attributes(self)
+
+    def _call_louvain(self, matrix):
+        # Requires matrix with only non-negative terms
+        if self.max_community_size == 0:
+            partitions = modularity_spectral_optimization(matrix)
+        else:
+            partitions = modularity_spectral_threshold(
+                matrix,
+                threshold=self.max_community_size,
+                return_communities=False,
+            )
+        return partitions
+
+    def _call_kmeans(self, matrix):
+        # Unrestricted cluster size default, dirty trick by using huge upper bound
+        threshold_cluster_size = 1e9
+        if self.max_community_size > 0:
+            threshold_cluster_size = self.max_community_size
+        return k_means_laplacian_threshold(
+            matrix,
+            k_values=None,
+            low_threshold=2,
+            up_threshold=threshold_cluster_size,
+            num_eigenvectors=80,
+        )[1]
 
     @timeit
     def cluster(self, matrix):
         if not self.active:
-            return np.zeros(len(matrix), dtype=int)
+            return np.zeros(len(matrix))
         if self.take_absolute_value:
             matrix = np.abs(matrix)
-        if self.max_community_size:
-            partitions, self.modularity, self.split_trace = capacity_newman_partition(
-                matrix, self.max_community_size, seed=self.seed)
+        if self.method == "louvain":
+            partitions = self._call_louvain(matrix)
+        elif self.method == "kmeans":
+            partitions = self._call_kmeans(matrix)
         else:
-            partitions, self.modularity = newman_partition(matrix, seed=self.seed)
-            self.split_trace = []
+            raise NotImplemented
         print(
-            "Max community size:", max(np.unique(partitions, return_counts=True)[1], default=0)
+            "Max commmunity size:", np.max(np.unique(partitions, return_counts=True)[1])
         )
         return partitions
 

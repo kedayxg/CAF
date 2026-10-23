@@ -12,8 +12,6 @@ authors = [
   { name = "CAF Contributors" }
 ]
 dependencies = [
-  "igraph==0.11.9",
-  "texttable==1.7.2",
   "numpy==2.4.6",
   "pandas==3.0.3",
   "scipy==1.17.1",
@@ -28,17 +26,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-clustering = [
-  "igraph==0.11.9",
-  "networkx==3.6.1",
-  "texttable==1.7.2"
-]
 quantum = [
   "qiskit==2.5.0"
-]
-hardware = [
-  "qiskit==2.5.0",
-  "pyqpanda3==0.5.0"
 ]
 gurobi = [
   "gurobipy==13.0.2"

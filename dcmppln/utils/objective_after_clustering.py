@@ -26,11 +26,11 @@ def get_model(returns,
     """
     n = len(returns)  # Number of assets
 
-    if budget is None:
+    if not budget:
         budget = n // 2
 
     ## q: Risk factor
-    if risk_factor is None:
+    if not risk_factor:
         risk_factor = 0.5
 
     model, weights = construct_markovitz_model(
@@ -69,7 +69,7 @@ def optimize_and_score(
     full_returns_,
     correlation_,
     partitions_: Union[np.ndarray, list],
-    card_: int | None = None,
+    card_: int = 0,
     input_risk_factor=1,
     return_time=False,
     filtering_method=None,
@@ -118,11 +118,8 @@ def optimize_and_score(
     sorted_communities = sorted(communities_, key=lambda x: x.shape[0], reverse=True)
 
     full_dim = len(partitions_)
-    if card_ is None:
+    if not card_:
         card_ = full_dim // 2
-    if not np.isfinite(card_) or int(card_) != card_ or not 0 <= card_ <= full_dim:
-        raise ValueError("cardinality must be an integer between zero and the asset count")
-    card_ = int(card_)
 
     card_subproblems = split_cardinality_constraint(list(map(len, sorted_communities)), card_)
 
