@@ -1,6 +1,6 @@
 # 在服务器补充真机实验
 
-`main` 是维护后的代码。原论文代码原样保留在 [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1)，提交为 `356c1852c65a185b05aed040052c5c3f750991bd`。已完成的经典与模拟实验对应提交 [`17253da`](https://github.com/kedayxg/CAF/tree/17253dab077d6f7cc77520d09908d0a3ddb90195)，源码指纹为 `9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8`。后续真机入口维护不改写这些实验记录。
+维护后的 v2 代码位于 [`v2-development`](https://github.com/kedayxg/CAF/tree/v2-development)，`main` 暂时保留 v1，待 v2 成熟后再合并。原论文代码也原样保留在 [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1)，提交为 `356c1852c65a185b05aed040052c5c3f750991bd`。已完成的经典与模拟实验对应提交 [`17253da`](https://github.com/kedayxg/CAF/tree/17253dab077d6f7cc77520d09908d0a3ddb90195)，源码指纹为 `9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8`。后续真机入口维护不改写这些实验记录。
 
 当前代码发布不包含待定的 v2 论文 TeX、PDF、投稿元数据或内部审稿记录。`manuscript/` 中发布的 Python 文件是实验、验证和生成工具；其中论文生成工具还需要作者另行提供的稿件源文件。
 
@@ -9,7 +9,7 @@
 使用 Python 3.11，从仓库根目录运行。这里用独立虚拟环境安装，避免改动服务器已有环境：
 
 ```bash
-git clone --branch main https://github.com/kedayxg/CAF.git
+git clone --branch v2-development https://github.com/kedayxg/CAF.git
 cd CAF
 python3.11 -m venv .venv
 source .venv/bin/activate

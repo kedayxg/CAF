@@ -1,7 +1,9 @@
 # CAF: Context-Aware Folding
 
-`main` contains the maintained implementation. The original paper code is
-preserved unchanged on [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1).
+This is the [`v2-development`](https://github.com/kedayxg/CAF/tree/v2-development)
+branch. `main` retains the v1 implementation until v2 is ready to merge.
+The original paper code is also preserved unchanged on
+[`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1).
 For server installation and the corrected hardware workflow, see the
 [hardware runbook](docs/HARDWARE_RUNBOOK.md). This code release includes
 reproduction tools and evidence; the pending v2 manuscript remains with the authors.
