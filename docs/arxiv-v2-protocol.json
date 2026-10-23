@@ -1,0 +1,23 @@
+{
+  "protocol": "igraph-newman-induced-capacity-v2",
+  "classical_capacity": 100,
+  "quantum_capacity": 16,
+  "source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+  "tasks": 345,
+  "groups": {
+    "panel2016": 20,
+    "qaoa2": 20,
+    "qaoa3": 20,
+    "sqa": 20,
+    "panel2018": 20,
+    "scaling_sa": 80,
+    "sparsity_sa": 20,
+    "q_sweep": 100,
+    "suppression": 40,
+    "gurobi": 5
+  },
+  "results_dir": "/workspace/.caf/arxiv-v2-rerun",
+  "frozen_dir": "/workspace/.caf/arxiv-v2-frozen",
+  "preflight": "96 tests passed; panel2016, q_sweep and finite-field SQA worker preflights passed",
+  "note": "Source code under caf_core/dcmppln/experiments/tests is frozen during the rerun. Manuscript generators are outside this digest scope."
+}

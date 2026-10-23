@@ -12,6 +12,7 @@ caf_root = current_dir.parent.parent
 if str(caf_root) not in sys.path:
     sys.path.insert(0, str(caf_root))
 
+from experiments.revision_protocol import CLASSICAL_CAPACITY
 from caf_core import evaluate_portfolio, run_caf_pipeline
 from experiments._common import (
     BUNDLED_DATA_DIR as bundled_data_dir,
@@ -107,9 +108,9 @@ def generate_scaling_plot(rows, out_dir):
     axes[0].axhline(0, color="gray", linestyle="--", linewidth=1)
     axes[0].set_title("CAF Objective Improvement vs N")
     axes[0].set_xlabel("N (assets)")
-    axes[0].set_ylabel("Improvement over JPM Pipeline (%)")
+    axes[0].set_ylabel("Improvement over static baseline (%)")
 
-    axes[1].plot(n_vals, static_t, marker="s", linewidth=2, label="JPM Pipeline")
+    axes[1].plot(n_vals, static_t, marker="s", linewidth=2, label="static baseline")
     axes[1].plot(n_vals, caf_t, marker="o", linewidth=2, label="CAF")
     axes[1].set_title("Runtime vs N")
     axes[1].set_xlabel("N (assets)")
@@ -137,9 +138,9 @@ def generate_cardinality_plot(rows, out_dir, n_assets):
     axes[0].axhline(0, color="gray", linestyle="--", linewidth=1)
     axes[0].set_title(f"CAF Objective Improvement vs K/N (N={n_assets})")
     axes[0].set_xlabel("K/N")
-    axes[0].set_ylabel("Improvement over JPM Pipeline (%)")
+    axes[0].set_ylabel("Improvement over static baseline (%)")
 
-    axes[1].plot(x_ratio, static_t, marker="s", linewidth=2, label="JPM Pipeline")
+    axes[1].plot(x_ratio, static_t, marker="s", linewidth=2, label="static baseline")
     axes[1].plot(x_ratio, caf_t, marker="o", linewidth=2, label="CAF")
     axes[1].set_title(f"Runtime vs K/N (N={n_assets})")
     axes[1].set_xlabel("K/N")
@@ -179,6 +180,7 @@ def parse_args():
     )
     parser.add_argument("--out-dir", type=Path, default=Path("outputs_scaling"), help="Output folder.")
     parser.add_argument("--runs", type=int, default=5, help="Number of stochastic runs per setting.")
+    parser.add_argument("--max-community-size", type=int, default=CLASSICAL_CAPACITY)
     parser.add_argument("--sizes", type=str, default="100,200,300,484", help="Comma-separated N list.")
     parser.add_argument("--solvers", type=str, default="sa", help="Comma-separated solver list: sa,gurobi.")
     parser.add_argument(
@@ -275,7 +277,7 @@ def main():
                         cov.values,
                         ret.values,
                         denoiser=Denoiser(active=True, q=0.5, q_fit=True),
-                        cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
+                        cluster=Clustering(active=True, clustering_method="newman", take_absolute_value=True, max_community_size=args.max_community_size, seed=42),
                         optimize_func=static_optimizer_factory(seed=run_seed),
                     )
                     if k_ratios:
@@ -287,7 +289,6 @@ def main():
                             optimize_on_correlation=False,
                             input_risk_factor=args.risk_factor,
                         )
-                        cardinality_divider = max(1, int(round(n_assets / cardinality)))
                         pipeline_result = pipeline.optimize_and_score(
                             matrix_to_cluster=C2,
                             matrix_to_optimize=cov.values,
@@ -302,7 +303,7 @@ def main():
                             denoise_time=0.0,
                             clustering_time=0.0,
                             risk_rebalancing=False,
-                            cardinality_divider=cardinality_divider,
+                            cardinality=cardinality,
                         )
                     else:
                         pipeline_result = pipeline.run(
@@ -355,7 +356,7 @@ def main():
 
                 summary = aggregate(run_records)
                 print(
-                    f"   Objective improvement (CAF vs JPM Pipeline): "
+                    f"   Objective improvement (CAF vs static baseline): "
                     f"{summary['delta_pct']['objective_improvement_mean_pct']:.3f}% "
                     f"+/- {summary['delta_pct']['objective_improvement_std_pct']:.3f}%"
                 )
@@ -386,6 +387,7 @@ def main():
             "sizes": sizes,
             "solvers": solvers,
             "risk_factor": args.risk_factor,
+            "max_community_size": int(args.max_community_size),
             "iterations": args.iterations,
             "patience": args.patience,
             "subset_seed": args.subset_seed,

@@ -1,0 +1,146 @@
+{
+  "status": "complete",
+  "protocol": {
+    "protocol": "gurobi-primary-two-panel-v2",
+    "core_source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+    "runner_sha256": "36d5a737df94b1cb42cce0db4047e899a08b67b468801241431e5807b06fbb4b",
+    "years": [
+      2016,
+      2018
+    ],
+    "capacity": 100,
+    "q": 0.5,
+    "max_rounds": 6,
+    "patience": 2,
+    "parameters": {
+      "Threads": 1,
+      "Seed": 0,
+      "MIPGap": 0.0001,
+      "TimeLimit": 300
+    },
+    "note": "Fixed memberships/budgets from the already published-in-workspace SA batch; both initialization and refinement use Gurobi. SA evidence retained unchanged."
+  },
+  "summary": {
+    "2016": {
+      "assets": 484,
+      "cardinality": 242,
+      "communities": 15,
+      "community_sizes": [
+        60,
+        53,
+        49,
+        49,
+        41,
+        39,
+        35,
+        32,
+        29,
+        24,
+        22,
+        17,
+        15,
+        12,
+        7
+      ],
+      "static_objective": 1.6379595984022908,
+      "caf_objective": 1.335466020068208,
+      "control_objective": 1.6379595984022908,
+      "gain_pct": 18.467706934233483,
+      "static_risk": 3.614440412589733,
+      "caf_risk": 2.9007048726635403,
+      "static_return": 0.16926060789257585,
+      "caf_return": 0.11488641626356215,
+      "static_time_sec": 0.4438997620018199,
+      "caf_time_sec": 1.7480298489972483,
+      "static_local_solves": 15,
+      "caf_local_solves": 75,
+      "control_local_solves": 75,
+      "local_solves": 165,
+      "max_local_gap": 9.896307071491107e-05,
+      "methods": {
+        "caf": {
+          "rounds": 5,
+          "accepted_updates": 24,
+          "objective": 1.335466020068208,
+          "time_sec": 1.7480298489972483,
+          "same_weights_as_static": false
+        },
+        "control": {
+          "rounds": 5,
+          "accepted_updates": 0,
+          "objective": 1.6379595984022908,
+          "time_sec": 1.968912158990861,
+          "same_weights_as_static": true
+        }
+      }
+    },
+    "2018": {
+      "assets": 1397,
+      "cardinality": 698,
+      "communities": 25,
+      "community_sizes": [
+        100,
+        98,
+        92,
+        89,
+        87,
+        85,
+        82,
+        81,
+        80,
+        79,
+        78,
+        77,
+        68,
+        64,
+        37,
+        30,
+        28,
+        26,
+        23,
+        19,
+        18,
+        16,
+        15,
+        14,
+        11
+      ],
+      "static_objective": 54.504183500014676,
+      "caf_objective": 51.64909860074284,
+      "control_objective": 54.504183500014676,
+      "gain_pct": 5.238285790064295,
+      "static_risk": 109.27482829496601,
+      "caf_risk": 103.33985780120096,
+      "static_return": 0.13323064746833221,
+      "caf_return": 0.020830299857641496,
+      "static_time_sec": 1.6424485150055261,
+      "caf_time_sec": 6.871687699996983,
+      "static_local_solves": 25,
+      "caf_local_solves": 125,
+      "control_local_solves": 125,
+      "local_solves": 275,
+      "max_local_gap": 8.323156530965671e-05,
+      "methods": {
+        "caf": {
+          "rounds": 5,
+          "accepted_updates": 35,
+          "objective": 51.64909860074284,
+          "time_sec": 6.871687699996983,
+          "same_weights_as_static": false
+        },
+        "control": {
+          "rounds": 5,
+          "accepted_updates": 0,
+          "objective": 54.504183500014676,
+          "time_sec": 7.476344106995384,
+          "same_weights_as_static": true
+        }
+      }
+    }
+  },
+  "source_files": {
+    "panel-2016.json": "de20203e5383b87fe61e059b90fcd32b9c7ff7221ac99652f664b8dba760da07",
+    "panel-2018.json": "c938ed33a54364c0ac249ff8b7f0d92a84285e7b37141d25121f17cc34321ce6"
+  },
+  "validation_sha256": "fcae63c322f3b6688d02fa283820de258df7d1d81c656a640321077a8c63edc2"
+}

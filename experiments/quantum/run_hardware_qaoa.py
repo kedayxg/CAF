@@ -5,7 +5,8 @@ This script runs warm-start QAOA on WK_C180 and compares it against the ideal
 simulator using the same optimized parameters `theta*`.
 
 Workflow:
-  1. Freeze the iteration-0 snapshot and select comm#2 (n<=6, with S0 showing exact=sim=ΔO<0).
+  1. Freeze the iteration-0 snapshot and inspect the requested community.
+     Maintained partitions do not preserve historical hardware target indices.
   2. Run warm-start QAOA on the ideal simulator to obtain theta*, E_sim, the
      simulated candidate, and ΔO_sim.
   3. Reuse the same theta* and the same warm-start ansatz on WK_C180:
@@ -48,7 +49,6 @@ from experiments._common import (  # noqa: E402
     split_cardinality_constraint,
     subset_problem,
 )
-from experiments.config import API_TOKEN, MACHINE_NAME  # noqa: E402
 from experiments.quantum.run_qaoa import (  # noqa: E402
     QAOAConfig,
     QiskitQAOAOptimizer,
@@ -76,6 +76,7 @@ def setup_pyqpanda(machine=None, local=False, physical_qubits=None, layout_metho
         BACKEND = core.CPUQVM()          # Local full-amplitude simulator for validation.
         SERVICE = CHIP_BACKEND = None
         return "CPUQVM(local)"
+    from experiments.config import API_TOKEN, MACHINE_NAME
     mach = machine or MACHINE_NAME
     SERVICE = qcloud.QCloudService(api_key=API_TOKEN)
     BACKEND = SERVICE.backend(mach)
@@ -87,10 +88,10 @@ def setup_pyqpanda(machine=None, local=False, physical_qubits=None, layout_metho
     except Exception:
         CHIP_BACKEND = None
     options = qcloud.QCloudOptions()
-    options.set_mapping(True); options.set_optimization(True); options.set_amend(True)
+    options.set_mapping(True); options.set_optimization(True); options.set_amend(False)
     # NOTE: result-type (integer counts vs platform probs) is NO LONGER controlled by options
     # in current pyqpanda3 — set_is_prob_counts() is a no-op now. It is selected via
-    # job.result(keys=["probCount"]) in _run_counts(). Kept amend=True (readout calibration).
+    # job.result(keys=["probCount"]) in _run_counts(). Readout amendment is disabled.
     OPTIONS = options
     return mach
 
@@ -166,7 +167,7 @@ def build_qaoa_prog(h, J, theta, p, ws_theta, n, var_labels):
     for layer in range(p):
         g, b = float(gammas[layer]), float(betas[layer])
         for i, c in h.items():
-            prog << core.RZ(l2p[i], 2.0 * g * float(c))
+            prog << core.RZ(l2p[i], -2.0 * g * float(c))
         for (i, j), c in J.items():
             _rzz_via_native(prog, l2p[i], l2p[j], 2.0 * g * float(c))
         for q in range(n):
@@ -180,11 +181,11 @@ def build_qaoa_prog(h, J, theta, p, ws_theta, n, var_labels):
 
 
 def make_hamiltonian(h, J, var_labels):
-    """Build the PauliOperator for sum_i h_i Z_i + sum_ij J_ij Z_i Z_j."""
+    """Map dimod s=2x-1 to Pauli Z: -sum_i h_i Z_i + sum_ij J_ij Z_i Z_j."""
     l2p = {lbl: q for q, lbl in enumerate(var_labels)}
     terms = {}
     for i, c in h.items():
-        terms[f"Z{l2p[i]}"] = float(c)
+        terms[f"Z{l2p[i]}"] = -float(c)
     for (i, j), c in J.items():
         terms[f"Z{l2p[i]} Z{l2p[j]}"] = float(c)
     try:
@@ -321,23 +322,19 @@ def _run_counts(prog, shots, n, poll_interval_s=3, max_polls=20):
             break
         if poll_interval_s > 0:
             time.sleep(poll_interval_s)
+    if final_status != "FINISHED":
+        raise RuntimeError(f"Hardware task did not finish successfully: {final_status}")
     try:
         res = job.result(keys=["probCount"])   # current pyqpanda3: result-type is selected HERE, not via options. "probCount" => integer per-shot counts.
-    except Exception as _e:
-        print(f"[warn] job.result(keys=['probCount']) unsupported on this backend ({type(_e).__name__}: {_e}); falling back to result() (will likely hit the taskResult/platform-prob fallback). If so, switch BACKEND.run_instruction([...]) to BACKEND.run(prog, shots, OPTIONS).")
-        res = job.result()
+    except Exception as exc:
+        raise RuntimeError("Raw probCount results are required; platform probabilities are not accepted") from exc
     counts_list = _safe_call(res, "get_counts_list")
     counts = (counts_list or [_safe_call(res, "get_counts", {})])[0] or {}
     origin_data = _safe_call(res, "origin_data")
-    taskresult_dist, taskresult_entry = ({}, None)
     decode_source = "counts"
     distribution_kind = "raw_counts"
     if not counts:
-        taskresult_dist, taskresult_entry = _taskresult_distribution(origin_data, n)
-        if taskresult_dist:
-            counts = taskresult_dist
-            decode_source = "taskResult"
-            distribution_kind = "platform_probs"
+        raise RuntimeError("Hardware returned no raw counts; platform probabilities are not accepted")
     meta = {
         "backend_mode": "qpu",
         "job_id": job_id,
@@ -351,7 +348,7 @@ def _run_counts(prog, shots, n, poll_interval_s=3, max_polls=20):
         "decode_source": decode_source,
         "distribution_kind": distribution_kind,
         "distribution_total": float(sum(counts.values())) if counts else 0.0,
-        "taskResult_entry": taskresult_entry,
+        "readout_amend": False,
         "selected_physical_qubits": SELECTED_PHYSICAL_QUBITS,
         "layout_method": LAYOUT_METHOD,
     }
@@ -369,7 +366,9 @@ def run_sim(get_model, to_cqm, adjusted, sub, K, q_eff, cfg, n):
         ws = {label_of_Cpos[j]: float(c[j]) for j in range(n)}
     opt = QiskitQAOAOptimizer(cfg, warmstart_c=ws)
     sim_cand, _, _ = opt(model, weights)
-    sim_cand = normalize_local_solution(sim_cand, n, K)
+    sim_cand, sample_info = normalize_local_solution(sim_cand, n, K, return_info=True)
+    if not sample_info["raw_candidate_feasible"] or not opt.last_candidate_sampled:
+        raise RuntimeError("Hardware comparison requires an actually sampled feasible simulator candidate")
     bqm, _ = dimod.cqm_to_bqm(to_cqm(model))
     h, J, offset = bqm.to_ising()
     var_labels = list(bqm.variables)
@@ -401,8 +400,7 @@ def hw_energy(prog, h, J, offset, var_labels):
     # pyqpanda's Pauli-Z expval uses |0> -> +1, |1> -> -1, while dimod's
     # Ising convention here uses s = 2x - 1. Flip the linear terms so the
     # expval-based diagnostic energy matches the simulator-side Ising scale.
-    h_fixed = {label: -float(coeff) for label, coeff in h.items()}
-    op, ok = make_hamiltonian(h_fixed, J, var_labels)
+    op, ok = make_hamiltonian(h, J, var_labels)
     if ok:
         return float(offset) + _expval(prog, op)
     val = float(offset)  # Fallback: accumulate expvals term by term.
@@ -428,6 +426,30 @@ def _ising_energy_from_bits(x_bits, h, J, offset, var_labels):
     return val
 
 
+def _validated_raw_counts(counts, meta, shots, n):
+    """Require a complete raw shot batch; zero-count keys are never candidates."""
+    if meta.get("distribution_kind") != "raw_counts":
+        raise RuntimeError("Only raw counts can support a sampled hardware candidate")
+    if meta.get("backend_mode") == "qpu" and meta.get("final_status") != "FINISHED":
+        raise RuntimeError("Hardware task did not finish successfully")
+    if meta.get("error_message"):
+        raise RuntimeError("Hardware backend reported an error")
+    if isinstance(shots, bool) or int(shots) != shots or shots < 1:
+        raise ValueError("shots must be a positive integer")
+    normalized = {}
+    for key, value in counts.items():
+        bits = _decode_taskresult_key(key, n)
+        if bits is None or len(bits) != n:
+            raise RuntimeError("Hardware returned an invalid bitstring")
+        if isinstance(value, (bool, np.bool_)) or not np.isfinite(value) or value < 0 or int(value) != value:
+            raise RuntimeError("Raw counts must be non-negative integers")
+        if value > 0:
+            normalized[bits] = normalized.get(bits, 0) + int(value)
+    if sum(normalized.values()) != shots:
+        raise RuntimeError("Raw count total does not match the requested shots")
+    return normalized
+
+
 def hw_counts_energy_and_sample(prog, n, K, shots, adjusted, sub, q_eff, h, J, offset, var_labels):
     """Single measurement pass for diagonal cost Hamiltonians.
 
@@ -438,7 +460,7 @@ def hw_counts_energy_and_sample(prog, n, K, shots, adjusted, sub, q_eff, h, J, o
     """
     prog << core.measure(list(range(n)), list(range(n)))
     counts, meta = _run_counts(prog, shots, n)
-    counts = _normalize_count_keys(counts, n)
+    counts = _validated_raw_counts(counts, meta, shots, n)
     width = max((len(k) for k in counts), default=n)
     total = sum(counts.values()) or 1
 
@@ -465,7 +487,7 @@ def hw_sample(prog, n, K, shots, adjusted, sub, q_eff):
     """
     prog << core.measure(list(range(n)), list(range(n)))   # Add measurements for count-based sampling.
     counts, meta = _run_counts(prog, shots, n)
-    counts = _normalize_count_keys(counts, n)
+    counts = _validated_raw_counts(counts, meta, shots, n)
     L = max(len(k) for k in counts) if counts else n
     best_x, best_e = None, None
     for bits, _ in counts.items():
@@ -493,7 +515,7 @@ def main():
     ap.add_argument("--out-dir", type=Path, default=HARDWARE_RESULTS_ROOT)
     ap.add_argument("--n-assets", type=int, default=40, help="Asset subset size used when freezing the snapshot.")
     ap.add_argument("--subset-seed", type=int, default=1234, help="Random seed for asset subset selection during snapshot freezing.")
-    ap.add_argument("--community", type=int, default=2, help="Community index to evaluate (S0 uses #2).")
+    ap.add_argument("--community", type=int, default=2, help="Zero-based community index; maintained partitions differ from the publication.")
     ap.add_argument("--qaoa-p", type=int, default=2)
     ap.add_argument("--qaoa-restarts", type=int, default=6)
     ap.add_argument("--qaoa-maxiter", type=int, default=80)
@@ -529,9 +551,9 @@ def main():
     np.random.seed(args.base_seed); random.seed(args.base_seed)
     pipe = Pipeline(corr_df.values, cov_df.values, ret_s.values,
                     denoiser=Denoiser(active=True, q=0.5, q_fit=True),
-                    cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
+                    cluster=Clustering(active=True, clustering_method="newman", take_absolute_value=True),
                     optimize_func=SimulatedAnnealingDwave(num_reads=200, seed=args.base_seed))
-    pr = pipe.run(run_optimizer=True, risk_rebalancing=True, cluster_on_correlation=True,
+    pr = pipe.run(run_optimizer=True, risk_rebalancing=False, cluster_on_correlation=True,
                   optimize_on_correlation=False, input_risk_factor=q)
     communities = extract_communities_from_partitions(pipe.__state__["result"]["partitions"])
     subcard = split_cardinality_constraint([len(c) for c in communities], cardinality)

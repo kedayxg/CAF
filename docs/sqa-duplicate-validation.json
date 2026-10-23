@@ -1,0 +1,19 @@
+{
+  "matched_count": 13,
+  "tasks": [
+    "group-sqa_index-10.json",
+    "group-sqa_index-11.json",
+    "group-sqa_index-12.json",
+    "group-sqa_index-13.json",
+    "group-sqa_index-14.json",
+    "group-sqa_index-15.json",
+    "group-sqa_index-16.json",
+    "group-sqa_index-17.json",
+    "group-sqa_index-18.json",
+    "group-sqa_index-19.json",
+    "group-sqa_index-7.json",
+    "group-sqa_index-8.json",
+    "group-sqa_index-9.json"
+  ],
+  "scope": "Repeated identical seeds are replication checks, not additional statistical trials"
+}

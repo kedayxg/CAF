@@ -5,38 +5,44 @@
 ###############################################################################
 import numpy as np
 
+
 def rebalancing_risk_factor(risk_factor, full_covariance, full_avg_return, communities):
+    """Rescale using actual communities, supplied as labels, a dict, or groups.
 
-    #### we have the full covariance matrix and the full average return vector, and the communities
-
-    balanced_risk_factor = risk_factor
-
-    ### calculate norm of the covariance matrix, and the norm of the average return vector
-    cov_norm = np.linalg.norm(full_covariance)
-    avg_return_norm = np.linalg.norm(full_avg_return)
-
-    ### calculate the number of the masked covariance that only takes blocks corresponding to the communities
-    num_communities = len(communities)
-
-    if type(communities) == dict:
-        pass
+    Degenerate zero-risk or zero-return data retain the input risk factor.
+    """
+    covariance = np.asarray(full_covariance, dtype=float)
+    returns = np.asarray(full_avg_return, dtype=float)
+    n = len(returns)
+    if returns.ndim != 1 or covariance.shape != (n, n):
+        raise ValueError("covariance and returns dimensions must agree")
+    if not np.all(np.isfinite(covariance)) or not np.all(np.isfinite(returns)):
+        raise ValueError("covariance and returns must be finite")
+    if not np.isfinite(risk_factor) or risk_factor < 0:
+        raise ValueError("risk_factor must be finite and non-negative")
+    if isinstance(communities, dict):
+        groups = list(communities.values())
     else:
-        communities = {k: v for k, v in enumerate(communities)}
-
-    community_cov_norm = 0
-    community_avg_return_norm = 0
-    
-    for community_idx, community in communities.items():
-        community = np.array([community]).astype(int)
-        community_covariance = full_covariance[np.ix_(community, community)]
-        community_avg_return = full_avg_return[community]
-
-        ### calculate the norm of the covariance matrix and the norm of the average return vector
-        community_cov_norm += np.linalg.norm(community_covariance)
-        community_avg_return_norm += np.linalg.norm(community_avg_return)
-        
-
-    ### add the ratio of the norms to the balanced risk factor
-    balanced_risk_factor *= (cov_norm/community_cov_norm)*(community_avg_return_norm/avg_return_norm)   
-
-    return balanced_risk_factor
+        items = list(communities)
+        if len(items) == n and all(np.ndim(item) == 0 for item in items):
+            labels = np.asarray(items)
+            groups = [np.flatnonzero(labels == label) for label in np.unique(labels)]
+        else:
+            groups = items
+    indices = []
+    for group in groups:
+        values = np.asarray(group)
+        if values.ndim != 1 or not len(values) or not np.issubdtype(values.dtype, np.integer):
+            raise ValueError("communities must contain nonempty integer index groups")
+        indices.append(values.astype(int))
+    covered = np.concatenate(indices) if indices else np.array([], dtype=int)
+    if not np.array_equal(np.sort(covered), np.arange(n)):
+        raise ValueError("communities must partition all assets exactly once")
+    cov_norm, return_norm = np.linalg.norm(covariance), np.linalg.norm(returns)
+    if cov_norm == 0 or return_norm == 0 or risk_factor == 0:
+        return float(risk_factor)
+    block_cov_norm = sum(np.linalg.norm(covariance[np.ix_(c, c)]) for c in indices)
+    block_return_norm = sum(np.linalg.norm(returns[c]) for c in indices)
+    if block_cov_norm == 0:
+        raise ValueError("cannot rescale a zero within-community covariance norm")
+    return float(risk_factor * cov_norm / block_cov_norm * block_return_norm / return_norm)

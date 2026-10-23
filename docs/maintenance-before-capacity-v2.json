@@ -1,0 +1,365 @@
+{
+  "implementation": "CAF adapters use only igraph Newman; historical spectral implementation and method aliases removed",
+  "historical_commit": "356c1852c65a185b05aed040052c5c3f750991bd",
+  "source_sha256": "adee9104fb77b7d7fd183cf2dfd0bc2bdb4a02a34e407a0eb3561b60b6ae5494",
+  "source_digest_scope": "sorted Python files under caf_core, dcmppln, experiments, tests; excludes local config.py",
+  "python": "3.11.17",
+  "dependencies": {
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "pandas": "3.0.3",
+    "qiskit": "2.5.0",
+    "dimod": "0.12.22",
+    "dwave-samplers": "1.7.0",
+    "gurobipy": "13.0.2",
+    "igraph": "0.11.9",
+    "igraph_c": "0.10.16"
+  },
+  "dataset_sha256": {
+    "1_2016-01-01_correlation.npy": "5ae4904dcd9a8b488d65f4471aa75deb32d66d09df14c957d61a5f5905c3e43c",
+    "1_2016-01-01_covariance.npy": "37949a878477c60c2402642927aedc4c65305ab177c07cb19e21c6409dd07220",
+    "1_2016-01-01_returns.npy": "af12abf79796046765f12e611b3ce392bcbff5a30e1b2154534f642eb04ae77f",
+    "1_2018-01-01_correlation.npy": "3b25a1d8c279a0710fc6703efb705cf2a11886525399a8758b9c1b8b46a1ffe3",
+    "1_2018-01-01_covariance.npy": "c1e0af2cbf28f8e1c90b0a22d23e87015b79274d0c36881b677ea8b2c6267caf",
+    "1_2018-01-01_returns.npy": "165ea17020651f6a332c49eb8a62ada7c60d87f43f298207ed61d511a7705e86"
+  },
+  "default_clustering": {
+    "method": "newman",
+    "seed": 42,
+    "arpack_maxiter": 10000,
+    "arpack_tol": 1e-10,
+    "graph_convention": "A_ii/2 self-loops; preserve matrix row degrees; natural community count",
+    "supported_methods": [
+      "newman"
+    ],
+    "max_community_size": 0,
+    "positive_capacity": "Restart igraph on oversized induced subgraphs; stop when a block fits; fail explicitly if oversized and unsplittable"
+  },
+  "tests": {
+    "passed": 92,
+    "expected_failures": 0,
+    "unexpected_failures": 0,
+    "log_sha256": "79e365eba30e5201f6261bf924ddc8cbb1970db26ed8a1950af5eee30be487dd"
+  },
+  "benchmark_2016": {
+    "validation_origin": "Completed independent igraph twenty-run study; subsequent default adapter integration matches every asset and solver order. Original execution fingerprint retained.",
+    "result": "library-igraph_spectral-results.json",
+    "source_sha256": "dab7f6955dc689a40415592397e5fccc8c80615c66ee7ef7aa5965a9d5200876",
+    "community_sizes": [
+      199,
+      153,
+      132
+    ],
+    "static_objective_mean": 1.5409447431541912,
+    "caf_objective_mean": 1.5129375531480442,
+    "statistics": {
+      "objective_sign_test_pvalue": 3.0517578125e-05,
+      "objective_improvement_runs": 16,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 4,
+      "objective_relative_improvement_mean_pct": 1.8028861780771401,
+      "objective_relative_improvement_std_pct": 1.3123236463952452,
+      "objective_relative_improvement_ci95_pct": [
+        1.2433374001365578,
+        2.393843160810578
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    },
+    "integration_partition_and_order_match": true,
+    "additional_official_entry_validation": "newman-entry-validation.json"
+  },
+  "paper_revision": "ARXIV_REVISION.md",
+  "revision_coverage": "revision-results.json",
+  "legacy_maintenance_record": "legacy-maintenance-results.json",
+  "full_library_comparison": "library-clustering-results.json",
+  "not_performed": [
+    "Repository push or release",
+    "arXiv upload",
+    "Fresh QPU execution"
+  ],
+  "sqa_protocol_correction": "SQA_PROTOCOL_REVIEW.md",
+  "aligned_frozen_control": "revision-frozen-results.json",
+  "sqa_finite_field_twenty_run_summary": {
+    "static": {
+      "objective_mean": -0.0009067412431304656,
+      "objective_std": 0.00047292451800784734,
+      "risk_mean": 0.02310597444008869,
+      "risk_std": 0.00116753998342676,
+      "return_mean": 0.01245972846317481,
+      "return_std": 0.0003857255159845456,
+      "time_sec_mean": 1.2765346355500697,
+      "time_sec_std": 0.09571836985302662
+    },
+    "caf": {
+      "objective_mean": -0.0018874427958233617,
+      "objective_std": 0.0002309158237565844,
+      "risk_mean": 0.01981158986399178,
+      "risk_std": 0.0004428776385624697,
+      "return_mean": 0.01179323772781925,
+      "return_std": 0.0003108883458534413,
+      "time_sec_mean": 2.1149807166001664,
+      "time_sec_std": 0.49469319879373436
+    },
+    "objective_improvement_pct_mean": 159.85832215830712,
+    "objective_improvement_pct_std": 161.89900543291887,
+    "absolute_delta_mean": -0.0009807015526928958,
+    "absolute_delta_std": 0.0004966152373493923,
+    "risk_reduction_pct_mean": 14.058017607326969,
+    "risk_reduction_pct_std": 4.385243344882699,
+    "return_increase_pct_mean": -5.282428403280654,
+    "return_increase_pct_std": 3.1690043213316983,
+    "wins": 20,
+    "total_runs": 20,
+    "diagnostics": {
+      "num_proposals": 312,
+      "num_feasible": 312,
+      "num_raw_feasible": 312,
+      "num_raw_unknown": 0,
+      "num_repaired": 0,
+      "num_backend_calls": 312,
+      "num_local_improved": 90,
+      "num_global_accepted": 87,
+      "num_local_improved_but_rejected": 3,
+      "local_improvement_rate_over_feasible": 0.28846153846153844,
+      "global_accept_rate_over_local_improved": 0.9666666666666667
+    }
+  },
+  "revision_status": "325/325 complete; independent objective and frozen enumeration validation passed",
+  "revision_report": "REVISION_RESULTS.md",
+  "revision_validation": "revision-validation.json",
+  "execution_recovery": "revision-execution-recovery.json",
+  "benchmark_2018": {
+    "static": {
+      "objective_mean": 56.75053040599662,
+      "objective_std": 0.20177459509354603,
+      "risk_mean": 113.52996417872575,
+      "risk_std": 0.40530335011611357,
+      "return_mean": 0.01445168336625904,
+      "return_std": 0.010149235847502578,
+      "time_sec_mean": 102.1996731438996,
+      "time_sec_std": 7.605301909472605
+    },
+    "caf": {
+      "objective_mean": 56.75053040599662,
+      "objective_std": 0.20177459509354603,
+      "risk_mean": 113.52996417872575,
+      "risk_std": 0.40530335011611357,
+      "return_mean": 0.01445168336625904,
+      "return_std": 0.010149235847502578,
+      "time_sec_mean": 208.07310180650046,
+      "time_sec_std": 11.820569871501709
+    },
+    "objective_improvement_pct_mean": 0.0,
+    "objective_improvement_pct_std": 0.0,
+    "absolute_delta_mean": 0.0,
+    "absolute_delta_std": 0.0,
+    "risk_reduction_pct_mean": 0.0,
+    "risk_reduction_pct_std": 0.0,
+    "return_increase_pct_mean": 0.0,
+    "return_increase_pct_std": 0.0,
+    "wins": 0,
+    "total_runs": 20,
+    "diagnostics": {
+      "num_proposals": 160,
+      "num_feasible": 160,
+      "num_raw_feasible": 160,
+      "num_raw_unknown": 0,
+      "num_repaired": 0,
+      "num_backend_calls": 160,
+      "num_local_improved": 0,
+      "num_global_accepted": 0,
+      "num_local_improved_but_rejected": 0,
+      "local_improvement_rate_over_feasible": 0.0,
+      "global_accept_rate_over_local_improved": 0.0
+    },
+    "objective_sign_test_pvalue": 1.0,
+    "objective_improvement_runs": 0,
+    "objective_worsened_runs": 0,
+    "objective_tied_runs": 20,
+    "objective_relative_improvement_mean_pct": 0.0,
+    "objective_relative_improvement_std_pct": 0.0,
+    "objective_relative_improvement_ci95_pct": [
+      0.0,
+      0.0
+    ],
+    "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+  },
+  "quantum_revision_summary": {
+    "qaoa2": {
+      "static": {
+        "objective_mean": -0.0018532587904627773,
+        "objective_std": 0.00019621001778193821,
+        "risk_mean": 0.02233447527023378,
+        "risk_std": 0.0004118834022928686,
+        "return_mean": 0.013020496425579666,
+        "return_std": 3.881676539810979e-05,
+        "time_sec_mean": 32.434024638600114,
+        "time_sec_std": 5.580795399005197
+      },
+      "caf": {
+        "objective_mean": -0.002238849226571073,
+        "objective_std": 7.750672776866712e-05,
+        "risk_mean": 0.01966342362570385,
+        "risk_std": 0.0002437719099933446,
+        "return_mean": 0.012070561039422997,
+        "return_std": 0.00016205109316115967,
+        "time_sec_mean": 108.42161028559985,
+        "time_sec_std": 18.27510105526764
+      },
+      "objective_improvement_pct_mean": 22.208954328194658,
+      "objective_improvement_pct_std": 14.26029543635294,
+      "absolute_delta_mean": -0.00038559043610829563,
+      "absolute_delta_std": 0.00018967401897449667,
+      "risk_reduction_pct_mean": 11.927143312870054,
+      "risk_reduction_pct_std": 2.046400707183313,
+      "return_increase_pct_mean": -7.294176159373009,
+      "return_increase_pct_std": 1.323168005617843,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 280,
+        "num_feasible": 280,
+        "num_raw_feasible": 280,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 280,
+        "num_local_improved": 65,
+        "num_global_accepted": 63,
+        "num_local_improved_but_rejected": 2,
+        "local_improvement_rate_over_feasible": 0.23214285714285715,
+        "global_accept_rate_over_local_improved": 0.9692307692307692
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 22.208954328194658,
+      "objective_relative_improvement_std_pct": 14.26029543635294,
+      "objective_relative_improvement_ci95_pct": [
+        16.43931694016958,
+        29.114830763756036
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    },
+    "qaoa3": {
+      "static": {
+        "objective_mean": -0.001880300588529165,
+        "objective_std": 0.00015455229141021407,
+        "risk_mean": 0.02228655021938806,
+        "risk_std": 0.00027692600897683586,
+        "return_mean": 0.013023575698223192,
+        "return_std": 3.696816198454174e-05,
+        "time_sec_mean": 46.01460367579957,
+        "time_sec_std": 8.381467624056624
+      },
+      "caf": {
+        "objective_mean": -0.0022498405357221944,
+        "objective_std": 4.8274079444631116e-05,
+        "risk_mean": 0.01970276907246927,
+        "risk_std": 0.0002440500687274428,
+        "return_mean": 0.01210122507195683,
+        "return_std": 0.00014543029833606597,
+        "time_sec_mean": 139.44505716890018,
+        "time_sec_std": 18.636906019381406
+      },
+      "objective_improvement_pct_mean": 20.410390802354613,
+      "objective_improvement_pct_std": 9.518825067261039,
+      "absolute_delta_mean": -0.00036953994719302963,
+      "absolute_delta_std": 0.00014787497941746208,
+      "risk_reduction_pct_mean": 11.578491735307397,
+      "risk_reduction_pct_std": 1.6222054843718445,
+      "return_increase_pct_mean": -7.081419706284109,
+      "return_increase_pct_std": 1.148284383726584,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 260,
+        "num_feasible": 260,
+        "num_raw_feasible": 260,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 260,
+        "num_local_improved": 63,
+        "num_global_accepted": 62,
+        "num_local_improved_but_rejected": 1,
+        "local_improvement_rate_over_feasible": 0.2423076923076923,
+        "global_accept_rate_over_local_improved": 0.9841269841269841
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 20.410390802354613,
+      "objective_relative_improvement_std_pct": 9.518825067261039,
+      "objective_relative_improvement_ci95_pct": [
+        16.359909620208672,
+        24.66379962312108
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    },
+    "sqa": {
+      "static": {
+        "objective_mean": -0.0009067412431304656,
+        "objective_std": 0.00047292451800784734,
+        "risk_mean": 0.02310597444008869,
+        "risk_std": 0.00116753998342676,
+        "return_mean": 0.01245972846317481,
+        "return_std": 0.0003857255159845456,
+        "time_sec_mean": 1.2765346355500697,
+        "time_sec_std": 0.09571836985302662
+      },
+      "caf": {
+        "objective_mean": -0.0018874427958233617,
+        "objective_std": 0.0002309158237565844,
+        "risk_mean": 0.01981158986399178,
+        "risk_std": 0.0004428776385624697,
+        "return_mean": 0.01179323772781925,
+        "return_std": 0.0003108883458534413,
+        "time_sec_mean": 2.1149807166001664,
+        "time_sec_std": 0.49469319879373436
+      },
+      "objective_improvement_pct_mean": 159.85832215830712,
+      "objective_improvement_pct_std": 161.89900543291887,
+      "absolute_delta_mean": -0.0009807015526928958,
+      "absolute_delta_std": 0.0004966152373493923,
+      "risk_reduction_pct_mean": 14.058017607326969,
+      "risk_reduction_pct_std": 4.385243344882699,
+      "return_increase_pct_mean": -5.282428403280654,
+      "return_increase_pct_std": 3.1690043213316983,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 312,
+        "num_feasible": 312,
+        "num_raw_feasible": 312,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 312,
+        "num_local_improved": 90,
+        "num_global_accepted": 87,
+        "num_local_improved_but_rejected": 3,
+        "local_improvement_rate_over_feasible": 0.28846153846153844,
+        "global_accept_rate_over_local_improved": 0.9666666666666667
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 159.85832215830712,
+      "objective_relative_improvement_std_pct": 161.89900543291887,
+      "objective_relative_improvement_ci95_pct": [
+        94.74489361195214,
+        237.06954848904454
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    }
+  },
+  "removed_legacy_source": {
+    "present_in_current_package": false,
+    "historical_sha256": "219d4761bd0c87669321dccade3c38b41d2222c7b3a9044c5c0f57708c29a4b1",
+    "historical_commit": "356c1852c65a185b05aed040052c5c3f750991bd"
+  },
+  "migration_validation": "igraph-only-validation.json",
+  "prior_maintenance_snapshot": "maintenance-before-igraph-only.json",
+  "provenance_note": "Original experiment source fingerprints and twenty-run outputs remain unchanged; current source digest and tests describe the igraph-only migration, not re-execution of all historical tasks."
+}

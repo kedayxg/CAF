@@ -46,48 +46,45 @@ def _enforce_local_cardinality(binary_vec, score_vec, community_cardinality):
     return repaired
 
 
-def _normalize_local_solution(raw_solution, local_state_len, community_cardinality):
-    """Normalize backend output into a feasible local binary vector.
+def _normalize_local_solution(raw_solution, local_state_len, community_cardinality, *, return_info=False):
+    """Normalize binary vectors or local indices, recording any feasibility repair.
 
-    Some optimizers may return:
-    - a full binary vector of length `local_state_len`,
-    - a list of selected local indices,
-    - or an irregular array in edge cases.
-
-    This helper converts all of them into a length-matched binary vector and
-    enforces the requested local cardinality.
+    With return_info=True, return (vector, info). The default public API still
+    returns only the vector. A repaired candidate must not be called a raw sample.
     """
+    n, k = int(local_state_len), int(community_cardinality)
+    if n != local_state_len or n < 0 or k != community_cardinality or not 0 <= k <= n:
+        raise ValueError("local cardinality must be an integer between zero and local size")
     arr = np.asarray(raw_solution).reshape(-1)
-
-    if arr.size == local_state_len:
+    if not np.issubdtype(arr.dtype, np.number) and arr.dtype != np.bool_:
+        raise ValueError("local solver output must contain finite numbers")
+    if not np.all(np.isfinite(arr)):
+        raise ValueError("local solver output must contain finite numbers")
+    raw_feasible = False
+    if arr.size == n:
         vec = (arr > 0.5).astype(int)
         score = arr.astype(float)
-        return _enforce_local_cardinality(vec, score, community_cardinality)
-
-    # Heuristic: treat output as a list of chosen local indices.
-    if (
-        arr.size > 0
-        and arr.size <= local_state_len
+        raw_feasible = bool(np.all((arr == 0) | (arr == 1)) and vec.sum() == k)
+    elif (
+        arr.size > 0 and arr.size <= n
         and np.issubdtype(arr.dtype, np.integer)
-        and np.all(arr >= 0)
-        and np.all(arr < local_state_len)
+        and np.all(arr >= 0) and np.all(arr < n)
         and np.unique(arr).size == arr.size
-        and (arr.size == community_cardinality or np.any(arr > 1))
+        and (arr.size == k or np.any(arr > 1))
     ):
-        vec = np.zeros(local_state_len, dtype=int)
+        vec = np.zeros(n, dtype=int)
         vec[arr.astype(int)] = 1
-        return _enforce_local_cardinality(vec, vec.astype(float), community_cardinality)
-
-    # Fallback: binarize and pad/truncate to protect downstream linear algebra.
-    vec = (arr > 0.5).astype(int)
-    score = arr.astype(float)
-    if vec.size < local_state_len:
-        vec = np.pad(vec, (0, local_state_len - vec.size), mode="constant")
-        score = np.pad(score, (0, local_state_len - score.size), mode="constant")
-    elif vec.size > local_state_len:
-        vec = vec[:local_state_len]
-        score = score[:local_state_len]
-    return _enforce_local_cardinality(vec, score, community_cardinality)
+        score = vec.astype(float)
+        raw_feasible = bool(arr.size == k)
+    else:
+        vec = (arr > 0.5).astype(int)[:n]
+        score = arr.astype(float)[:n]
+        if vec.size < n:
+            vec = np.pad(vec, (0, n - vec.size))
+            score = np.pad(score, (0, n - score.size))
+    result = _enforce_local_cardinality(vec, score, k)
+    info = {"raw_candidate_feasible": raw_feasible, "candidate_repaired": not raw_feasible}
+    return (result, info) if return_info else result
 
 
 def _attach_local_problem_metadata(model, adjusted_returns, sub_covariance, budget, risk_factor):
@@ -131,6 +128,36 @@ def evaluate_state_vector(state_vector, covariance_matrix, expected_returns, ris
     )
 
 
+def _validated_problem(covariance, returns, communities, cardinalities):
+    covariance = np.asarray(_to_numpy_values(covariance), dtype=float)
+    returns = np.asarray(_to_numpy_values(returns), dtype=float)
+    if returns.ndim != 1 or covariance.shape != (returns.size, returns.size):
+        raise ValueError("covariance must be square and match the returns vector")
+    if not np.all(np.isfinite(covariance)) or not np.all(np.isfinite(returns)):
+        raise ValueError("covariance and returns must be finite")
+    if not np.allclose(covariance, covariance.T, rtol=1e-10, atol=1e-12):
+        raise ValueError("covariance must be symmetric")
+    groups, cards = list(communities), list(cardinalities)
+    if len(groups) != len(cards):
+        raise ValueError("each community must have one cardinality")
+    validated = []
+    for community, card in zip(groups, cards):
+        indices = np.asarray(community)
+        if indices.ndim != 1 or not len(indices) or not np.issubdtype(indices.dtype, np.integer):
+            raise ValueError("communities must be nonempty integer index arrays")
+        if not np.isfinite(card) or int(card) != card or not 0 <= card <= len(indices):
+            raise ValueError("community cardinality must be an integer within its size")
+        validated.append(indices.astype(int))
+    covered = np.concatenate(validated) if validated else np.array([], dtype=int)
+    if not np.array_equal(np.sort(covered), np.arange(returns.size)):
+        raise ValueError("communities must partition all assets exactly once")
+    return covariance, returns, validated, [int(card) for card in cards]
+
+
+def _reads_for_size(size):
+    return 200 if size > 80 else 100 if size > 30 else 20
+
+
 def run_caf_pipeline(
     covariance_matrix,
     expected_returns,
@@ -159,7 +186,7 @@ def run_caf_pipeline(
         optimizer_factory: Produces a callable optimizer for the local model.
         risk_factor: Global portfolio risk-aversion coefficient.
         effective_risk_factor: Optional risk factor used inside local proposals.
-        initial_selected_indices: Optional warm-start selection.
+        initial_selected_indices: Feasible warm-start indices. If omitted, solve\n            independent local problems to build a feasible state before refinement.
         iterations: Maximum CAF outer iterations.
         use_incremental: Whether to use cached incremental objective updates.
         patience: Early-stopping patience in outer iterations.
@@ -183,13 +210,55 @@ def run_caf_pipeline(
     except (TypeError, ValueError):
         factory_accepts_seed = False
 
-    dimension = covariance_matrix.shape[0]
-    covariance_values = _to_numpy_values(covariance_matrix)
-    returns_values = _to_numpy_values(expected_returns)
+    covariance_values, returns_values, communities, subproblem_cardinalities = _validated_problem(
+        covariance_matrix, expected_returns, communities, subproblem_cardinalities
+    )
+    dimension = len(returns_values)
+    for name, value in (("risk_factor", risk_factor), ("effective_risk_factor", effective_risk_factor)):
+        if not np.isfinite(value) or value < 0:
+            raise ValueError(f"{name} must be finite and non-negative")
+    if int(iterations) != iterations or iterations < 0 or int(patience) != patience or patience < 1:
+        raise ValueError("iterations must be non-negative and patience must be positive integers")
+    iterations, patience = int(iterations), int(patience)
+
+    def make_optimizer(reads, call_seed):
+        kwargs = {"num_reads": reads}
+        if factory_accepts_seed and call_seed is not None:
+            kwargs["seed"] = int(call_seed)
+        return optimizer_factory(**kwargs)
 
     current_state = np.zeros(dimension, dtype=int)
+    initialization_diagnostics = []
     if initial_selected_indices is not None:
-        current_state[initial_selected_indices] = 1
+        indices = np.asarray(initial_selected_indices)
+        if indices.size == 0:
+            indices = np.array([], dtype=int)
+        if indices.ndim != 1 or not np.issubdtype(indices.dtype, np.integer):
+            raise ValueError("initial_selected_indices must be a one-dimensional integer sequence")
+        if np.any(indices < 0) or np.any(indices >= dimension) or len(np.unique(indices)) != len(indices):
+            raise ValueError("initial_selected_indices must be unique and in range")
+        current_state[indices] = 1
+        if any(current_state[c].sum() != k for c, k in zip(communities, subproblem_cardinalities)):
+            raise ValueError("initial_selected_indices must satisfy every community budget")
+    else:
+        # Feasibility is established before monotonic acceptance; zero is not a
+        # feasible starting portfolio when any community has a nonzero budget.
+        for pos, (community, card) in enumerate(zip(communities, subproblem_cardinalities)):
+            if card in (0, len(community)):
+                current_state[community] = int(card > 0)
+                continue
+            sub_covariance = covariance_values[np.ix_(community, community)]
+            model, weights = get_model_func(
+                returns_values[community], sub_covariance, budget=card, risk_factor=effective_risk_factor
+            )
+            _attach_local_problem_metadata(
+                model, returns_values[community], sub_covariance, card, effective_risk_factor
+            )
+            optimizer = make_optimizer(_reads_for_size(len(community)), None if seed is None else int(seed) + pos)
+            raw, _, _ = optimizer(model, weights)
+            local, info = _normalize_local_solution(raw, len(community), card, return_info=True)
+            current_state[community] = local
+            initialization_diagnostics.append({"community_pos": pos, **info})
 
     current_metrics = evaluate_state_vector(
         current_state,
@@ -228,146 +297,46 @@ def run_caf_pipeline(
             )
 
         def solve_community(community, community_cardinality, community_pos):
-            """Build and solve one community subproblem."""
+            """Generate a proposal using the state frozen until all futures finish."""
             community_start = perf_counter()
-            community_cardinality = int(community_cardinality)
-            local_build_time = 0.0
-            local_solve_time = 0.0
-
-            c_size = len(community)
-            if c_size > 80:
-                dynamic_reads = 200
-            elif c_size > 30:
-                dynamic_reads = 100
-            else:
-                dynamic_reads = 20
-
-            if factory_accepts_seed and seed is not None:
-                call_seed = int(seed) + iteration_idx * 100003 + int(community_pos)
-                local_optimizer = optimizer_factory(
-                    num_reads=dynamic_reads,
-                    seed=call_seed,
-                )
-            else:
-                local_optimizer = optimizer_factory(num_reads=dynamic_reads)
-
-            thread_id = threading.get_ident()
-
+            t0 = perf_counter()
+            local_state = current_state[community]
+            sub_covariance = covariance_values[np.ix_(community, community)]
+            dynamic_reads = _reads_for_size(len(community))
             if use_incremental:
-                t0 = perf_counter()
-                local_state = current_state[community]
-                sub_covariance = covariance_values[np.ix_(community, community)]
-
-                if community_cardinality <= 0:
-                    local_solution = np.zeros_like(local_state)
-                    adjusted_returns = returns_values[community].copy()
-                    local_build_time += perf_counter() - t0
-                else:
-                    # Remove the local block contribution from the cached global
-                    # covariance-vector product, leaving only the external context.
-                    external_shift = 2 * effective_risk_factor * (
-                        current_cov_vector[community] - sub_covariance @ local_state
-                    )
-                    adjusted_returns = returns_values[community] - external_shift
-                    model, weights = get_model_func(
-                        adjusted_returns,
-                        sub_covariance,
-                        budget=community_cardinality,
-                        risk_factor=effective_risk_factor,
-                    )
-                    _attach_local_problem_metadata(
-                        model,
-                        adjusted_returns,
-                        sub_covariance,
-                        community_cardinality,
-                        effective_risk_factor,
-                    )
-                    model.name = f"model_{thread_id}"  # Prevent temp file collision.
-                    local_build_time += perf_counter() - t0
-
-                    t1 = perf_counter()
-                    local_solution, _, _ = local_optimizer(model, weights)
-                    local_solution = _normalize_local_solution(
-                        local_solution,
-                        local_state_len=len(local_state),
-                        community_cardinality=community_cardinality,
-                    )
-                    local_solve_time += perf_counter() - t1
-
-                return (
-                    community,
-                    community_cardinality,
-                    local_solution,
-                    local_state,
-                    sub_covariance,
-                    adjusted_returns,
-                    dynamic_reads,
-                    perf_counter() - community_start,
-                    local_build_time,
-                    local_solve_time,
-                )
+                shift = current_cov_vector[community] - sub_covariance @ local_state
             else:
-                t0 = perf_counter()
-                if community_cardinality <= 0:
-                    local_build_time += perf_counter() - t0
-                    return (
-                        community,
-                        community_cardinality,
-                        np.zeros(len(community), dtype=int),
-                        current_state[community],
-                        covariance_values[np.ix_(community, community)],
-                        returns_values[community].copy(),
-                        dynamic_reads,
-                        perf_counter() - community_start,
-                        local_build_time,
-                        local_solve_time,
-                    )
-
-                fixed_indices = np.setdiff1d(all_indices, community, assume_unique=False)
-                external_shift = (
-                    2
-                    * effective_risk_factor
-                    * covariance_values[np.ix_(community, fixed_indices)]
-                    @ current_state[fixed_indices]
-                )
-                adjusted_returns = returns_values[community] - external_shift
-                sub_covariance = covariance_values[np.ix_(community, community)]
+                external = np.setdiff1d(all_indices, community)
+                shift = covariance_values[np.ix_(community, external)] @ current_state[external]
+            adjusted_returns = returns_values[community] - 2 * effective_risk_factor * shift
+            info = {"raw_candidate_feasible": None, "candidate_repaired": False}
+            backend_called = community_cardinality not in (0, len(community))
+            if backend_called:
                 model, weights = get_model_func(
-                    adjusted_returns,
-                    sub_covariance,
-                    budget=community_cardinality,
+                    adjusted_returns, sub_covariance, budget=community_cardinality,
                     risk_factor=effective_risk_factor,
                 )
                 _attach_local_problem_metadata(
-                    model,
-                    adjusted_returns,
-                    sub_covariance,
-                    community_cardinality,
-                    effective_risk_factor,
+                    model, adjusted_returns, sub_covariance, community_cardinality, effective_risk_factor
                 )
-                model.name = f"model_{thread_id}"  # Prevent temp file collision.
-                local_build_time += perf_counter() - t0
-
+                model.name = f"model_{threading.get_ident()}"
+                call_seed = None if seed is None else int(seed) + iteration_idx * 100003 + community_pos
+                optimizer = make_optimizer(dynamic_reads, call_seed)
+                build_time = perf_counter() - t0
                 t1 = perf_counter()
-                local_solution, _, _ = local_optimizer(model, weights)
-                local_solution = _normalize_local_solution(
-                    local_solution,
-                    local_state_len=len(community),
-                    community_cardinality=community_cardinality,
+                raw, _, _ = optimizer(model, weights)
+                local_solution, info = _normalize_local_solution(
+                    raw, len(community), community_cardinality, return_info=True
                 )
-                local_solve_time += perf_counter() - t1
-                return (
-                    community,
-                    community_cardinality,
-                    local_solution,
-                    current_state[community],
-                    sub_covariance,
-                    adjusted_returns,
-                    dynamic_reads,
-                    perf_counter() - community_start,
-                    local_build_time,
-                    local_solve_time,
-                )
+                solve_time = perf_counter() - t1
+            else:
+                local_solution = np.full(len(community), int(community_cardinality > 0), dtype=int)
+                build_time, solve_time = perf_counter() - t0, 0.0
+            return (
+                community, community_cardinality, local_solution, local_state,
+                sub_covariance, adjusted_returns, dynamic_reads,
+                perf_counter() - community_start, build_time, solve_time, info, backend_called,
+            )
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [
@@ -387,6 +356,8 @@ def run_caf_pipeline(
             comm_time,
             local_build_time,
             local_solve_time,
+            normalization_info,
+            backend_called,
         ) in results:
             time_build += local_build_time
             time_solve += local_solve_time
@@ -424,7 +395,7 @@ def run_caf_pipeline(
                     global_delta_if_committed = float(
                         candidate_metrics["objective"] - current_metrics["objective"]
                     )
-                    if candidate_metrics["objective"] < current_metrics["objective"] - 1e-5:
+                    if global_delta_if_committed <= -1e-5:
                         current_state = candidate_state
                         current_metrics = candidate_metrics
                         accepted_globally = True
@@ -437,6 +408,8 @@ def run_caf_pipeline(
                         "local_cardinality": int(community_cardinality),
                         "dynamic_reads": int(dynamic_reads),
                         "candidate_feasible": bool(candidate_feasible),
+                        "backend_called": bool(backend_called),
+                        **normalization_info,
                         "local_obj_before": float(local_obj_before),
                         "local_obj_candidate": float(local_obj_candidate),
                         "local_improved": bool(local_improved),
@@ -448,7 +421,7 @@ def run_caf_pipeline(
         iteration_seconds.append(perf_counter() - iteration_start)
 
         # Early stopping is based on the true global objective after the iteration.
-        if current_metrics["objective"] < best_objective - 1e-5:
+        if current_metrics["objective"] < best_objective:
             best_objective = current_metrics["objective"]
             no_improve_count = 0
         else:
@@ -481,6 +454,7 @@ def run_caf_pipeline(
 
     result = {
         "selected_indices": selected_indices,
+        "initialization_diagnostics": initialization_diagnostics,
         "metrics": final_metrics,
         "history": history,
         "timing": {

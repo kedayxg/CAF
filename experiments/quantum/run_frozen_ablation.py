@@ -34,6 +34,8 @@ for p in (str(CAF_ROOT),):
         sys.path.insert(0, p)
 
 from caf_core import evaluate_state_vector, normalize_local_solution  # noqa: E402
+from experiments.revision_protocol import QUANTUM_CAPACITY
+from experiments.classical.run_fixed_community_benchmark import source_digest
 from experiments._common import (  # noqa: E402
     extract_communities_from_partitions,
     load_local_jpm_data,
@@ -84,7 +86,9 @@ def solve_local(get_model, to_cqm, adjusted, sub_cov, K, q_eff, cfg):
         ws = {label_of_Cpos[j]: float(c[j]) for j in range(n)}
     opt = QiskitQAOAOptimizer(cfg, warmstart_c=ws)
     sim_cand, _, _ = opt(model, weights)                 # already aligned to community-local weight order
-    sim_cand = normalize_local_solution(sim_cand, n, K)  # enforce exact cardinality without changing local order
+    sim_cand, sample_info = normalize_local_solution(sim_cand, n, K, return_info=True)
+    if not sample_info["raw_candidate_feasible"] or not opt.last_candidate_sampled:
+        raise RuntimeError("Frozen QAOA validation requires an actually sampled feasible candidate")
 
     cqm = to_cqm(model)
     bqm, _ = dimod.cqm_to_bqm(cqm)
@@ -112,9 +116,10 @@ def main():
         default=None,
         help="Optional override path to another dcmppln checkout. Defaults to the vendored copy.",
     )
-    ap.add_argument("--data-dir", type=Path, default=SNAPSHOT_ROOT / "data" / "russell3000_subset")
+    ap.add_argument("--data-dir", type=Path, default=CAF_ROOT / "data" / "russell3000_subset")
     ap.add_argument("--out-dir", type=Path, default=HARDWARE_RESULTS_ROOT)
     ap.add_argument("--n-assets", type=int, default=40)
+    ap.add_argument("--max-community-size", type=int, default=QUANTUM_CAPACITY)
     ap.add_argument("--subset-seed", type=int, default=1234)
     ap.add_argument("--base-seed", type=int, default=42)
     ap.add_argument("--risk-factor", type=float, default=0.5)
@@ -123,6 +128,8 @@ def main():
     ap.add_argument("--qaoa-maxiter", type=int, default=80)
     ap.add_argument("--num-reads", type=int, default=200)
     ap.add_argument("--warmstart", action="store_true", help="Enable Egger-style warm-start QAOA from the continuous relaxation.")
+    ap.add_argument("--local-risk-rebalancing", action="store_true",
+                    help="Use the historical norm-rescaled local surrogate; default keeps local/global q aligned.")
     args = ap.parse_args()
 
     Clustering, Denoiser, SimulatedAnnealingDwave, Pipeline, get_model, rebal = load_upstream_components(args.jpm_repo)
@@ -136,13 +143,15 @@ def main():
     np.random.seed(args.base_seed); random.seed(args.base_seed)
     pipe = Pipeline(corr_df.values, cov_df.values, ret_s.values,
                     denoiser=Denoiser(active=True, q=0.5, q_fit=True),
-                    cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
+                    cluster=Clustering(active=True, clustering_method="newman", take_absolute_value=True,
+                                       max_community_size=args.max_community_size, seed=42),
                     optimize_func=SimulatedAnnealingDwave(num_reads=args.num_reads, seed=args.base_seed))
-    pr = pipe.run(run_optimizer=True, risk_rebalancing=True, cluster_on_correlation=True,
+    pr = pipe.run(run_optimizer=True, risk_rebalancing=False, cluster_on_correlation=True,
                   optimize_on_correlation=False, input_risk_factor=q)
     communities = extract_communities_from_partitions(pipe.__state__["result"]["partitions"])
     subcard = split_cardinality_constraint([len(c) for c in communities], cardinality)
-    q_eff = rebal(q, cov_df.values, ret_s.values, pipe.__state__["result"]["partitions"])
+    q_eff = (rebal(q, cov_df.values, ret_s.values, pipe.__state__["result"]["partitions"])
+             if args.local_risk_rebalancing else q)
     static_sel = np.where(np.asarray(pr["recombined_solution"]).astype(np.int64) == 1)[0].tolist()
 
     cov = cov_df.values; ret = ret_s.values
@@ -195,7 +204,11 @@ def main():
     elif exact_only:
         ci = max(exact_only, key=lambda r: -r["dO_inject"])["idx"]; why = "warning: only exact satisfies ΔO<0 while sim misses it (QAOA does not concentrate on the optimum for this QUBO)"
     else:
-        ci = min([r["idx"] for r in scan if r["n"] <= 6], key=lambda idx: len(communities[idx])); why = "warning: no improving n<=6 community is available"
+        eligible = [r for r in scan if r["dO_inject"] is not None]
+        if not eligible:
+            raise ValueError("No nontrivial community fits the n<=16 simulator limit")
+        ci = min(eligible, key=lambda r: r["n"])["idx"]
+        why = "simulator-only fallback: no improving n<=6 hardware target is available"
     C = communities[ci]; K_C = int(subcard[ci]); n = len(C)
     print(f"\nSelected community #{ci}: n_local={n}, k_local={K_C} ({why})")
 
@@ -222,6 +235,11 @@ def main():
     args.out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     snap = {"base_seed": args.base_seed, "n_assets": args.n_assets, "q_eff": float(q_eff),
+            "partition_max_community_size": args.max_community_size,
+            "source_sha256": source_digest(), "subset_seed": args.subset_seed,
+            "qaoa_config": cfg.__dict__,
+            "local_risk_rebalancing": args.local_risk_rebalancing,
+            "selection_reason": why, "simulator_only": not bool(both or exact_only),
             "community_sizes": sizes, "selected": int(ci), "n_local": n, "k_local": K_C,
             "current_state": current_state.tolist(), "base_objective": base_obj,
             "scan": scan, "rows": rows}

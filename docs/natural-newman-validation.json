@@ -1,0 +1,201 @@
+{
+  "status": "passed",
+  "checks": {
+    "verified_portfolios": 610,
+    "paired_revision_runs": 285,
+    "verified_histories": 225,
+    "suppression_community_observations": 128,
+    "unavailable_presolve_comparisons": 4,
+    "main_2016_runs": 20
+  },
+  "task_source_sha256_counts": {
+    "2307ca24918192ca1c92407bed1f3a86d17cfcd7ad97978afdc3624beeb73cd2": 40,
+    "d413575796b98d5540d3e6077b68f93f3ae03abe37330e4c21d8a52cdaf9591b": 140,
+    "b0d899a1f4e9824d93a6c18883cd34f7c0b5617967bab13971a0a1bb1826157f": 57,
+    "96ff4254914d8e2978d8a384c735bb648fb38c3df077ce994d50ab394a1096a7": 15,
+    "6e68a0828c33acf1ba746074bff9f644b6ec2ba58a71a16da1200d7e4352b8cd": 73
+  },
+  "frozen_independent_enumeration": [
+    {
+      "community": 0,
+      "assets": [
+        7,
+        9,
+        10,
+        13,
+        14,
+        16,
+        18,
+        21,
+        24,
+        26,
+        28,
+        34,
+        35,
+        39
+      ],
+      "injected": {
+        "candidate": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "global_delta": -0.00031080335243496675
+      },
+      "uninjected": {
+        "candidate": [
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "global_delta": -0.0002727946750840111
+      }
+    },
+    {
+      "community": 3,
+      "assets": [
+        1,
+        12,
+        17,
+        25,
+        27,
+        31,
+        32,
+        33
+      ],
+      "injected": {
+        "candidate": [
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "global_delta": -0.0001623575616338021
+      },
+      "uninjected": {
+        "candidate": [
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "global_delta": 0.0
+      }
+    },
+    {
+      "community": 2,
+      "assets": [
+        0,
+        2,
+        3,
+        5,
+        19,
+        23,
+        29,
+        30
+      ],
+      "injected": {
+        "candidate": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "global_delta": -7.259552974899983e-05
+      },
+      "uninjected": {
+        "candidate": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "global_delta": 0.0
+      }
+    },
+    {
+      "community": 1,
+      "assets": [
+        4,
+        6,
+        8,
+        11,
+        15,
+        20,
+        22,
+        36,
+        37,
+        38
+      ],
+      "injected": {
+        "candidate": [
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "global_delta": 0.0
+      },
+      "uninjected": {
+        "candidate": [
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "global_delta": 0.0
+      }
+    }
+  ],
+  "scope": "Direct full-matrix objective recomputation for every stored portfolio; aligned frozen exact moves independently enumerated"
+}

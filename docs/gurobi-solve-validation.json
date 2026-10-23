@@ -1,0 +1,28 @@
+{
+  "MIPGap": 0.0001,
+  "TimeLimit": 300,
+  "Threads": 1,
+  "settings": {
+    "group-gurobi_index-0_k-50_n-200": {
+      "optimal_solves_at_requested_tolerance": 15,
+      "timeouts": 0
+    },
+    "group-gurobi_index-0_k-242_n-484": {
+      "optimal_solves_at_requested_tolerance": 15,
+      "timeouts": 0
+    },
+    "group-gurobi_index-0_k-100_n-200": {
+      "optimal_solves_at_requested_tolerance": 15,
+      "timeouts": 0
+    },
+    "group-gurobi_index-0_k-150_n-300": {
+      "optimal_solves_at_requested_tolerance": 15,
+      "timeouts": 0
+    },
+    "group-gurobi_index-0_k-50_n-100": {
+      "optimal_solves_at_requested_tolerance": 8,
+      "timeouts": 0,
+      "origin": "initial compatible precheck cached by launcher"
+    }
+  }
+}

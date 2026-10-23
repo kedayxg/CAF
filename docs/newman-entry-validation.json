@@ -1,0 +1,15 @@
+{
+  "source_sha256": "b0d899a1f4e9824d93a6c18883cd34f7c0b5617967bab13971a0a1bb1826157f",
+  "command": "python -m experiments.classical.run_benchmark --runs 1 --skip-q-sweep",
+  "seed": 42,
+  "checks": {
+    "static_weights_match_library": true,
+    "caf_weights_match_library": true,
+    "caf_objective_history_matches_library_at_1e_minus_12": true,
+    "uncached_weights_match_cached": true
+  },
+  "raw_result_sha256": "0a57b50627d6ff748a6b222bd064c9dfca05d7cd57031b3aa18147f08e38ab24",
+  "static_objective": 1.5132811426585042,
+  "caf_objective": 1.4985591688356652,
+  "uncached_objective": 1.4985591688356652
+}

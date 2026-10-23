@@ -1,0 +1,135 @@
+{
+  "experiment": "Three public community detection libraries with static SA and CAF",
+  "source_sha256": "dab7f6955dc689a40415592397e5fccc8c80615c66ee7ef7aa5965a9d5200876",
+  "tests_passed": 66,
+  "known_upstream_expected_failures": 9,
+  "test_log_sha256": "d5f154eec8e3bdc331c09a89f0ca929d8ea10fc6d1a8f6db81ef6cf03e34f2cf",
+  "pyproject_sha256": "998438daca8892153a9b475494f7f03ddb590cd8cfc48b4ae5a3e8e4cf753ed8",
+  "scope": "2016 N=484, one fixed partition seed per method, 20 independent solver seeds each. Not a sweep over graph seeds, market panels or library parameters. Runtime jobs ran concurrently and are not a controlled speed comparison.",
+  "methods": [
+    {
+      "method": "igraph_spectral",
+      "name": "igraph Newman spectral",
+      "detail_file": "library-igraph_spectral-results.json",
+      "community_count": 3,
+      "community_sizes": [
+        199,
+        153,
+        132
+      ],
+      "largest_community": 199,
+      "modularity": 0.16781936836780037,
+      "static_objective_mean": 1.5409447431541912,
+      "static_objective_std": 0.022058056195236354,
+      "caf_objective_mean": 1.5129375531480442,
+      "caf_objective_std": 0.014130105281836423,
+      "mean_improvement_pct": 1.8028861780771401,
+      "improvement_ci95_pct": [
+        1.2433374001365578,
+        2.393843160810578
+      ],
+      "wins": 16,
+      "ties": 4,
+      "losses": 0,
+      "sign_test_pvalue": 3.0517578125e-05,
+      "static_reads_per_run": 600,
+      "caf_reads_per_full_scan": 600,
+      "mean_caf_reads_used": 2310.0,
+      "validation": {
+        "proposals": 231,
+        "backend_calls": 231,
+        "accepted": 34,
+        "repaired": 0,
+        "raw_feasible_backend_calls": 231
+      }
+    },
+    {
+      "method": "cnm9",
+      "name": "NetworkX CNM, fixed 9",
+      "detail_file": "library-cnm9-results.json",
+      "community_count": 9,
+      "community_sizes": [
+        348,
+        125,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "largest_community": 348,
+      "modularity": 0.1691049268662445,
+      "static_objective_mean": 1.4900290172408288,
+      "static_objective_std": 0.021771788962992186,
+      "caf_objective_mean": 1.454834552652778,
+      "caf_objective_std": 0.010028896293460958,
+      "mean_improvement_pct": 2.3467638284236054,
+      "improvement_ci95_pct": [
+        1.827636380307595,
+        2.848651015711199
+      ],
+      "wins": 19,
+      "ties": 1,
+      "losses": 0,
+      "sign_test_pvalue": 3.814697265625e-06,
+      "static_reads_per_run": 1800,
+      "caf_reads_per_full_scan": 420,
+      "mean_caf_reads_used": 1953.0,
+      "validation": {
+        "proposals": 837,
+        "backend_calls": 279,
+        "accepted": 48,
+        "repaired": 0,
+        "raw_feasible_backend_calls": 279
+      }
+    },
+    {
+      "method": "louvain",
+      "name": "NetworkX Louvain",
+      "detail_file": "library-louvain-results.json",
+      "community_count": 4,
+      "community_sizes": [
+        176,
+        126,
+        125,
+        57
+      ],
+      "largest_community": 176,
+      "modularity": 0.17319302302718653,
+      "static_objective_mean": 1.5699721049244824,
+      "static_objective_std": 0.02229765653149597,
+      "caf_objective_mean": 1.521940100321063,
+      "caf_objective_std": 0.016564150254439757,
+      "mean_improvement_pct": 3.0482489237172268,
+      "improvement_ci95_pct": [
+        2.5290196568288796,
+        3.559273963681496
+      ],
+      "wins": 20,
+      "ties": 0,
+      "losses": 0,
+      "sign_test_pvalue": 1.9073486328125e-06,
+      "static_reads_per_run": 800,
+      "caf_reads_per_full_scan": 700,
+      "mean_caf_reads_used": 2905.0,
+      "validation": {
+        "proposals": 332,
+        "backend_calls": 332,
+        "accepted": 45,
+        "repaired": 0,
+        "raw_feasible_backend_calls": 332
+      }
+    }
+  ],
+  "igraph_c_version": "0.10.16",
+  "igraph_matches_archived_corrected_partition": true,
+  "igraph_matches_archived_corrected_portfolios": true,
+  "rankings": {
+    "lowest_mean_final_objective": "cnm9",
+    "highest_mean_relative_gain": "louvain",
+    "highest_modularity": "louvain",
+    "smallest_maximum_block": "louvain"
+  }
+}

@@ -13,6 +13,7 @@ caf_root = current_dir.parent.parent
 if str(caf_root) not in sys.path:
     sys.path.insert(0, str(caf_root))
 
+from experiments.revision_protocol import CLASSICAL_CAPACITY
 from caf_core import evaluate_portfolio, run_caf_pipeline
 from experiments._common import (
     BUNDLED_DATA_DIR as bundled_data_dir,
@@ -85,6 +86,31 @@ def bootstrap_ci_mean(values: np.ndarray, n_boot: int = 5000, alpha: float = 0.0
     return float(lo), float(hi)
 
 
+def paired_objective_statistics(static_objectives, caf_objectives):
+    """Exclude tied pairs from the sign test, retaining them in gain estimates."""
+    static = np.asarray(static_objectives, dtype=float)
+    caf = np.asarray(caf_objectives, dtype=float)
+    if static.ndim != 1 or static.size == 0 or static.shape != caf.shape:
+        raise ValueError("paired objectives must be nonempty vectors of equal size")
+    if not np.all(np.isfinite(static)) or not np.all(np.isfinite(caf)) or np.any(static == 0):
+        raise ValueError("paired objectives must be finite with nonzero static objectives")
+    delta = caf - static
+    wins = int(np.sum(delta < -1e-9))
+    losses = int(np.sum(delta > 1e-9))
+    relative = -delta / np.abs(static) * 100.0
+    lo, hi = bootstrap_ci_mean(relative, seed=42)
+    return {
+        "objective_sign_test_pvalue": sign_test_two_sided(wins, wins + losses),
+        "objective_improvement_runs": wins,
+        "objective_worsened_runs": losses,
+        "objective_tied_runs": int(len(delta) - wins - losses),
+        "objective_relative_improvement_mean_pct": float(relative.mean()),
+        "objective_relative_improvement_std_pct": float(relative.std()),
+        "objective_relative_improvement_ci95_pct": [lo, hi],
+        "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9",
+    }
+
+
 def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, total_iterations: int):
     import matplotlib.pyplot as plt
     from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
@@ -116,10 +142,10 @@ def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, to
         y=jpm_res["metrics"]["objective"],
         color="r",
         linestyle="--",
-        label="JPM Mean Baseline",
+        label="Static mean baseline",
     )
-    plt.title("CAF vs JPM: Objective Convergence over Iterations", fontsize=14, pad=15)
-    plt.xlabel("Iteration (0 = Initialization from JPM)", fontsize=12)
+    plt.title("CAF vs static: objective over iterations", fontsize=14, pad=15)
+    plt.xlabel("Iteration (0 = static initialization)", fontsize=12)
     plt.ylabel("Objective Value (Lower is Better)", fontsize=12)
     plt.legend(fontsize=11)
     plt.xticks(iterations)
@@ -154,7 +180,7 @@ def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, to
         s=150,
         marker="*",
         zorder=5,
-        label="JPM / Iter 0",
+        label="Static / Iter 0",
     )
     plt.title("Risk-Return Tradeoff Trajectory during CAF Folding", fontsize=14, pad=15)
     plt.xlabel("Portfolio Risk (Lower is Better)", fontsize=12)
@@ -165,7 +191,7 @@ def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, to
     plt.close()
 
     # 3) Ablation summary
-    labels = ["JPM Pipeline", "CAF Static (No Incremental)", "CAF Incremental"]
+    labels = ["Static decomposition", "CAF (full recomputation)", "CAF (cached)"]
     objectives = [
         jpm_res["metrics"]["objective"],
         static_res["metrics"]["objective"],
@@ -239,11 +265,11 @@ def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, to
     delta_ret_std = [row["delta_ret_std"] for row in q_sweep_rows]
 
     plt.figure(figsize=(10, 6))
-    plt.errorbar(q_vals, delta_obj_pct, yerr=delta_obj_std, marker="o", linewidth=2, capsize=4, label="ΔObjective % (CAF vs JPM)")
+    plt.errorbar(q_vals, delta_obj_pct, yerr=delta_obj_std, marker="o", linewidth=2, capsize=4, label="ΔObjective % (CAF vs static)")
     plt.errorbar(q_vals, delta_risk_pct, yerr=delta_risk_std, marker="s", linewidth=2, capsize=4, label="ΔRisk %")
     plt.errorbar(q_vals, delta_ret_pct, yerr=delta_ret_std, marker="^", linewidth=2, capsize=4, label="ΔReturn %")
     plt.axhline(0, color="gray", linestyle="--", linewidth=1)
-    plt.title("q-Sweep Trade-off (CAF vs JPM)")
+    plt.title("q-Sweep Trade-off (CAF vs static)")
     plt.xlabel("Risk Factor q")
     plt.ylabel("Relative Change (%)")
     plt.legend()
@@ -294,7 +320,7 @@ def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, to
     # Top pipeline blocks (uniform spacing)
     add_box(0.8, 6.0, 2.8, 1.2, "Market Data\nSigma, mu, Corr", "#E8F2FF", "#2E5AAC", fontsize=11, bold=True)
     add_box(4.0, 6.0, 2.8, 1.2, "Static Decomposition\nRMT + Newman", "#F2EDFF", "#6A3FB5", fontsize=11)
-    add_box(7.2, 6.0, 2.8, 1.2, "JPM Initialization\nCommunities + x0", "#FFF1E6", "#C96A1B", fontsize=11)
+    add_box(7.2, 6.0, 2.8, 1.2, "Static initialization\nCommunities + x0", "#FFF1E6", "#C96A1B", fontsize=11)
 
     # CAF core loop container
     loop_container = FancyBboxPatch(
@@ -355,7 +381,7 @@ def generate_plots(caf_res, jpm_res, static_res, q_sweep_rows, out_dir: Path, to
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Reproduce CAF vs JPM benchmark.")
+    parser = argparse.ArgumentParser(description="Reproduce CAF vs static benchmark.")
     parser.add_argument(
         "--jpm-repo",
         type=Path,
@@ -420,6 +446,11 @@ def parse_args():
         action="store_true",
         help="Regenerate figures from a saved benchmark summary without rerunning experiments.",
     )
+    parser.add_argument(
+        "--refresh-statistics", action="store_true",
+        help="Recompute paired statistics from saved per-run records without rerunning solvers.",
+    )
+    parser.add_argument("--max-community-size", type=int, default=CLASSICAL_CAPACITY)
     return parser.parse_args()
 
 
@@ -427,6 +458,18 @@ def main():
     args = parse_args()
     summary_path = args.summary_file if args.summary_file is not None else (args.out_dir / "benchmark_summary.json")
     summary_path.parent.mkdir(parents=True, exist_ok=True)
+    if args.refresh_statistics:
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        records = summary["per_run_records"]
+        if len(records) != summary["runs"]:
+            raise ValueError("saved run count does not match the per-run records")
+        summary.update(paired_objective_statistics(
+            [r["jpm"]["metrics"]["objective"] for r in records],
+            [r["caf"]["metrics"]["objective"] for r in records],
+        ))
+        summary_path.write_text(json.dumps(to_jsonable(summary), indent=2), encoding="utf-8")
+        print(f"Paired statistics refreshed from {len(records)} recorded runs: {summary_path}")
+        return
     if args.plot_only:
         if not summary_path.exists():
             raise FileNotFoundError(f"Summary file not found for --plot-only: {summary_path}")
@@ -486,15 +529,17 @@ def main():
         np.random.seed(run_seed)
         random.seed(run_seed)
         print(f"\n>>> Starting Run {run_idx + 1}/{num_runs} (seed={run_seed}) <<<")
-        # 1. Run JPM Pipeline to get initialization and communities
+        # 1. Run Static decomposition to get initialization and communities
         t0_jpm = perf_counter()
         pipeline = Pipeline(
             correlation_matrix.values, covariance_matrix.values, expected_returns.values,
             denoiser=Denoiser(active=True, q=0.5, q_fit=True),
-            cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
+            cluster=Clustering(active=True, clustering_method="newman", take_absolute_value=True, max_community_size=args.max_community_size, seed=42),
             optimize_func=SimulatedAnnealingDwave(num_reads=num_reads),
         )
-        pipeline_result = pipeline.run(run_optimizer=True, risk_rebalancing=True, cluster_on_correlation=True, optimize_on_correlation=False, input_risk_factor=risk_factor)
+        # The publication code actually disabled rescaling in Pipeline.run.
+        # Keep q aligned explicitly; historical tables also used the old clustering.
+        pipeline_result = pipeline.run(run_optimizer=True, risk_rebalancing=False, cluster_on_correlation=True, optimize_on_correlation=False, input_risk_factor=risk_factor)
         
         communities = extract_communities_from_partitions(pipeline.__state__["result"]["partitions"])
         subproblem_cardinalities = split_cardinality_constraint([len(c) for c in communities], cardinality)
@@ -518,7 +563,7 @@ def main():
         )
         caf_results_list.append(caf_res)
 
-        # 3. CAF static ablation (same initialization, no incremental context caching)
+        # 3. Full-recomputation ablation: context remains enabled.
         caf_static_res = run_caf_pipeline(
             covariance_matrix,
             expected_returns,
@@ -652,6 +697,7 @@ def main():
                     "runs": int(num_runs),
                     "data_prefix": args.data_prefix,
                     "risk_factor": float(risk_factor),
+            "max_community_size": int(args.max_community_size),
                     "q_values": q_values,
                     "num_reads": int(num_reads),
                     "iterations": int(iterations),
@@ -683,24 +729,26 @@ def main():
         print(f"  -> Risk            : {m['risk']:.6f} ± {m['risk_std']:.6f}")
         print(f"  -> Expected Return : {m['expected_return']:.6f} ± {m['expected_return_std']:.6f}")
         print(f"  -> Total Time      : {t['total_seconds']:.6f}s ± {t['total_seconds_std']:.6f}s")
-        print(f"  -> Rel vs JPM      : {((m['objective'] - base_obj) / abs(base_obj)) * 100:.2f}%\n")
+        print(f"  -> Rel vs static      : {((m['objective'] - base_obj) / abs(base_obj)) * 100:.2f}%\n")
 
     print("\n==================================================")
     print(f"BENCHMARK RESULTS (Averaged over {num_runs} runs)")
     print("==================================================")
-    print_agg_block("JPM Official Pipeline", agg_jpm, baseline_objective)
-    print_agg_block("CAF Pipeline (Ours)", agg_caf, baseline_objective)
-    print_agg_block("CAF Static (No Incremental)", agg_static, baseline_objective)
+    print_agg_block("Static decomposition baseline", agg_jpm, baseline_objective)
+    print_agg_block("CAF refinement (cached)", agg_caf, baseline_objective)
+    print_agg_block("CAF (full recomputation)", agg_static, baseline_objective)
 
     # Statistical evidence for objective improvement: paired sign test + bootstrap CI
     jpm_objs = np.asarray([r["metrics"]["objective"] for r in jpm_results_list], dtype=float)
     caf_objs = np.asarray([r["metrics"]["objective"] for r in caf_results_list], dtype=float)
+    paired_stats = paired_objective_statistics(jpm_objs, caf_objs)
     rel_impr = ((jpm_objs - caf_objs) / np.abs(jpm_objs)) * 100.0
-    wins = int(np.sum(caf_objs < jpm_objs))
-    p_sign = sign_test_two_sided(wins, num_runs)
-    ci_lo, ci_hi = bootstrap_ci_mean(rel_impr, n_boot=5000, alpha=0.05, seed=42)
-    print("Paired Statistical Check (CAF vs JPM, objective)")
+    wins = paired_stats["objective_improvement_runs"]
+    p_sign = paired_stats["objective_sign_test_pvalue"]
+    ci_lo, ci_hi = paired_stats["objective_relative_improvement_ci95_pct"]
+    print("Paired Statistical Check (CAF vs static, objective)")
     print(f"  -> Runs with improvement : {wins}/{num_runs}")
+    print(f"  -> Tied runs excluded from sign test: {paired_stats['objective_tied_runs']}")
     print(f"  -> Sign test p-value     : {p_sign:.6f}")
     print(f"  -> Mean rel improvement  : {np.mean(rel_impr):.4f}%")
     print(f"  -> 95% bootstrap CI      : [{ci_lo:.4f}%, {ci_hi:.4f}%]\n")
@@ -712,6 +760,7 @@ def main():
             "run_seeds": run_seeds,
             "runs": int(num_runs),
             "risk_factor": float(risk_factor),
+            "max_community_size": int(args.max_community_size),
             "num_reads": int(num_reads),
             "iterations": int(iterations),
             "patience": int(patience),
@@ -720,11 +769,7 @@ def main():
         "jpm": agg_jpm,
         "caf": {"metrics": agg_caf["metrics"], "timing": agg_caf["timing"], "history": aggregated_history},
         "caf_static": agg_static,
-        "objective_sign_test_pvalue": p_sign,
-        "objective_improvement_runs": wins,
-        "objective_relative_improvement_mean_pct": float(np.mean(rel_impr)),
-        "objective_relative_improvement_std_pct": float(np.std(rel_impr)),
-        "objective_relative_improvement_ci95_pct": [ci_lo, ci_hi],
+        **paired_stats,
         "q_sweep_rows": q_sweep_rows,
         "per_run_records": per_run_records,
     }

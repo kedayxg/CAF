@@ -23,6 +23,7 @@ from neal import SimulatedAnnealingSampler
 from gurobipy import GRB, Env, read
 import os
 import time
+import tempfile
 
 
 class Optimizer(ABC):
@@ -162,14 +163,15 @@ class SimulatedAnnealingDwave(Optimizer):
         execution_time = end_time - start_time
         processing_time = tp_stop - tp_start
 
-        values_dict = sampleset.first.sample
-        if cqm.check_feasible(sampleset.first.sample):
-            best_sample_weights = [
-                values_dict[f"weights_{i}"] for i in range(len(values_dict))
-            ]
-        else:
-            # Attempted default value
-            best_sample_weights = [0 for i in range(len(values_dict))]
+        values_dict = next(
+            (row.sample for row in sampleset.data(fields=["sample"], sorted_by="energy")
+             if cqm.check_feasible(row.sample)),
+            None,
+        )
+        if values_dict is None:
+            raise RuntimeError("SA returned no feasible local sample; increase the sampling budget")
+        labels = list(cqm.variables) if weights is None else [weight.name for weight in weights]
+        best_sample_weights = [values_dict[label] for label in labels]
         return best_sample_weights, execution_time, processing_time
 
 
@@ -197,10 +199,14 @@ class GurobiOptimizer(Optimizer):
         :param log_best_feasible: bool log best feasible solutions
         :return:
         """
-        with open("temp.lp", "w") as f:
+        # Each local solve owns its LP file, including concurrent experiments.
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".lp", delete=False) as f:
             f.write(model.lp_string.replace("*", " * "))
-
-        m = read("temp.lp")
+            lp_path = f.name
+        try:
+            m = read(lp_path)
+        finally:
+            os.unlink(lp_path)
         for param, values in self.optimizer_parameters.items():
             m.setParam(param, values)
 
