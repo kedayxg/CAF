@@ -1,0 +1,59 @@
+{
+  "validation_date_utc": "2026-10-23",
+  "qpu_submitted": false,
+  "cloud_account_accessed": false,
+  "diagnostic_script_sha256": "315f20fe287603f2676c798cc1bcf8799ce1eca8e4ff3062b43cccd5d284deb0",
+  "original_hardware_driver_sha256": "43d8b4180f3b4ce3e899a3486a307cf3d0598ef0492741f99c1f42bcbc32f574",
+  "original_driver_unchanged": true,
+  "regression_tests": {
+    "command": "python -m pytest -q",
+    "passed": 120,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sdk": "pyqpanda3 0.5.0",
+  "local_fixed": {
+    "command": "python -m experiments.quantum.diagnose_hardware --local --suite all --compensation both --shots 1024",
+    "completed": 20,
+    "shots_per_case": 1024,
+    "max_uncalibrated_compiled_TV": 2.498001805406602e-16,
+    "max_zero_calibration_pulse_TV": 2.220446049250313e-16,
+    "max_sampled_TV": 0.0283203125,
+    "basis_counts": {
+      "basis_10_comp_on": {
+        "10": 1024
+      },
+      "basis_11_comp_on": {
+        "11": 1024
+      },
+      "basis_01_comp_on": {
+        "01": 1024
+      },
+      "basis_00_comp_on": {
+        "00": 1024
+      }
+    },
+    "manifest_sha256": "bf9c1bfd859e1f935737ca068bb6d121ec8b940165775626544c7649dbe8e07d"
+  },
+  "local_backend": {
+    "command": "python -m experiments.quantum.diagnose_hardware --local --suite readout --compiler-basis backend --shots 1024",
+    "completed": 7,
+    "manifest_sha256": "9ec18afe528e08c7fa7d8e45f483f424014a78cb744f8d2a6191c3cf3aadd548"
+  },
+  "synthetic_nonzero_calibration": {
+    "physical_pair": [
+      12,
+      13
+    ],
+    "angles": [
+      0.2,
+      0.3
+    ],
+    "preparations": 40,
+    "max_fixed_backend_pulse_distribution_TV": 3.0531133177191805e-16,
+    "original_chip_not_mutated": true,
+    "on_off_instructions_differ": true,
+    "validation_sha256": "5ea2d462f4a5997bcba9e310fff1edd022af4249949377ef9e32acd0b771ee12"
+  },
+  "limits": "Synthetic offline SDK checks only; real-device pulse interpretation, count ordering, mapping options, noise and calibration require server feedback. Historical experiments/fingerprints are not relabeled."
+}

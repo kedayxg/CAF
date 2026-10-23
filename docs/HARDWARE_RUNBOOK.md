@@ -1,5 +1,7 @@
 # 在服务器补充真机实验
 
+针对已收到硬件分布与理想模拟的差异，新增[两比特真机诊断](HARDWARE_DIAGNOSTICS.md)。建议先运行基础门、位序与 CZ 补偿探针并反馈完整产物，再决定是否重跑本手册中的大电路。诊断入口独立于冻结实验，保存实际指令和芯片配置；原正式实验默认设置未修改。
+
 维护后的 v2 代码位于 [`v2-development`](https://github.com/kedayxg/CAF/tree/v2-development)，`main` 暂时保留 v1，待 v2 成熟后再合并。原论文代码也原样保留在 [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1)，提交为 `356c1852c65a185b05aed040052c5c3f750991bd`。已完成的经典与模拟实验对应提交 [`17253da`](https://github.com/kedayxg/CAF/tree/17253dab077d6f7cc77520d09908d0a3ddb90195)，源码指纹为 `9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8`。后续真机入口维护不改写这些实验记录。
 
 当前代码发布不包含待定的 v2 论文 TeX、PDF、投稿元数据或内部审稿记录。`manuscript/` 中发布的 Python 文件是实验、验证和生成工具；其中论文生成工具还需要作者另行提供的稿件源文件。

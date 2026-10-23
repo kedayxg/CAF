@@ -7,6 +7,9 @@ The original paper code is also preserved unchanged on
 For server installation and the corrected hardware workflow, see the
 [hardware runbook](docs/HARDWARE_RUNBOOK.md). This code release includes
 reproduction tools and evidence; the pending v2 manuscript remains with the authors.
+For small hardware probes before repeating QAOA, use the
+[two-qubit diagnostics guide](docs/HARDWARE_DIAGNOSTICS.md): it records submitted
+instructions, calibration, measurement maps and raw counts for feedback.
 
 The maintained reproduction path uses python-igraph 0.11.9 Newman's leading-
 eigenvector method (`clustering_method="newman"`). It replaces the upstream
