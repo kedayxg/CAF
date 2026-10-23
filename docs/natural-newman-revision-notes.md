@@ -11,8 +11,8 @@ separate completed studies; the PDF has not yet incorporated them.
 Completion: all 325 required offline task records are assembled and validated.
 Independent full-matrix recomputation passes for 610 stored portfolios; frozen
 exact moves also match independent enumeration. See [final results](REVISION_RESULTS.md),
-[review PDF](../manuscript/CAF_arxiv_revision.pdf) and
-[LaTeX source package](../manuscript/CAF_arxiv_source.zip).
+review PDF（作者本地材料，未随代码发布） and
+LaTeX source package（作者本地材料，未随代码发布）.
 
 The revision adopts python-igraph 0.11.9 Newman's leading-eigenvector method,
 partition seed 42 and ARPACK maxiter=10000, tol=1e-10. It retains matrix diagonal
@@ -106,7 +106,7 @@ current local license; the auxiliary presolve restriction is disclosed separatel
   not corrected-partition hardware validation. The new frozen selector gives
   n=8,K=4 and is simulator-only; no improving n<=6 target met the declared rule.
 
-The supplied source is in [manuscript](../manuscript/README.md). Generated
+The supplied source is in manuscript（作者本地材料，未随代码发布）. Generated
 [revision-results.json](revision-results.json) records completion and missing
 tasks; incomplete manuscript builds contain a visible draft notice and cannot
 be packaged by `package_revision.py`. Final publication artifacts are prepared

@@ -2,6 +2,12 @@
 
 ## Unreleased maintenance
 
+- Prepare the corrected server hardware driver: capacity 16, aligned local/global
+  q, offline listing/preparation, explicit target selection, durable job receipts
+  and raw-count records. Validate actual pyqpanda3 0.5.0 CPUQVM against Qiskit;
+  no QPU execution is claimed.
+- Honor Gurobi adapter parameters and requested variable order, reject missing
+  incumbents, and load the optional backend only when it is used.
 - Scope arXiv v2 as an implementation correction and revalidation. Keep BCD as
   a technical foundation and latest-context updates as an appendix ablation;
   retain all capacity/subset and resource results without adding experiments.

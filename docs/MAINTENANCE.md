@@ -94,8 +94,8 @@ difference has been established. Concurrent times do not establish a speed ranki
 Full protocols, results and independent checks are in
 [ARXIV_REVISION.md](ARXIV_REVISION.md), [REVISION_RESULTS.md](REVISION_RESULTS.md)
 and [revision-validation.json](revision-validation.json). The reviewed
-[PDF](../manuscript/CAF_arxiv_revision.pdf) and matching
-[source ZIP](../manuscript/CAF_arxiv_source.zip) compiled successfully from a
+PDF（作者本地材料，未随代码发布） and matching
+source ZIP（作者本地材料，未随代码发布） compiled successfully from a
 clean extraction. [The code snapshot](CAF_v2_code_snapshot.zip) preserves the
 executed code; its manifest includes dependency files and input hashes.
 
@@ -154,4 +154,4 @@ CAF与最新上下文顺序BCD的最终目标24/24一致；BCD在9个配置中�
 
 ## 当前稿件范围收敛
 
-按作者确认，v2聚焦实现修复与原研究重新验证。主实验继续比较独立静态初始化和CAF精炼；BCD保留为技术来源，最新上下文顺序更新定位为更新时序消融。正文简述24/24终值一致，完整容量、子集、轮次和计时结果移至附录；摘要和结论不再把它作为主要算法排名。所有结果及限制保留，SA注入消融不删，按结果选择的合成例子不进入主论文。本轮没有新增实验或修改核心代码。前述审阅和执行结果为保留的历史记录；当前呈现以[修订范围](ARXIV_V2_SCOPE.md)、最新PDF及交付校验为准。未上传arXiv。
+按作者确认，v2聚焦实现修复与原研究重新验证。主实验继续比较独立静态初始化和CAF精炼；BCD保留为技术来源，最新上下文顺序更新定位为更新时序消融。正文简述24/24终值一致，完整容量、子集、轮次和计时结果移至附录；摘要和结论不再把它作为主要算法排名。所有结果及限制保留，SA注入消融不删，按结果选择的合成例子不进入主论文。本轮没有新增实验或修改核心代码。前述审阅和执行结果为保留的历史记录；当前呈现以修订范围（作者本地材料，未随代码发布）、最新PDF及交付校验为准。未上传arXiv。

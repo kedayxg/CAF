@@ -19,8 +19,6 @@ import dimod
 import numpy as np
 from neal import SimulatedAnnealingSampler
 
-# Gurobi imports
-from gurobipy import GRB, Env, read
 import os
 import time
 import tempfile
@@ -186,6 +184,7 @@ class GurobiOptimizer(Optimizer):
             "MIPGap": DEFAULT_MIP_GAP,
             "Threads": 1,
         }
+        self.optimizer_parameters.update(kwargs)
         self.name = self.__class__.__name__
         self.params = get_instance_non_private_attributes(self)
 
@@ -199,6 +198,9 @@ class GurobiOptimizer(Optimizer):
         :param log_best_feasible: bool log best feasible solutions
         :return:
         """
+        # Keep Gurobi optional for SA and hardware-only installations.
+        from gurobipy import read
+
         # Each local solve owns its LP file, including concurrent experiments.
         with tempfile.NamedTemporaryFile(mode="w", suffix=".lp", delete=False) as f:
             f.write(model.lp_string.replace("*", " * "))
@@ -222,8 +224,12 @@ class GurobiOptimizer(Optimizer):
         execution_time = end_time - start_time
         processing_time = tp_stop - tp_start
 
+        if m.SolCount == 0:
+            raise RuntimeError(f"Gurobi returned no feasible incumbent (status {m.Status})")
+        names = ([weight.name for weight in weights] if weights is not None
+                 else [f"weights_{i}" for i in range(m.NumVars)])
         solution = np.array(
-            [m.getVarByName(f"weights_{i}").X for i in range(m.NumVars)]
+            [m.getVarByName(name).X for name in names]
         )
         solution = solution + 0.0  # trick to avoid -0.0 values
         return solution, execution_time, processing_time

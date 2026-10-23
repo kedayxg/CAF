@@ -1,5 +1,11 @@
 # CAF: Context-Aware Folding
 
+`main` contains the maintained implementation. The original paper code is
+preserved unchanged on [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1).
+For server installation and the corrected hardware workflow, see the
+[hardware runbook](docs/HARDWARE_RUNBOOK.md). This code release includes
+reproduction tools and evidence; the pending v2 manuscript remains with the authors.
+
 The maintained reproduction path uses python-igraph 0.11.9 Newman's leading-
 eigenvector method (`clustering_method="newman"`). It replaces the upstream
 modified spectral routine, whose recursive indexing and gain-handling defects
@@ -26,8 +32,8 @@ and [2018](docs/CAPACITY_2018_CAF_STUDY.md). Reproduce them with
 (use `--year 2018` and a different output directory for that panel).
 
 See [maintenance notes](docs/MAINTENANCE.md) and [the arXiv revision record](docs/ARXIV_REVISION.md)
-for protocol changes and rerun coverage; the [final revision results](docs/REVISION_RESULTS.md)
-link the reviewed PDF and source package. The corrected
+for protocol changes and rerun coverage; the [revision results](docs/REVISION_RESULTS.md)
+record the numerical evidence. The corrected
 2016 natural partition has sizes 199, 153 and 132. Twenty paired SA runs yield
 mean objectives 1.540945 (static) and 1.512938 (CAF), a 1.8029% mean paired gain
 with 16 improvements and four ties. These are unrestricted reference results; the arXiv v2 primary experiments
@@ -240,12 +246,11 @@ python manuscript/run_coordination_study.py --out-dir coordination_study_v2
 python manuscript/validate_coordination_study.py --results coordination_study_v2
 ```
 
-Use [the manuscript instructions](manuscript/README.md) to independently validate,
-generate and package the results. A final package requires all task records and
-matching independent validation. [The execution record](docs/ARXIV_V2_WORKLOG.md)
-records the completed rerun. The reviewed [PDF](manuscript/CAF_arxiv_revision.pdf)
-and [source package](manuscript/CAF_arxiv_source.zip) are ready for author review;
-they have not been uploaded to arXiv. All 96 tests pass, with zero expected failures.
+The [release provenance](docs/CODE_RELEASE.md) identifies the frozen experimental
+code and retained independent validation. The experiment snapshot passed 96
+tests; the maintained server release adds hardware and Gurobi-adapter regression
+checks. Pending manuscript sources and PDFs are held locally by the authors and
+are not included in this code release. No arXiv submission is performed here.
 
 The primary Gurobi flows improve the objective by 18.47% on 2016 and 5.24% on
 2018. Repeated unshifted solves leave both initial portfolios unchanged. All
@@ -274,7 +279,7 @@ local solves and 5,094 proposals pass independent replay. See
 The v2 scope is implementation correction and revalidation. BCD remains a
 technical foundation; the latest-context variant is an update-timing ablation.
 The body summarizes the result and the appendix retains all detailed tables.
-See [revision scope](docs/ARXIV_V2_SCOPE.md).
+See [code release provenance](docs/CODE_RELEASE.md).
 
 The standalone scripts below support additional configurations and exploration;
 exact manuscript numbers come from the canonical batch and its manifests.
@@ -322,7 +327,20 @@ python -m experiments.quantum.run_qaoa \
 
 ### Frozen simulator study and optional hardware interface
 
-`run_hardware_qaoa.py` requires a local `experiments/config.py`. Create it by copying `experiments/config.example.py`, then provide the hardware token through `ORIGINQ_API_TOKEN`.
+Start with the offline community listing and simulator preparation:
+
+```bash
+python -m experiments.quantum.run_hardware_qaoa --list-communities
+python -m experiments.quantum.run_hardware_qaoa --community 3 --prepare-only
+```
+
+The hardware driver now uses the corrected capacity-16 partition and aligned
+local/global q=0.5 by default. `--local` checks the real pyqpanda3 CPUQVM;
+`--submit` explicitly submits a QPU job. Cloud credentials come from
+`ORIGINQ_API_TOKEN` or an optional ignored `experiments/config.py`. Job IDs and
+preparation data are saved before polling. Follow the complete
+[server hardware guide](docs/HARDWARE_RUNBOOK.md), including raw-count validation
+and timeout handling. No fresh QPU results accompany this release.
 
 ## Reproducibility notes
 
