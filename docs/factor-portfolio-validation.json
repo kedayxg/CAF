@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "core_source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+  "search_sha256": "ef8672c471beb3c2781fdb19c83490d0c004dd9933c4a005d7b82504640eac17",
+  "validator_sha256": "30ab9da04ec3097b024645bb4d88ac8f824fa765e6bf3d826d131ed2bb4a7b14",
+  "results_sha256": "d41aaa5d677a12101105a27121c35129e45465c53b634041f97e8071c3beec2f",
+  "counts": {
+    "caf_global": 3069,
+    "bcd_global": 3051,
+    "tied": 4764,
+    "bcd_better": 108,
+    "caf_better": 128
+  },
+  "selected_first_seed": {
+    "caf_example": 31,
+    "bcd_example": 48
+  },
+  "checks": {
+    "full_matrix_dynamics_replays": 10000,
+    "enumerated_global_states": 1080000,
+    "instances": 5000,
+    "native_gurobi_local_solves": 78,
+    "native_exact_enum_local_solves": 78
+  },
+  "interpretation": "All 5000 outcomes independently replayed. Selected favorable and reverse examples validated with actual CAF/BCD code, exhaustive local solve and native Gurobi. Illustrative postselection, not general superiority."
+}

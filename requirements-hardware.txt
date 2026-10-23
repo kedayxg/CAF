@@ -1,0 +1,4 @@
+-r requirements.txt
+
+# SDK tested with the server driver and actual local CPUQVM (no QPU submission).
+pyqpanda3==0.5.0

@@ -1,0 +1,322 @@
+{
+  "status": "declared_before_results",
+  "protocol": "caf-bcd-capacity-subsets-v1",
+  "cases": [
+    {
+      "index": 0,
+      "year": 2016,
+      "subset_seed": null,
+      "assets": null,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 1,
+      "year": 2016,
+      "subset_seed": null,
+      "assets": null,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 2,
+      "year": 2016,
+      "subset_seed": null,
+      "assets": null,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 3,
+      "year": 2016,
+      "subset_seed": 1729,
+      "assets": 300,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 4,
+      "year": 2016,
+      "subset_seed": 1729,
+      "assets": 300,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 5,
+      "year": 2016,
+      "subset_seed": 1729,
+      "assets": 300,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 6,
+      "year": 2016,
+      "subset_seed": 2718,
+      "assets": 300,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 7,
+      "year": 2016,
+      "subset_seed": 2718,
+      "assets": 300,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 8,
+      "year": 2016,
+      "subset_seed": 2718,
+      "assets": 300,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 9,
+      "year": 2016,
+      "subset_seed": 3141,
+      "assets": 300,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 10,
+      "year": 2016,
+      "subset_seed": 3141,
+      "assets": 300,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 11,
+      "year": 2016,
+      "subset_seed": 3141,
+      "assets": 300,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 12,
+      "year": 2018,
+      "subset_seed": null,
+      "assets": null,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 13,
+      "year": 2018,
+      "subset_seed": null,
+      "assets": null,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 14,
+      "year": 2018,
+      "subset_seed": null,
+      "assets": null,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 15,
+      "year": 2018,
+      "subset_seed": 1729,
+      "assets": 300,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 16,
+      "year": 2018,
+      "subset_seed": 1729,
+      "assets": 300,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 17,
+      "year": 2018,
+      "subset_seed": 1729,
+      "assets": 300,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 18,
+      "year": 2018,
+      "subset_seed": 2718,
+      "assets": 300,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 19,
+      "year": 2018,
+      "subset_seed": 2718,
+      "assets": 300,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 20,
+      "year": 2018,
+      "subset_seed": 2718,
+      "assets": 300,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    },
+    {
+      "index": 21,
+      "year": 2018,
+      "subset_seed": 3141,
+      "assets": 300,
+      "capacity": 75,
+      "method_order": [
+        "caf_serial",
+        "sequential_bcd",
+        "caf_parallel4"
+      ]
+    },
+    {
+      "index": 22,
+      "year": 2018,
+      "subset_seed": 3141,
+      "assets": 300,
+      "capacity": 100,
+      "method_order": [
+        "sequential_bcd",
+        "caf_parallel4",
+        "caf_serial"
+      ]
+    },
+    {
+      "index": 23,
+      "year": 2018,
+      "subset_seed": 3141,
+      "assets": 300,
+      "capacity": 150,
+      "method_order": [
+        "caf_parallel4",
+        "caf_serial",
+        "sequential_bcd"
+      ]
+    }
+  ],
+  "capacities": [
+    75,
+    100,
+    150
+  ],
+  "subset_assets": 300,
+  "subset_seeds": [
+    1729,
+    2718,
+    3141
+  ],
+  "methods": [
+    "caf_serial",
+    "sequential_bcd",
+    "caf_parallel4"
+  ],
+  "rounds": 6,
+  "parameters": {
+    "Threads": 1,
+    "Seed": 0,
+    "MIPGap": 0.0001,
+    "TimeLimit": 300
+  },
+  "core_source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+  "runner_sha256": "0ab8da0d12096132396d6448581485dfa88d0063a1dc50fe17f4df2c737098ab",
+  "timing": "One timing per method; serial case execution; rotated method order. Report actual 1/4-worker resource use; no assumed speed superiority.",
+  "failure_policy": "Retain all unsplittable Newman failures without forced splitting or case replacement.",
+  "comparison": "Same static portfolio, partition, proportional budgets, six complete sweeps. BCD recomputes latest context before each solve; CAF freezes all proposals per sweep."
+}

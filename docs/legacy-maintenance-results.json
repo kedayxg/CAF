@@ -1,0 +1,293 @@
+{
+  "implementation": "maintained CAF and adapters with historical upstream spectral source retained",
+  "historical_commit": "356c1852c65a185b05aed040052c5c3f750991bd",
+  "source_sha256": "dab7f6955dc689a40415592397e5fccc8c80615c66ee7ef7aa5965a9d5200876",
+  "source_digest_scope": "sorted Python files under caf_core, dcmppln, experiments, tests; excludes local config.py",
+  "python": "3.11.17",
+  "dependencies": {
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "pandas": "3.0.3",
+    "qiskit": "2.5.0",
+    "dimod": "0.12.22",
+    "dwave-samplers": "1.7.0",
+    "gurobipy": "13.0.2"
+  },
+  "dataset_sha256": {
+    "1_2016-01-01_correlation.npy": "5ae4904dcd9a8b488d65f4471aa75deb32d66d09df14c957d61a5f5905c3e43c",
+    "1_2016-01-01_covariance.npy": "37949a878477c60c2402642927aedc4c65305ab177c07cb19e21c6409dd07220",
+    "1_2016-01-01_returns.npy": "af12abf79796046765f12e611b3ce392bcbff5a30e1b2154534f642eb04ae77f",
+    "1_2018-01-01_correlation.npy": "3b25a1d8c279a0710fc6703efb705cf2a11886525399a8758b9c1b8b46a1ffe3",
+    "1_2018-01-01_covariance.npy": "c1e0af2cbf28f8e1c90b0a22d23e87015b79274d0c36881b677ea8b2c6267caf",
+    "1_2018-01-01_returns.npy": "165ea17020651f6a332c49eb8a62ada7c60d87f43f298207ed61d511a7705e86"
+  },
+  "spectral_source_sha256": "219d4761bd0c87669321dccade3c38b41d2222c7b3a9044c5c0f57708c29a4b1",
+  "spectral_source_byte_identical_to_historical": true,
+  "tests": {
+    "passed": 66,
+    "expected_failures": 9,
+    "unexpected_failures": 0,
+    "known_failure_scope": "Deferred upstream spectral defects and graph input validation",
+    "log_sha256": "d5f154eec8e3bdc331c09a89f0ca929d8ea10fc6d1a8f6db81ef6cf03e34f2cf"
+  },
+  "benchmark_2016": {
+    "validation_origin": "The previously executed 20-seed control used maintained baseline/CAF code with historical spectral source injected at runtime. Restoring that exact source makes these the current default execution paths. This is not a fresh 20-run execution after the restore.",
+    "config": {
+      "seeds": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61
+      ],
+      "risk_factor": 0.5,
+      "risk_rebalancing": false,
+      "baseline_num_reads": 200,
+      "iterations": 6,
+      "patience": 2,
+      "incremental": true
+    },
+    "community_sizes": [
+      101,
+      96,
+      92,
+      81,
+      49,
+      38,
+      14,
+      11,
+      2
+    ],
+    "statistics": {
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 6.589790563765932,
+      "objective_relative_improvement_std_pct": 1.4180789999683325,
+      "objective_relative_improvement_ci95_pct": [
+        5.989189556160281,
+        7.224077279146618
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    },
+    "static_mean_objective": 1.5453447572772658,
+    "caf_mean_objective": 1.4432843517005078,
+    "all_portfolios_and_histories_match_historical": true,
+    "per_run": [
+      {
+        "seed": 42,
+        "static_objective": 1.5179622085164493,
+        "caf_objective": 1.4528642479112361
+      },
+      {
+        "seed": 43,
+        "static_objective": 1.5672372126269873,
+        "caf_objective": 1.4487497081434597
+      },
+      {
+        "seed": 44,
+        "static_objective": 1.5690785910150973,
+        "caf_objective": 1.4572262481379001
+      },
+      {
+        "seed": 45,
+        "static_objective": 1.539020117723761,
+        "caf_objective": 1.4492396607008133
+      },
+      {
+        "seed": 46,
+        "static_objective": 1.545717206108318,
+        "caf_objective": 1.4363389991427402
+      },
+      {
+        "seed": 47,
+        "static_objective": 1.5413575064026963,
+        "caf_objective": 1.4708992855662757
+      },
+      {
+        "seed": 48,
+        "static_objective": 1.5415583655064455,
+        "caf_objective": 1.4532968494851017
+      },
+      {
+        "seed": 49,
+        "static_objective": 1.5241877915994886,
+        "caf_objective": 1.4292604394766133
+      },
+      {
+        "seed": 50,
+        "static_objective": 1.5925423368879013,
+        "caf_objective": 1.4489215378434988
+      },
+      {
+        "seed": 51,
+        "static_objective": 1.552342598689588,
+        "caf_objective": 1.442463179616411
+      },
+      {
+        "seed": 52,
+        "static_objective": 1.5291447420288824,
+        "caf_objective": 1.4254108519456448
+      },
+      {
+        "seed": 53,
+        "static_objective": 1.5323336042096918,
+        "caf_objective": 1.425953668037497
+      },
+      {
+        "seed": 54,
+        "static_objective": 1.5192981391534792,
+        "caf_objective": 1.4382914074132307
+      },
+      {
+        "seed": 55,
+        "static_objective": 1.5354330234797604,
+        "caf_objective": 1.4419524284401286
+      },
+      {
+        "seed": 56,
+        "static_objective": 1.5428334640028416,
+        "caf_objective": 1.4113887728573002
+      },
+      {
+        "seed": 57,
+        "static_objective": 1.5129797492789685,
+        "caf_objective": 1.438570915577788
+      },
+      {
+        "seed": 58,
+        "static_objective": 1.5710423106288716,
+        "caf_objective": 1.4397644846634905
+      },
+      {
+        "seed": 59,
+        "static_objective": 1.5329993407025868,
+        "caf_objective": 1.4665848993172808
+      },
+      {
+        "seed": 60,
+        "static_objective": 1.5627331762363696,
+        "caf_objective": 1.4263150689412878
+      },
+      {
+        "seed": 61,
+        "static_objective": 1.5770936607471255,
+        "caf_objective": 1.4621943807924602
+      }
+    ],
+    "raw_control_sha256": "9f512bdc24d81a2d729bd46a973d09dd92f89ce7e94bb087699dff8588439dbc"
+  },
+  "post_restore_no_cache_check": {
+    "seed": 42,
+    "final_weights_match_cached": true,
+    "objective_difference": 0.0,
+    "histories_match_at_1e_minus_12": true,
+    "raw_result_sha256": "046b7bd9d8ad6de41f76e6f926ed84d83f4651b06d87665983fbbcd696ccf36d"
+  },
+  "post_restore_frozen_check": {
+    "config": {
+      "n_assets": 40,
+      "subset_seed": 1234,
+      "base_seed": 42,
+      "p": 2,
+      "warmstart": true,
+      "restarts": 1,
+      "maxiter": 12,
+      "shots": 4000
+    },
+    "q_eff": 0.7630163729879873,
+    "community_sizes": [
+      16,
+      9,
+      5,
+      5,
+      3,
+      1,
+      1
+    ],
+    "selected": 2,
+    "n_local": 5,
+    "k_local": 3,
+    "rows": [
+      {
+        "solver": "noop",
+        "injection": "\u2014",
+        "global_dO": 0.0,
+        "accepted": false
+      },
+      {
+        "solver": "exact",
+        "injection": "off",
+        "global_dO": 0.0,
+        "accepted": false
+      },
+      {
+        "solver": "exact",
+        "injection": "on",
+        "global_dO": -0.00010536375699854092,
+        "accepted": true
+      },
+      {
+        "solver": "sim_qaoa",
+        "injection": "on",
+        "global_dO": -0.00010536375699854092,
+        "accepted": true
+      },
+      {
+        "solver": "hw_qaoa",
+        "injection": "on",
+        "global_dO": null,
+        "accepted": null
+      }
+    ],
+    "hamming_exact_vs_sim": 0,
+    "raw_result_sha256": "9f7c33389b4405ff34e0be28749d9d068c0cf329dc3ab219824f0e8bf79bccca",
+    "scope": "Single offline functional check; not full stochastic QAOA statistics or hardware validation. Corrected local risk rescaling changes q_eff relative to the historical implementation."
+  },
+  "frozen_fallback_metadata_check": {
+    "fixture": "Synthetic no-improvement feedback with deterministic local candidates",
+    "result": "Small n<=6 fallback correctly remains simulator-only",
+    "scope": "Branch validation only; synthetic results are not scientific experiment evidence"
+  },
+  "not_revalidated_in_current_configuration": [
+    "Full QAOA p=2 and p=3 repeated-run statistics",
+    "Full 2018 twenty-run comparison",
+    "Fresh real-hardware execution, native SDK behavior and raw count archives",
+    "All paper scaling/suppression statistics after maintenance"
+  ],
+  "archived_corrected_spectral_study": "corrected-spectral-results.json",
+  "preceding_validation_source_sha256": "dee87afa3c586c6cf3d5d1f80e26ef3b39bcfe798375b908c90cc454dd4454b3",
+  "fixed_nine_experiment": {
+    "result": "fixed-nine-results.json",
+    "relative_improvement_mean_pct": 9.238669926057481,
+    "improving_runs": 20,
+    "tied_runs": 0,
+    "scope": "Optional experiment; default vendored spectral source remains historical."
+  },
+  "library_clustering_experiment": {
+    "summary": "library-clustering-results.json",
+    "runs_per_method": 20,
+    "methods": [
+      "igraph_spectral",
+      "cnm9",
+      "louvain"
+    ],
+    "default_partition_unchanged": true
+  }
+}

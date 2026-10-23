@@ -1,0 +1,12 @@
+{
+  "initial_launcher_exit": 1,
+  "reason": "One suppression task initially failed at Gurobi error10010 before the license-limit diagnostic handling was added.",
+  "task": {
+    "group": "suppression",
+    "n": 300,
+    "index": 1
+  },
+  "recovery": "Same parameters and seed rerun after recording unsupported presolve as missing; full source fingerprints retained.",
+  "recovered_result_sha256": "67944060027f2aa0a32fbe8a9dd4f394278d541137602bb75e5b697da52a9117",
+  "final_evidence": "325 required task records assembled and independent validation passed; four auxiliary presolve comparisons unavailable."
+}

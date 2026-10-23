@@ -29,6 +29,7 @@ from dcmppln.denoiser import Denoiser  # noqa: E402
 from dcmppln.optimizer import SimulatedAnnealingDwave  # noqa: E402
 from dcmppln.pipeline import Pipeline  # noqa: E402
 from dcmppln.utils.objective_after_clustering import get_model  # noqa: E402
+from experiments.revision_protocol import CLASSICAL_CAPACITY
 
 
 def parse_args():
@@ -48,6 +49,7 @@ def parse_args():
         help="Comma-separated list of N values.",
     )
     parser.add_argument("--runs", type=int, default=10, help="Runs per N.")
+    parser.add_argument("--max-community-size", type=int, default=CLASSICAL_CAPACITY)
     parser.add_argument(
         "--subset-seed",
         type=int,
@@ -96,7 +98,12 @@ def get_active_vars(model):
             os.remove(tmp_path)
     m.setParam("OutputFlag", 0)
     m.setParam("Presolve", -1)
-    p = m.presolve()
+    try:
+        p = m.presolve()
+    except gp.GurobiError as error:
+        if error.errno != 10010:  # size-limited license, not a model/solver failure
+            raise
+        return None
     if p is None:
         return 0
     return int(p.NumVars)
@@ -113,9 +120,12 @@ def run_one_setting(cov_df, corr_df, ret_s, n_assets, run_idx, args):
         ret.values,
         denoiser=Denoiser(active=True, q=0.5, q_fit=True),
         cluster=Clustering(
-            active=True, clustering_method="louvain", take_absolute_value=True
+            active=True, clustering_method="newman", take_absolute_value=True,
+            max_community_size=getattr(args, "max_community_size", CLASSICAL_CAPACITY), seed=42,
         ),
-        optimize_func=SimulatedAnnealingDwave(num_reads=args.sa_num_reads),
+        optimize_func=SimulatedAnnealingDwave(
+            num_reads=args.sa_num_reads, seed=args.subset_seed + n_assets * 100 + run_idx
+        ),
     )
     result = pipeline.run(
         run_optimizer=True,
@@ -167,14 +177,15 @@ def run_one_setting(cov_df, corr_df, ret_s, n_assets, run_idx, args):
                 "run_idx": int(run_idx),
                 "community_idx": int(community_idx),
                 "community_size": int(community_size),
-                "active_static": int(active_static),
-                "active_caf": int(active_caf),
+                "active_static": active_static,
+                "active_caf": active_caf,
+                "presolve_status": "license_size_limit" if active_static is None or active_caf is None else "available",
                 "reduction_vs_size_pct": float(
                     100.0 * (community_size - active_caf) / max(community_size, 1)
-                ),
+                ) if active_caf is not None else None,
                 "reduction_vs_static_pct": float(
                     100.0 * (active_static - active_caf) / max(active_static, 1)
-                ),
+                ) if active_static is not None and active_caf is not None else None,
                 "suppressed_static_pct": float(100.0 * suppressed_static),
                 "suppressed_caf_pct": float(100.0 * suppressed_caf),
                 "suppressed_delta_pct": float(100.0 * (suppressed_caf - suppressed_static)),
@@ -188,17 +199,22 @@ def summarize(rows, sizes):
     if not rows:
         return summary
 
-    red_size = np.asarray([r["reduction_vs_size_pct"] for r in rows], dtype=float)
-    red_static = np.asarray([r["reduction_vs_static_pct"] for r in rows], dtype=float)
+    def values(records, key):
+        return np.asarray([r[key] for r in records if r[key] is not None], dtype=float)
+    def stat(array, fn=np.mean):
+        return float(fn(array)) if len(array) else None
+    red_size = values(rows, "reduction_vs_size_pct")
+    red_static = values(rows, "reduction_vs_static_pct")
     sup_delta = np.asarray([r["suppressed_delta_pct"] for r in rows], dtype=float)
     summary["overall"] = {
         "samples": int(len(rows)),
-        "reduction_vs_size_mean_pct": float(red_size.mean()),
-        "reduction_vs_size_std_pct": float(red_size.std()),
-        "reduction_vs_size_q10_pct": float(np.quantile(red_size, 0.10)),
-        "reduction_vs_size_q90_pct": float(np.quantile(red_size, 0.90)),
-        "reduction_vs_static_mean_pct": float(red_static.mean()),
-        "reduction_vs_static_std_pct": float(red_static.std()),
+        "presolve_available_samples": int(len(red_static)),
+        "reduction_vs_size_mean_pct": stat(red_size),
+        "reduction_vs_size_std_pct": stat(red_size, np.std),
+        "reduction_vs_size_q10_pct": stat(red_size, lambda a: np.quantile(a, .1)),
+        "reduction_vs_size_q90_pct": stat(red_size, lambda a: np.quantile(a, .9)),
+        "reduction_vs_static_mean_pct": stat(red_static),
+        "reduction_vs_static_std_pct": stat(red_static, np.std),
         "suppressed_delta_mean_pct": float(sup_delta.mean()),
         "suppressed_delta_std_pct": float(sup_delta.std()),
         "suppressed_delta_q10_pct": float(np.quantile(sup_delta, 0.10)),
@@ -210,17 +226,18 @@ def summarize(rows, sizes):
         if not rows_n:
             continue
         a_size = np.asarray([r["community_size"] for r in rows_n], dtype=float)
-        a_static = np.asarray([r["active_static"] for r in rows_n], dtype=float)
-        a_caf = np.asarray([r["active_caf"] for r in rows_n], dtype=float)
-        r_size = np.asarray([r["reduction_vs_size_pct"] for r in rows_n], dtype=float)
+        a_static = values(rows_n, "active_static")
+        a_caf = values(rows_n, "active_caf")
+        r_size = values(rows_n, "reduction_vs_size_pct")
         s_delta = np.asarray([r["suppressed_delta_pct"] for r in rows_n], dtype=float)
         summary["by_size"][str(n_assets)] = {
             "samples": int(len(rows_n)),
+            "presolve_available_samples": sum(r["reduction_vs_static_pct"] is not None for r in rows_n),
             "community_size_mean": float(a_size.mean()),
-            "active_static_mean": float(a_static.mean()),
-            "active_caf_mean": float(a_caf.mean()),
-            "reduction_vs_size_mean_pct": float(r_size.mean()),
-            "reduction_vs_size_std_pct": float(r_size.std()),
+            "active_static_mean": stat(a_static),
+            "active_caf_mean": stat(a_caf),
+            "reduction_vs_size_mean_pct": stat(r_size),
+            "reduction_vs_size_std_pct": stat(r_size, np.std),
             "suppressed_delta_mean_pct": float(s_delta.mean()),
             "suppressed_delta_std_pct": float(s_delta.std()),
         }
@@ -240,8 +257,9 @@ def save_plot(rows, sizes, figure_path):
     for n_assets in sizes:
         rows_n = [r for r in rows if r["N"] == n_assets]
         if rows_n:
-            static_means.append(np.mean([r["active_static"] for r in rows_n]))
-            caf_means.append(np.mean([r["active_caf"] for r in rows_n]))
+            for key, means in (("active_static", static_means), ("active_caf", caf_means)):
+                available = [r[key] for r in rows_n if r[key] is not None]
+                means.append(np.mean(available) if available else np.nan)
             suppression_delta_means.append(
                 np.mean([r["suppressed_delta_pct"] for r in rows_n])
             )
@@ -252,7 +270,7 @@ def save_plot(rows, sizes, figure_path):
 
     x = np.arange(len(sizes))
     width = 0.36
-    axes[0].bar(x - width / 2, static_means, width, label="JPM Pipeline Presolve Active")
+    axes[0].bar(x - width / 2, static_means, width, label="Static presolve active")
     axes[0].bar(x + width / 2, caf_means, width, label="CAF Presolve Active")
     axes[0].set_xticks(x, bar_labels)
     axes[0].set_xlabel("N")

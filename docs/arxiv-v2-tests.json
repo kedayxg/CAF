@@ -1,0 +1,7 @@
+{
+  "source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+  "passed": 96,
+  "expected_failures": 0,
+  "unexpected_failures": 0,
+  "log_sha256": "bcd96f2d85c4c72bd97b18fbff9b864ae6e829db8aff6c386e8ac6ede08e0392"
+}

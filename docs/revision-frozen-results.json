@@ -1,0 +1,185 @@
+{
+  "source_sha256": "96ff4254914d8e2978d8a384c735bb648fb38c3df077ce994d50ab394a1096a7",
+  "command": "python -m experiments.quantum.run_frozen_ablation --n-assets 40 --qaoa-p 2 --qaoa-restarts 6 --qaoa-maxiter 80 --warmstart",
+  "config": {
+    "subset_seed": 1234,
+    "base_seed": 42,
+    "risk_factor": 0.5,
+    "static_risk_rebalancing": false,
+    "local_risk_rebalancing": false,
+    "p": 2,
+    "restarts": 6,
+    "maxiter": 80,
+    "shots": 4000,
+    "warmstart": true
+  },
+  "result_sha256": "a033bd6be97d9f39618eab25e9c22bb7fe031dff0267592e60ae52efae5f3713",
+  "result": {
+    "base_seed": 42,
+    "n_assets": 40,
+    "q_eff": 0.5,
+    "local_risk_rebalancing": false,
+    "selection_reason": "simulator-only fallback: no improving n<=6 hardware target is available",
+    "simulator_only": true,
+    "community_sizes": [
+      [
+        0,
+        14
+      ],
+      [
+        1,
+        10
+      ],
+      [
+        2,
+        8
+      ],
+      [
+        3,
+        8
+      ]
+    ],
+    "selected": 3,
+    "n_local": 8,
+    "k_local": 4,
+    "current_state": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0
+    ],
+    "base_objective": -0.0017892640375584187,
+    "scan": [
+      {
+        "idx": 0,
+        "n": 14,
+        "K": 7,
+        "dO_inject": -0.00031080335243496675,
+        "acc_inject": true,
+        "dO_noinject": -0.0002727946750840111,
+        "acc_noinject": true,
+        "dO_sim": -0.00031080335243496675,
+        "acc_sim": true,
+        "E_exact": 0.0019922907645000265,
+        "E_sim": 0.0019922907645000265,
+        "approx": 1.0,
+        "hamming": 0
+      },
+      {
+        "idx": 3,
+        "n": 8,
+        "K": 4,
+        "dO_inject": -0.0001623575616338021,
+        "acc_inject": true,
+        "dO_noinject": 0.0,
+        "acc_noinject": false,
+        "dO_sim": -0.0001623575616338021,
+        "acc_sim": true,
+        "E_exact": 0.0006557247369999783,
+        "E_sim": 0.0006557247369999783,
+        "approx": 1.0,
+        "hamming": 0
+      },
+      {
+        "idx": 2,
+        "n": 8,
+        "K": 4,
+        "dO_inject": -7.259552974899983e-05,
+        "acc_inject": true,
+        "dO_noinject": 0.0,
+        "acc_noinject": false,
+        "dO_sim": -7.259552974899983e-05,
+        "acc_sim": true,
+        "E_exact": 0.00020402281599999836,
+        "E_sim": 0.00020402281599999836,
+        "approx": 1.0,
+        "hamming": 0
+      },
+      {
+        "idx": 1,
+        "n": 10,
+        "K": 5,
+        "dO_inject": 0.0,
+        "acc_inject": false,
+        "dO_noinject": 0.0,
+        "acc_noinject": false,
+        "dO_sim": 0.0,
+        "acc_sim": false,
+        "E_exact": 0.0016229872025000647,
+        "E_sim": 0.0016229872025000647,
+        "approx": 1.0,
+        "hamming": 0
+      }
+    ],
+    "rows": [
+      {
+        "solver": "noop",
+        "injection": "\u2014",
+        "global_dO": 0.0,
+        "accepted": false
+      },
+      {
+        "solver": "exact",
+        "injection": "off",
+        "global_dO": 0.0,
+        "accepted": false
+      },
+      {
+        "solver": "exact",
+        "injection": "on",
+        "global_dO": -0.0001623575616338021,
+        "accepted": true
+      },
+      {
+        "solver": "sim_qaoa",
+        "injection": "on",
+        "global_dO": -0.0001623575616338021,
+        "accepted": true
+      },
+      {
+        "solver": "hw_qaoa",
+        "injection": "on",
+        "global_dO": null,
+        "accepted": null
+      }
+    ]
+  },
+  "scope": "Aligned local/global q; exact/simulator only; no QPU execution",
+  "earlier_rescaled_control": "revision-frozen-rescaled-results.json"
+}

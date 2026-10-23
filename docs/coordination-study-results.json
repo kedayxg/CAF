@@ -1,0 +1,3579 @@
+{
+  "status": "complete",
+  "protocol": {
+    "protocol": "caf-bcd-capacity-subsets-v1",
+    "cases": [
+      {
+        "index": 0,
+        "year": 2016,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 1,
+        "year": 2016,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 2,
+        "year": 2016,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 3,
+        "year": 2016,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 4,
+        "year": 2016,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 5,
+        "year": 2016,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 6,
+        "year": 2016,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 7,
+        "year": 2016,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 8,
+        "year": 2016,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 9,
+        "year": 2016,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 10,
+        "year": 2016,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 11,
+        "year": 2016,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 12,
+        "year": 2018,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 13,
+        "year": 2018,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 14,
+        "year": 2018,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 15,
+        "year": 2018,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 16,
+        "year": 2018,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 17,
+        "year": 2018,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 18,
+        "year": 2018,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 19,
+        "year": 2018,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 20,
+        "year": 2018,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      {
+        "index": 21,
+        "year": 2018,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      {
+        "index": 22,
+        "year": 2018,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      {
+        "index": 23,
+        "year": 2018,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      }
+    ],
+    "core_source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+    "runner_sha256": "b2e543d833e6237f0015ec55b38a6d84c85c5c894844c13f959cc8fc76f2060c",
+    "capacities": [
+      75,
+      100,
+      150
+    ],
+    "subset_assets": 300,
+    "subset_seeds": [
+      1729,
+      2718,
+      3141
+    ],
+    "methods": [
+      "caf_serial",
+      "sequential_bcd",
+      "caf_parallel4"
+    ],
+    "rounds": 6,
+    "patience_disabled": true,
+    "partition_seed": 42,
+    "risk_factor": 0.5,
+    "parameters": {
+      "Threads": 1,
+      "Seed": 0,
+      "MIPGap": 0.0001,
+      "TimeLimit": 300
+    },
+    "case_workers": 1,
+    "fixed_budgets": true,
+    "no_repartition_within_refinement": true,
+    "report_all_partition_failures": true,
+    "timing_interpretation": "Single timings, not repeated statistical trials. Four-worker CAF uses more simultaneous solver resources; quality/call-count comparison uses equal six-sweep budgets."
+  },
+  "cases": [
+    {
+      "case": {
+        "index": 0,
+        "year": 2016,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 484,
+      "cardinality": 242,
+      "community_count": 15,
+      "community_sizes": [
+        60,
+        53,
+        49,
+        49,
+        41,
+        39,
+        35,
+        32,
+        29,
+        24,
+        22,
+        17,
+        15,
+        12,
+        7
+      ],
+      "static_objective": 1.6379595984022908,
+      "static_seconds": 0.373167994999676,
+      "preprocessing_seconds": 0.8585997430054704,
+      "methods": {
+        "caf_serial": {
+          "objective": 1.335466020068208,
+          "gain_pct": 18.467706934233483,
+          "risk": 2.9007048726635403,
+          "expected_return": 0.11488641626356215,
+          "calls": 90,
+          "wall_seconds": 1.7463857399998233,
+          "solver_wall_sum": 0.1870132939220639,
+          "service_wall_sum": 0.5585646299587097,
+          "ideal_unlimited_service_makespan": 0.0724533809843706,
+          "history": [
+            1.6379595984022908,
+            1.338459630087037,
+            1.3356067903199278,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 24,
+          "accepted_by_round": [
+            15,
+            7,
+            2,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.896307071491107e-05
+        },
+        "sequential_bcd": {
+          "objective": 1.335466020068208,
+          "gain_pct": 18.467706934233483,
+          "risk": 2.9007048726635403,
+          "expected_return": 0.11488641626356215,
+          "calls": 90,
+          "wall_seconds": 1.8142434769979445,
+          "solver_wall_sum": 0.20795200495922472,
+          "service_wall_sum": 0.5948050349543337,
+          "ideal_unlimited_service_makespan": 0.08355778100667521,
+          "history": [
+            1.6379595984022908,
+            1.3366834376570649,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 19,
+          "accepted_by_round": [
+            15,
+            4,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.896307071491107e-05
+        },
+        "caf_parallel4": {
+          "objective": 1.335466020068208,
+          "gain_pct": 18.467706934233483,
+          "risk": 2.9007048726635403,
+          "expected_return": 0.11488641626356215,
+          "calls": 90,
+          "wall_seconds": 1.8979856869991636,
+          "solver_wall_sum": 1.7802586840407457,
+          "service_wall_sum": 3.459603003997472,
+          "ideal_unlimited_service_makespan": 0.7957706630113535,
+          "history": [
+            1.6379595984022908,
+            1.338459630087037,
+            1.3356067903199278,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 24,
+          "accepted_by_round": [
+            15,
+            7,
+            2,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.896307071491107e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 1,
+        "year": 2016,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 484,
+      "cardinality": 242,
+      "community_count": 15,
+      "community_sizes": [
+        60,
+        53,
+        49,
+        49,
+        41,
+        39,
+        35,
+        32,
+        29,
+        24,
+        22,
+        17,
+        15,
+        12,
+        7
+      ],
+      "static_objective": 1.6379595984022908,
+      "static_seconds": 0.42983853099576663,
+      "preprocessing_seconds": 0.7126308800070547,
+      "methods": {
+        "caf_serial": {
+          "objective": 1.335466020068208,
+          "gain_pct": 18.467706934233483,
+          "risk": 2.9007048726635403,
+          "expected_return": 0.11488641626356215,
+          "calls": 90,
+          "wall_seconds": 2.784231910991366,
+          "solver_wall_sum": 0.3286561259737937,
+          "service_wall_sum": 1.0835771540441783,
+          "ideal_unlimited_service_makespan": 0.26376802200684324,
+          "history": [
+            1.6379595984022908,
+            1.338459630087037,
+            1.3356067903199278,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 24,
+          "accepted_by_round": [
+            15,
+            7,
+            2,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.896307071491107e-05
+        },
+        "sequential_bcd": {
+          "objective": 1.335466020068208,
+          "gain_pct": 18.467706934233483,
+          "risk": 2.9007048726635403,
+          "expected_return": 0.11488641626356215,
+          "calls": 90,
+          "wall_seconds": 1.8585287999885622,
+          "solver_wall_sum": 0.20586075000755955,
+          "service_wall_sum": 0.5950368110934505,
+          "ideal_unlimited_service_makespan": 0.08290392899652943,
+          "history": [
+            1.6379595984022908,
+            1.3366834376570649,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 19,
+          "accepted_by_round": [
+            15,
+            4,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.896307071491107e-05
+        },
+        "caf_parallel4": {
+          "objective": 1.335466020068208,
+          "gain_pct": 18.467706934233483,
+          "risk": 2.9007048726635403,
+          "expected_return": 0.11488641626356215,
+          "calls": 90,
+          "wall_seconds": 2.1304545269958908,
+          "solver_wall_sum": 2.5156244780373527,
+          "service_wall_sum": 4.044835826061899,
+          "ideal_unlimited_service_makespan": 0.7309793659951538,
+          "history": [
+            1.6379595984022908,
+            1.338459630087037,
+            1.3356067903199278,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208,
+            1.335466020068208
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 24,
+          "accepted_by_round": [
+            15,
+            7,
+            2,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.896307071491107e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 2,
+        "year": 2016,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 484,
+      "cardinality": 242,
+      "community_count": 10,
+      "community_sizes": [
+        132,
+        60,
+        53,
+        49,
+        49,
+        41,
+        39,
+        29,
+        17,
+        15
+      ],
+      "static_objective": 1.4750736767449064,
+      "static_seconds": 0.9303442579985131,
+      "preprocessing_seconds": 1.0524357539979974,
+      "methods": {
+        "caf_serial": {
+          "objective": 1.2183664758159167,
+          "gain_pct": 17.40300874295811,
+          "risk": 2.6619291185013156,
+          "expected_return": 0.11259808343474104,
+          "calls": 60,
+          "wall_seconds": 3.7189219779975247,
+          "solver_wall_sum": 0.28674211891484447,
+          "service_wall_sum": 0.9548615080420859,
+          "ideal_unlimited_service_makespan": 0.3909727280115476,
+          "history": [
+            1.4750736767449064,
+            1.223073869198098,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 17,
+          "accepted_by_round": [
+            10,
+            7,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.092253745544335e-05
+        },
+        "sequential_bcd": {
+          "objective": 1.2183664758159167,
+          "gain_pct": 17.40300874295811,
+          "risk": 2.6619291185013156,
+          "expected_return": 0.11259808343474104,
+          "calls": 60,
+          "wall_seconds": 3.5909355859912466,
+          "solver_wall_sum": 0.275544056945364,
+          "service_wall_sum": 1.0876270789449336,
+          "ideal_unlimited_service_makespan": 0.5880840909667313,
+          "history": [
+            1.4750736767449064,
+            1.21912251592515,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 13,
+          "accepted_by_round": [
+            10,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.202976560818198e-05
+        },
+        "caf_parallel4": {
+          "objective": 1.2183664758159167,
+          "gain_pct": 17.40300874295811,
+          "risk": 2.6619291185013156,
+          "expected_return": 0.11259808343474104,
+          "calls": 60,
+          "wall_seconds": 3.838807246007491,
+          "solver_wall_sum": 4.519183309937944,
+          "service_wall_sum": 6.9594694119005,
+          "ideal_unlimited_service_makespan": 1.8875273089797702,
+          "history": [
+            1.4750736767449064,
+            1.223073869198098,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167,
+            1.2183664758159167
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 17,
+          "accepted_by_round": [
+            10,
+            7,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.092253745544335e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 3,
+        "year": 2016,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 15,
+      "community_sizes": [
+        48,
+        33,
+        30,
+        27,
+        24,
+        24,
+        23,
+        23,
+        17,
+        16,
+        12,
+        10,
+        7,
+        5,
+        1
+      ],
+      "static_objective": 0.5821786285756698,
+      "static_seconds": 0.23840030700375792,
+      "preprocessing_seconds": 0.6613667170022381,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4709599650892936,
+          "gain_pct": 19.10387259636762,
+          "risk": 1.0962239875555786,
+          "expected_return": 0.0771520286884957,
+          "calls": 84,
+          "wall_seconds": 1.2337767330027418,
+          "solver_wall_sum": 0.17717561204335652,
+          "service_wall_sum": 0.5000447830243502,
+          "ideal_unlimited_service_makespan": 0.06879173299239483,
+          "history": [
+            0.5821786285756698,
+            0.4717317208026601,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 20,
+          "accepted_by_round": [
+            14,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.592272912111047e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4709599650892936,
+          "gain_pct": 19.10387259636762,
+          "risk": 1.0962239875555786,
+          "expected_return": 0.0771520286884957,
+          "calls": 84,
+          "wall_seconds": 1.2928617739962647,
+          "solver_wall_sum": 0.19964309004717506,
+          "service_wall_sum": 0.5827835449454142,
+          "ideal_unlimited_service_makespan": 0.13363095598469954,
+          "history": [
+            0.5821786285756698,
+            0.4713304880836755,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 17,
+          "accepted_by_round": [
+            14,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.685976963897919e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.4709599650892936,
+          "gain_pct": 19.10387259636762,
+          "risk": 1.0962239875555786,
+          "expected_return": 0.0771520286884957,
+          "calls": 84,
+          "wall_seconds": 1.192786151994369,
+          "solver_wall_sum": 1.6571451539348345,
+          "service_wall_sum": 2.621056822958053,
+          "ideal_unlimited_service_makespan": 0.44296659901738167,
+          "history": [
+            0.5821786285756698,
+            0.4717317208026601,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936,
+            0.4709599650892936
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 20,
+          "accepted_by_round": [
+            14,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.592272912111047e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 4,
+        "year": 2016,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 9,
+      "community_sizes": [
+        86,
+        48,
+        33,
+        30,
+        27,
+        24,
+        24,
+        16,
+        12
+      ],
+      "static_objective": 0.5162937154589017,
+      "static_seconds": 0.32907353500195313,
+      "preprocessing_seconds": 0.6115987509983825,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4186799717813436,
+          "gain_pct": 18.906630229034505,
+          "risk": 0.98935371366691,
+          "expected_return": 0.07599688505211145,
+          "calls": 54,
+          "wall_seconds": 1.760646982002072,
+          "solver_wall_sum": 0.18549031802103855,
+          "service_wall_sum": 0.5436005780065898,
+          "ideal_unlimited_service_makespan": 0.17249323400028516,
+          "history": [
+            0.5162937154589017,
+            0.4197988289756847,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 15,
+          "accepted_by_round": [
+            9,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.48272623327417e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4186799717813436,
+          "gain_pct": 18.906630229034505,
+          "risk": 0.98935371366691,
+          "expected_return": 0.07599688505211145,
+          "calls": 54,
+          "wall_seconds": 1.582482063997304,
+          "solver_wall_sum": 0.20073472506192047,
+          "service_wall_sum": 0.5101660929067293,
+          "ideal_unlimited_service_makespan": 0.1462150109873619,
+          "history": [
+            0.5162937154589017,
+            0.4188370728897972,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 12,
+          "accepted_by_round": [
+            9,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 2.7965230452878712e-06
+        },
+        "caf_parallel4": {
+          "objective": 0.4186799717813436,
+          "gain_pct": 18.906630229034505,
+          "risk": 0.98935371366691,
+          "expected_return": 0.07599688505211145,
+          "calls": 54,
+          "wall_seconds": 1.6328073190088617,
+          "solver_wall_sum": 1.7923990859562764,
+          "service_wall_sum": 2.9626791819755454,
+          "ideal_unlimited_service_makespan": 0.8496393039968098,
+          "history": [
+            0.5162937154589017,
+            0.4197988289756847,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436,
+            0.4186799717813436
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 15,
+          "accepted_by_round": [
+            9,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.48272623327417e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 5,
+        "year": 2016,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 3,
+      "community_sizes": [
+        109,
+        105,
+        86
+      ],
+      "static_objective": 0.4490434836916785,
+      "static_seconds": 0.689282010003808,
+      "preprocessing_seconds": 0.7400359279999975,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4018506433377414,
+          "gain_pct": 10.509637054735792,
+          "risk": 0.9485691040205063,
+          "expected_return": 0.07243390867251176,
+          "calls": 18,
+          "wall_seconds": 2.828678095000214,
+          "solver_wall_sum": 0.2523867730196798,
+          "service_wall_sum": 0.5630116389656905,
+          "ideal_unlimited_service_makespan": 0.2284309689712245,
+          "history": [
+            0.4490434836916785,
+            0.4023764250576629,
+            0.40194790920779794,
+            0.4018506433377414,
+            0.4018506433377414,
+            0.4018506433377414,
+            0.4018506433377414
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            3,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.131000343579445e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4018506433377414,
+          "gain_pct": 10.509637054735792,
+          "risk": 0.9485691040205063,
+          "expected_return": 0.07243390867251176,
+          "calls": 18,
+          "wall_seconds": 2.5744368890009355,
+          "solver_wall_sum": 0.22425804802333005,
+          "service_wall_sum": 0.6162015959707787,
+          "ideal_unlimited_service_makespan": 0.3219721099740127,
+          "history": [
+            0.4490434836916785,
+            0.4023384218651968,
+            0.40190467107787603,
+            0.4018506433377414,
+            0.4018506433377414,
+            0.4018506433377414,
+            0.4018506433377414
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            3,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.131000343579445e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.4018506433377414,
+          "gain_pct": 10.509637054735792,
+          "risk": 0.9485691040205063,
+          "expected_return": 0.07243390867251176,
+          "calls": 18,
+          "wall_seconds": 3.3897268919972703,
+          "solver_wall_sum": 0.5274347289960133,
+          "service_wall_sum": 1.6027848979720147,
+          "ideal_unlimited_service_makespan": 0.8974583429662744,
+          "history": [
+            0.4490434836916785,
+            0.4023764250576629,
+            0.40194790920779794,
+            0.4018506433377414,
+            0.4018506433377414,
+            0.4018506433377414,
+            0.4018506433377414
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            3,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.131000343579445e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 6,
+        "year": 2016,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 15,
+      "community_sizes": [
+        37,
+        34,
+        34,
+        25,
+        22,
+        22,
+        21,
+        20,
+        19,
+        18,
+        18,
+        14,
+        9,
+        6,
+        1
+      ],
+      "static_objective": 0.6088163649943785,
+      "static_seconds": 0.19762957400234882,
+      "preprocessing_seconds": 0.5359111450088676,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4745070934897384,
+          "gain_pct": 22.060719656555268,
+          "risk": 1.0969786926951892,
+          "expected_return": 0.07398225285785621,
+          "calls": 84,
+          "wall_seconds": 0.9914295979979215,
+          "solver_wall_sum": 0.14916284709761385,
+          "service_wall_sum": 0.4262891940015834,
+          "ideal_unlimited_service_makespan": 0.05796111997915432,
+          "history": [
+            0.6088163649943785,
+            0.47575111881212173,
+            0.47454842740371045,
+            0.4745245801188178,
+            0.4745070934897384,
+            0.4745070934897384,
+            0.4745070934897384
+          ],
+          "first_final_round": 4,
+          "accepted_updates": 22,
+          "accepted_by_round": [
+            14,
+            6,
+            1,
+            1,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.23685616822814e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4745070934897384,
+          "gain_pct": 22.060719656555268,
+          "risk": 1.0969786926951892,
+          "expected_return": 0.07398225285785621,
+          "calls": 84,
+          "wall_seconds": 0.9476153730065562,
+          "solver_wall_sum": 0.18320096195384394,
+          "service_wall_sum": 0.4424940800090553,
+          "ideal_unlimited_service_makespan": 0.08726233599008992,
+          "history": [
+            0.6088163649943785,
+            0.47489341980894106,
+            0.4745562614289036,
+            0.4745070934897384,
+            0.4745070934897384,
+            0.4745070934897384,
+            0.4745070934897384
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 20,
+          "accepted_by_round": [
+            14,
+            4,
+            2,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.0731719122642434e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.4745070934897384,
+          "gain_pct": 22.060719656555268,
+          "risk": 1.0969786926951892,
+          "expected_return": 0.07398225285785621,
+          "calls": 84,
+          "wall_seconds": 1.0167579049884807,
+          "solver_wall_sum": 1.3226624660019297,
+          "service_wall_sum": 2.293478060004418,
+          "ideal_unlimited_service_makespan": 0.3719488050264772,
+          "history": [
+            0.6088163649943785,
+            0.47575111881212173,
+            0.47454842740371045,
+            0.4745245801188178,
+            0.4745070934897384,
+            0.4745070934897384,
+            0.4745070934897384
+          ],
+          "first_final_round": 4,
+          "accepted_updates": 22,
+          "accepted_by_round": [
+            14,
+            6,
+            1,
+            1,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.23685616822814e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 7,
+        "year": 2016,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 7,
+      "community_sizes": [
+        99,
+        82,
+        37,
+        34,
+        25,
+        14,
+        9
+      ],
+      "static_objective": 0.4989505347223633,
+      "static_seconds": 0.35328217400819995,
+      "preprocessing_seconds": 0.6469783210050082,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4193525957617673,
+          "gain_pct": 15.9530721827741,
+          "risk": 0.9836964778909117,
+          "expected_return": 0.07249564318368858,
+          "calls": 42,
+          "wall_seconds": 1.8510921470005997,
+          "solver_wall_sum": 0.16629807297431398,
+          "service_wall_sum": 0.5448775600962108,
+          "ideal_unlimited_service_makespan": 0.24237822300347034,
+          "history": [
+            0.4989505347223633,
+            0.42082874779678986,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 11,
+          "accepted_by_round": [
+            7,
+            4,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.147959986702672e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4193525957617673,
+          "gain_pct": 15.9530721827741,
+          "risk": 0.9836964778909117,
+          "expected_return": 0.07249564318368858,
+          "calls": 42,
+          "wall_seconds": 1.9294180209981278,
+          "solver_wall_sum": 0.1995887130178744,
+          "service_wall_sum": 0.6128163679386489,
+          "ideal_unlimited_service_makespan": 0.2807038169557927,
+          "history": [
+            0.4989505347223633,
+            0.41995725727031674,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 9,
+          "accepted_by_round": [
+            7,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.178423713328377e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.4193525957617673,
+          "gain_pct": 15.9530721827741,
+          "risk": 0.9836964778909117,
+          "expected_return": 0.07249564318368858,
+          "calls": 42,
+          "wall_seconds": 2.2844346530037,
+          "solver_wall_sum": 2.029132309005945,
+          "service_wall_sum": 3.527310352976201,
+          "ideal_unlimited_service_makespan": 1.2509467699856032,
+          "history": [
+            0.4989505347223633,
+            0.42082874779678986,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673,
+            0.4193525957617673
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 11,
+          "accepted_by_round": [
+            7,
+            4,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.147959986702672e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 8,
+        "year": 2016,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 3,
+      "community_sizes": [
+        119,
+        99,
+        82
+      ],
+      "static_objective": 0.46850617471807243,
+      "static_seconds": 0.4487277619919041,
+      "preprocessing_seconds": 0.5056065520038828,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4141367865829213,
+          "gain_pct": 11.604839182294315,
+          "risk": 0.9652904953396568,
+          "expected_return": 0.06850846108690711,
+          "calls": 18,
+          "wall_seconds": 2.4047226589900674,
+          "solver_wall_sum": 0.21842828996886965,
+          "service_wall_sum": 0.5935675629589241,
+          "ideal_unlimited_service_makespan": 0.3398269039898878,
+          "history": [
+            0.46850617471807243,
+            0.4144026611994522,
+            0.41415989968409783,
+            0.4141367865829213,
+            0.4141367865829213,
+            0.4141367865829213,
+            0.4141367865829213
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            3,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.608564348356106e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4141367865829213,
+          "gain_pct": 11.604839182294315,
+          "risk": 0.9652904953396568,
+          "expected_return": 0.06850846108690711,
+          "calls": 18,
+          "wall_seconds": 2.3776760329928948,
+          "solver_wall_sum": 0.2252035999990767,
+          "service_wall_sum": 0.5008858070359565,
+          "ideal_unlimited_service_makespan": 0.2513618830125779,
+          "history": [
+            0.46850617471807243,
+            0.4144026611994522,
+            0.41415989968409783,
+            0.4141367865829213,
+            0.4141367865829213,
+            0.4141367865829213,
+            0.4141367865829213
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            3,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.608564348356106e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.4141367865829213,
+          "gain_pct": 11.604839182294315,
+          "risk": 0.9652904953396568,
+          "expected_return": 0.06850846108690711,
+          "calls": 18,
+          "wall_seconds": 2.759709660007502,
+          "solver_wall_sum": 0.6739554950036108,
+          "service_wall_sum": 2.070301587038557,
+          "ideal_unlimited_service_makespan": 0.9709620990033727,
+          "history": [
+            0.46850617471807243,
+            0.4144026611994522,
+            0.41415989968409783,
+            0.4141367865829213,
+            0.4141367865829213,
+            0.4141367865829213,
+            0.4141367865829213
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            3,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.608564348356106e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 9,
+        "year": 2016,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 14,
+      "community_sizes": [
+        45,
+        29,
+        28,
+        28,
+        22,
+        22,
+        22,
+        20,
+        19,
+        18,
+        18,
+        15,
+        10,
+        4
+      ],
+      "static_objective": 0.6352213266678901,
+      "static_seconds": 0.2035789210058283,
+      "preprocessing_seconds": 0.5393205779982964,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.49326662143632627,
+          "gain_pct": 22.34728263551853,
+          "risk": 1.1480687320527996,
+          "expected_return": 0.08076774459007355,
+          "calls": 84,
+          "wall_seconds": 0.924511427001562,
+          "solver_wall_sum": 0.1384874419454718,
+          "service_wall_sum": 0.3843577400111826,
+          "ideal_unlimited_service_makespan": 0.055905293018440716,
+          "history": [
+            0.6352213266678901,
+            0.49556863266707174,
+            0.49329444333256,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 21,
+          "accepted_by_round": [
+            13,
+            7,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.175386711443427e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.49326662143632627,
+          "gain_pct": 22.34728263551853,
+          "risk": 1.1480687320527996,
+          "expected_return": 0.08076774459007355,
+          "calls": 84,
+          "wall_seconds": 0.8994448650046252,
+          "solver_wall_sum": 0.14698392101854552,
+          "service_wall_sum": 0.3861937420151662,
+          "ideal_unlimited_service_makespan": 0.05588775202340912,
+          "history": [
+            0.6352213266678901,
+            0.49424567236379396,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 17,
+          "accepted_by_round": [
+            13,
+            4,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.328356400154127e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.49326662143632627,
+          "gain_pct": 22.34728263551853,
+          "risk": 1.1480687320527996,
+          "expected_return": 0.08076774459007355,
+          "calls": 84,
+          "wall_seconds": 0.937107787001878,
+          "solver_wall_sum": 1.01925035691238,
+          "service_wall_sum": 1.9563812319393037,
+          "ideal_unlimited_service_makespan": 0.348271210983512,
+          "history": [
+            0.6352213266678901,
+            0.49556863266707174,
+            0.49329444333256,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627,
+            0.49326662143632627
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 21,
+          "accepted_by_round": [
+            13,
+            7,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.175386711443427e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 10,
+        "year": 2016,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 8,
+      "community_sizes": [
+        86,
+        83,
+        29,
+        28,
+        28,
+        18,
+        18,
+        10
+      ],
+      "static_objective": 0.5525699214227793,
+      "static_seconds": 0.2994559249927988,
+      "preprocessing_seconds": 0.5189920289994916,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.4496065172942477,
+          "gain_pct": 18.633552087565178,
+          "risk": 1.053651898659568,
+          "expected_return": 0.0772194320355363,
+          "calls": 48,
+          "wall_seconds": 1.3073191040020902,
+          "solver_wall_sum": 0.16134756202518474,
+          "service_wall_sum": 0.3808324639539933,
+          "ideal_unlimited_service_makespan": 0.13574614601384383,
+          "history": [
+            0.5525699214227793,
+            0.4510920611757083,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 11,
+          "accepted_by_round": [
+            8,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.397996507035934e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.4496065172942477,
+          "gain_pct": 18.633552087565178,
+          "risk": 1.053651898659568,
+          "expected_return": 0.0772194320355363,
+          "calls": 48,
+          "wall_seconds": 1.4642101500066929,
+          "solver_wall_sum": 0.17741134103562217,
+          "service_wall_sum": 0.41178376505558845,
+          "ideal_unlimited_service_makespan": 0.14706371598003898,
+          "history": [
+            0.5525699214227793,
+            0.45001980835839456,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 9,
+          "accepted_by_round": [
+            8,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.397996507035934e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.4496065172942477,
+          "gain_pct": 18.633552087565178,
+          "risk": 1.053651898659568,
+          "expected_return": 0.0772194320355363,
+          "calls": 48,
+          "wall_seconds": 1.4702868339954875,
+          "solver_wall_sum": 1.863292564972653,
+          "service_wall_sum": 2.8589901669620303,
+          "ideal_unlimited_service_makespan": 0.9256191019958351,
+          "history": [
+            0.5525699214227793,
+            0.4510920611757083,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477,
+            0.4496065172942477
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 11,
+          "accepted_by_round": [
+            8,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.397996507035934e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 11,
+        "year": 2016,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 3,
+      "community_sizes": [
+        131,
+        86,
+        83
+      ],
+      "static_objective": 0.48454232366693334,
+      "static_seconds": 0.40220388599846046,
+      "preprocessing_seconds": 0.4661195759981638,
+      "methods": {
+        "caf_serial": {
+          "objective": 0.43304542539565033,
+          "gain_pct": 10.627946364223314,
+          "risk": 1.0161945909043906,
+          "expected_return": 0.07505187005654497,
+          "calls": 18,
+          "wall_seconds": 2.39599343300506,
+          "solver_wall_sum": 0.2553191580082057,
+          "service_wall_sum": 0.6527436370233772,
+          "ideal_unlimited_service_makespan": 0.38337373900867533,
+          "history": [
+            0.48454232366693334,
+            0.4339318293586928,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 5,
+          "accepted_by_round": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.630815376147663e-05
+        },
+        "sequential_bcd": {
+          "objective": 0.43304542539565033,
+          "gain_pct": 10.627946364223314,
+          "risk": 1.0161945909043906,
+          "expected_return": 0.07505187005654497,
+          "calls": 18,
+          "wall_seconds": 2.3072007190057775,
+          "solver_wall_sum": 0.26094104199728463,
+          "service_wall_sum": 0.61597666698799,
+          "ideal_unlimited_service_makespan": 0.35889791301451623,
+          "history": [
+            0.48454232366693334,
+            0.4336252260184572,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 5,
+          "accepted_by_round": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.831054713856663e-05
+        },
+        "caf_parallel4": {
+          "objective": 0.43304542539565033,
+          "gain_pct": 10.627946364223314,
+          "risk": 1.0161945909043906,
+          "expected_return": 0.07505187005654497,
+          "calls": 18,
+          "wall_seconds": 2.689259527993272,
+          "solver_wall_sum": 1.1732620720431441,
+          "service_wall_sum": 2.2699474600085523,
+          "ideal_unlimited_service_makespan": 1.0815593649895163,
+          "history": [
+            0.48454232366693334,
+            0.4339318293586928,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033,
+            0.43304542539565033
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 5,
+          "accepted_by_round": [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.630815376147663e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 12,
+        "year": 2018,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 1397,
+      "cardinality": 698,
+      "community_count": 65,
+      "community_sizes": [
+        68,
+        64,
+        45,
+        44,
+        40,
+        38,
+        37,
+        35,
+        34,
+        33,
+        31,
+        30,
+        30,
+        30,
+        30,
+        29,
+        28,
+        27,
+        27,
+        26,
+        25,
+        25,
+        24,
+        24,
+        24,
+        23,
+        23,
+        22,
+        21,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        19,
+        18,
+        18,
+        18,
+        17,
+        16,
+        16,
+        15,
+        15,
+        15,
+        14,
+        14,
+        14,
+        14,
+        14,
+        12,
+        11,
+        11,
+        8,
+        8,
+        7,
+        7,
+        7,
+        6,
+        6,
+        5,
+        5,
+        4,
+        4,
+        2
+      ],
+      "static_objective": 60.30513503720928,
+      "static_seconds": 0.872748463996686,
+      "preprocessing_seconds": 4.490495302001364,
+      "methods": {
+        "caf_serial": {
+          "objective": 54.94574595342363,
+          "gain_pct": 8.887118950117296,
+          "risk": 109.87443562832212,
+          "expected_return": -0.00852813926257387,
+          "calls": 384,
+          "wall_seconds": 5.459483458995237,
+          "solver_wall_sum": 0.687876232812414,
+          "service_wall_sum": 2.126250334957149,
+          "ideal_unlimited_service_makespan": 0.10815970601106528,
+          "history": [
+            60.30513503720928,
+            54.96175067160907,
+            54.94616982310892,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 71,
+          "accepted_by_round": [
+            61,
+            9,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 1.2907637796919935e-05
+        },
+        "sequential_bcd": {
+          "objective": 54.94574595342363,
+          "gain_pct": 8.887118950117296,
+          "risk": 109.87443562832212,
+          "expected_return": -0.00852813926257387,
+          "calls": 384,
+          "wall_seconds": 6.208666049991734,
+          "solver_wall_sum": 0.809011787903728,
+          "service_wall_sum": 2.471357701200759,
+          "ideal_unlimited_service_makespan": 0.14549114200053737,
+          "history": [
+            60.30513503720928,
+            54.9557270000763,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 68,
+          "accepted_by_round": [
+            62,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 5.6923972945778946e-05
+        },
+        "caf_parallel4": {
+          "objective": 54.94574595342363,
+          "gain_pct": 8.887118950117296,
+          "risk": 109.87443562832212,
+          "expected_return": -0.00852813926257387,
+          "calls": 384,
+          "wall_seconds": 6.063717038996401,
+          "solver_wall_sum": 9.942201171128545,
+          "service_wall_sum": 14.745467286076746,
+          "ideal_unlimited_service_makespan": 1.0998101140139624,
+          "history": [
+            60.30513503720928,
+            54.96175067160907,
+            54.94616982310892,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363,
+            54.94574595342363
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 71,
+          "accepted_by_round": [
+            61,
+            9,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 1.2907637796919935e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 13,
+        "year": 2018,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 1397,
+      "cardinality": 698,
+      "community_count": 25,
+      "community_sizes": [
+        100,
+        98,
+        92,
+        89,
+        87,
+        85,
+        82,
+        81,
+        80,
+        79,
+        78,
+        77,
+        68,
+        64,
+        37,
+        30,
+        28,
+        26,
+        23,
+        19,
+        18,
+        16,
+        15,
+        14,
+        11
+      ],
+      "static_objective": 54.504183500014676,
+      "static_seconds": 1.7833426919969497,
+      "preprocessing_seconds": 4.534367844011285,
+      "methods": {
+        "caf_serial": {
+          "objective": 51.64909860074284,
+          "gain_pct": 5.238285790064295,
+          "risk": 103.33985780120096,
+          "expected_return": 0.020830299857641496,
+          "calls": 150,
+          "wall_seconds": 11.365590282002813,
+          "solver_wall_sum": 0.7907294220785843,
+          "service_wall_sum": 2.825578131058137,
+          "ideal_unlimited_service_makespan": 0.5838866250123829,
+          "history": [
+            54.504183500014676,
+            51.6654812976015,
+            51.64950624698887,
+            51.64909860074284,
+            51.64909860074284,
+            51.64909860074284,
+            51.64909860074284
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 35,
+          "accepted_by_round": [
+            25,
+            9,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 7.240561643133322e-05
+        },
+        "sequential_bcd": {
+          "objective": 51.64909860074284,
+          "gain_pct": 5.238285790064295,
+          "risk": 103.33985780120096,
+          "expected_return": 0.020830299857641496,
+          "calls": 150,
+          "wall_seconds": 9.260698578000301,
+          "solver_wall_sum": 0.6807844990398735,
+          "service_wall_sum": 2.0116047269984847,
+          "ideal_unlimited_service_makespan": 0.20010601298417896,
+          "history": [
+            54.504183500014676,
+            51.65492640397474,
+            51.64950624698887,
+            51.64909860074284,
+            51.64909860074284,
+            51.64909860074284,
+            51.64909860074284
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 32,
+          "accepted_by_round": [
+            25,
+            6,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 4.9751592065266136e-05
+        },
+        "caf_parallel4": {
+          "objective": 51.64909860074284,
+          "gain_pct": 5.238285790064295,
+          "risk": 103.33985780120096,
+          "expected_return": 0.020830299857641496,
+          "calls": 150,
+          "wall_seconds": 10.252427120998618,
+          "solver_wall_sum": 11.834154792042682,
+          "service_wall_sum": 17.508455750954454,
+          "ideal_unlimited_service_makespan": 2.1257121800008463,
+          "history": [
+            54.504183500014676,
+            51.6654812976015,
+            51.64950624698887,
+            51.64909860074284,
+            51.64909860074284,
+            51.64909860074284,
+            51.64909860074284
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 35,
+          "accepted_by_round": [
+            25,
+            9,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 7.240561643133322e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 14,
+        "year": 2018,
+        "subset_seed": null,
+        "assets": null,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 1397,
+      "cardinality": 698,
+      "community_count": 16,
+      "community_sizes": [
+        126,
+        111,
+        100,
+        98,
+        92,
+        89,
+        87,
+        85,
+        82,
+        81,
+        80,
+        79,
+        78,
+        77,
+        68,
+        64
+      ],
+      "static_objective": 53.25341803787483,
+      "static_seconds": 2.0481406850012718,
+      "preprocessing_seconds": 5.494928340995102,
+      "methods": {
+        "caf_serial": {
+          "objective": 51.303059629690615,
+          "gain_pct": 3.6624098133890364,
+          "risk": 102.6388916076367,
+          "expected_return": 0.016386174127728425,
+          "calls": 96,
+          "wall_seconds": 10.398224320000736,
+          "solver_wall_sum": 0.6418835200165631,
+          "service_wall_sum": 2.291654445056338,
+          "ideal_unlimited_service_makespan": 0.5027024419832742,
+          "history": [
+            53.25341803787483,
+            51.31668438509429,
+            51.30329403194791,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 25,
+          "accepted_by_round": [
+            16,
+            8,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 4.353698389722181e-05
+        },
+        "sequential_bcd": {
+          "objective": 51.303059629690615,
+          "gain_pct": 3.6624098133890364,
+          "risk": 102.6388916076367,
+          "expected_return": 0.016386174127728425,
+          "calls": 96,
+          "wall_seconds": 9.83776341000339,
+          "solver_wall_sum": 0.6316478361113695,
+          "service_wall_sum": 2.303606990069966,
+          "ideal_unlimited_service_makespan": 0.574598397986847,
+          "history": [
+            53.25341803787483,
+            51.30388701755452,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 18,
+          "accepted_by_round": [
+            16,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 4.353698389722181e-05
+        },
+        "caf_parallel4": {
+          "objective": 51.303059629690615,
+          "gain_pct": 3.6624098133890364,
+          "risk": 102.6388916076367,
+          "expected_return": 0.016386174127728425,
+          "calls": 96,
+          "wall_seconds": 11.948693265992915,
+          "solver_wall_sum": 12.568576981924707,
+          "service_wall_sum": 18.998020248051034,
+          "ideal_unlimited_service_makespan": 2.62777868899866,
+          "history": [
+            53.25341803787483,
+            51.31668438509429,
+            51.30329403194791,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615,
+            51.303059629690615
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 25,
+          "accepted_by_round": [
+            16,
+            8,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 4.353698389722181e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 15,
+        "year": 2018,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 14,
+      "community_sizes": [
+        49,
+        39,
+        30,
+        29,
+        23,
+        22,
+        20,
+        19,
+        18,
+        12,
+        11,
+        11,
+        10,
+        7
+      ],
+      "static_objective": 2.683525361639565,
+      "static_seconds": 0.2225421649927739,
+      "preprocessing_seconds": 0.4935080389986979,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.4362772458550515,
+          "gain_pct": 9.213556142187947,
+          "risk": 4.850380718952741,
+          "expected_return": -0.011086886378680792,
+          "calls": 84,
+          "wall_seconds": 1.080281037997338,
+          "solver_wall_sum": 0.151547616958851,
+          "service_wall_sum": 0.42684768096660264,
+          "ideal_unlimited_service_makespan": 0.07113274298899341,
+          "history": [
+            2.683525361639565,
+            2.4368286285553147,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 15,
+          "accepted_by_round": [
+            13,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.918476012786601e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.4362772458550515,
+          "gain_pct": 9.213556142187947,
+          "risk": 4.850380718952741,
+          "expected_return": -0.011086886378680792,
+          "calls": 84,
+          "wall_seconds": 1.0043925300124101,
+          "solver_wall_sum": 0.16280486690811813,
+          "service_wall_sum": 0.42763610495603643,
+          "ideal_unlimited_service_makespan": 0.06496314200921915,
+          "history": [
+            2.683525361639565,
+            2.4368286285553147,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 15,
+          "accepted_by_round": [
+            13,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.918476012786601e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.4362772458550515,
+          "gain_pct": 9.213556142187947,
+          "risk": 4.850380718952741,
+          "expected_return": -0.011086886378680792,
+          "calls": 84,
+          "wall_seconds": 1.1993402980006067,
+          "solver_wall_sum": 1.5311189029598609,
+          "service_wall_sum": 2.597268355108099,
+          "ideal_unlimited_service_makespan": 0.6078063460299745,
+          "history": [
+            2.683525361639565,
+            2.4368286285553147,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515,
+            2.4362772458550515
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 15,
+          "accepted_by_round": [
+            13,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.918476012786601e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 16,
+        "year": 2018,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 5,
+      "community_sizes": [
+        93,
+        89,
+        49,
+        39,
+        30
+      ],
+      "static_objective": 2.4208221773020875,
+      "static_seconds": 0.38609053699474316,
+      "preprocessing_seconds": 0.7337074730021413,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.3237360775807177,
+          "gain_pct": 4.010459778155558,
+          "risk": 4.6300593152239315,
+          "expected_return": -0.008706419968751957,
+          "calls": 30,
+          "wall_seconds": 1.8462732740008505,
+          "solver_wall_sum": 0.16888999202637933,
+          "service_wall_sum": 0.43830642601824366,
+          "ideal_unlimited_service_makespan": 0.16193254699464887,
+          "history": [
+            2.4208221773020875,
+            2.3250674617907765,
+            2.3239049342491414,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 10,
+          "accepted_by_round": [
+            5,
+            4,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.137022611464836e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.3237360775807177,
+          "gain_pct": 4.010459778155558,
+          "risk": 4.6300593152239315,
+          "expected_return": -0.008706419968751957,
+          "calls": 30,
+          "wall_seconds": 2.040726043996983,
+          "solver_wall_sum": 0.18289679997542407,
+          "service_wall_sum": 0.4987455220107222,
+          "ideal_unlimited_service_makespan": 0.17621852297452278,
+          "history": [
+            2.4208221773020875,
+            2.3241657142893137,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            5,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.137022611464836e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.3237360775807177,
+          "gain_pct": 4.010459778155558,
+          "risk": 4.6300593152239315,
+          "expected_return": -0.008706419968751957,
+          "calls": 30,
+          "wall_seconds": 2.0124536379880738,
+          "solver_wall_sum": 1.430679727011011,
+          "service_wall_sum": 2.723827436027932,
+          "ideal_unlimited_service_makespan": 1.1821173099888256,
+          "history": [
+            2.4208221773020875,
+            2.3250674617907765,
+            2.3239049342491414,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177,
+            2.3237360775807177
+          ],
+          "first_final_round": 3,
+          "accepted_updates": 10,
+          "accepted_by_round": [
+            5,
+            4,
+            1,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.137022611464836e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 17,
+        "year": 2018,
+        "subset_seed": 1729,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 3,
+      "community_sizes": [
+        118,
+        93,
+        89
+      ],
+      "static_objective": 2.3345662365871327,
+      "static_seconds": 0.44635596899024677,
+      "preprocessing_seconds": 0.5289167669980088,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.2854612390473164,
+          "gain_pct": 2.1033884912000698,
+          "risk": 4.584054944496321,
+          "expected_return": 0.0065662332008443736,
+          "calls": 18,
+          "wall_seconds": 2.5637775609939126,
+          "solver_wall_sum": 0.24638060896540992,
+          "service_wall_sum": 0.6701473599823657,
+          "ideal_unlimited_service_makespan": 0.37016443998436444,
+          "history": [
+            2.3345662365871327,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164
+          ],
+          "first_final_round": 1,
+          "accepted_updates": 3,
+          "accepted_by_round": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.668227085583981e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.2854612390473164,
+          "gain_pct": 2.1033884912000698,
+          "risk": 4.584054944496321,
+          "expected_return": 0.0065662332008443736,
+          "calls": 18,
+          "wall_seconds": 2.356777302993578,
+          "solver_wall_sum": 0.21298996100085787,
+          "service_wall_sum": 0.5845137059804983,
+          "ideal_unlimited_service_makespan": 0.31989586098643485,
+          "history": [
+            2.3345662365871327,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164
+          ],
+          "first_final_round": 1,
+          "accepted_updates": 3,
+          "accepted_by_round": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.668227085583981e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.2854612390473164,
+          "gain_pct": 2.1033884912000698,
+          "risk": 4.584054944496321,
+          "expected_return": 0.0065662332008443736,
+          "calls": 18,
+          "wall_seconds": 2.541207373011275,
+          "solver_wall_sum": 0.5863232209958369,
+          "service_wall_sum": 1.5846439250308322,
+          "ideal_unlimited_service_makespan": 0.8248597049969248,
+          "history": [
+            2.3345662365871327,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164,
+            2.2854612390473164
+          ],
+          "first_final_round": 1,
+          "accepted_updates": 3,
+          "accepted_by_round": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.668227085583981e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 18,
+        "year": 2018,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 7,
+      "community_sizes": [
+        69,
+        66,
+        53,
+        33,
+        32,
+        26,
+        21
+      ],
+      "static_objective": 2.4399314459219337,
+      "static_seconds": 0.24713450200215448,
+      "preprocessing_seconds": 0.5356571040028939,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.314480649389919,
+          "gain_pct": 5.141570544602452,
+          "risk": 4.642396485003635,
+          "expected_return": 0.006717593111898814,
+          "calls": 42,
+          "wall_seconds": 1.2845225419878261,
+          "solver_wall_sum": 0.13426988603896461,
+          "service_wall_sum": 0.35604728598264046,
+          "ideal_unlimited_service_makespan": 0.09031356500054244,
+          "history": [
+            2.4399314459219337,
+            2.31625122746737,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 9,
+          "accepted_by_round": [
+            7,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.964280452210808e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.314480649389919,
+          "gain_pct": 5.141570544602452,
+          "risk": 4.642396485003635,
+          "expected_return": 0.006717593111898814,
+          "calls": 42,
+          "wall_seconds": 1.221146875002887,
+          "solver_wall_sum": 0.13521077898622025,
+          "service_wall_sum": 0.3522361569921486,
+          "ideal_unlimited_service_makespan": 0.08817416901001707,
+          "history": [
+            2.4399314459219337,
+            2.3154735103378212,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 8,
+          "accepted_by_round": [
+            7,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.964280452210808e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.314480649389919,
+          "gain_pct": 5.141570544602452,
+          "risk": 4.642396485003635,
+          "expected_return": 0.006717593111898814,
+          "calls": 42,
+          "wall_seconds": 1.3955089679948287,
+          "solver_wall_sum": 1.0889437870500842,
+          "service_wall_sum": 2.2499906820012257,
+          "ideal_unlimited_service_makespan": 0.8165065930079436,
+          "history": [
+            2.4399314459219337,
+            2.31625122746737,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 9,
+          "accepted_by_round": [
+            7,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.964280452210808e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 19,
+        "year": 2018,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 7,
+      "community_sizes": [
+        69,
+        66,
+        53,
+        33,
+        32,
+        26,
+        21
+      ],
+      "static_objective": 2.4399314459219337,
+      "static_seconds": 0.2616970620001666,
+      "preprocessing_seconds": 0.45538421400124207,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.314480649389919,
+          "gain_pct": 5.141570544602452,
+          "risk": 4.642396485003635,
+          "expected_return": 0.006717593111898814,
+          "calls": 42,
+          "wall_seconds": 1.2858200880000368,
+          "solver_wall_sum": 0.13883238105336204,
+          "service_wall_sum": 0.37426104696351103,
+          "ideal_unlimited_service_makespan": 0.08772402998874895,
+          "history": [
+            2.4399314459219337,
+            2.31625122746737,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 9,
+          "accepted_by_round": [
+            7,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.964280452210808e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.314480649389919,
+          "gain_pct": 5.141570544602452,
+          "risk": 4.642396485003635,
+          "expected_return": 0.006717593111898814,
+          "calls": 42,
+          "wall_seconds": 1.281628054988687,
+          "solver_wall_sum": 0.17537349904887378,
+          "service_wall_sum": 0.4025886690214975,
+          "ideal_unlimited_service_makespan": 0.13674477802123874,
+          "history": [
+            2.4399314459219337,
+            2.3154735103378212,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 8,
+          "accepted_by_round": [
+            7,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.964280452210808e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.314480649389919,
+          "gain_pct": 5.141570544602452,
+          "risk": 4.642396485003635,
+          "expected_return": 0.006717593111898814,
+          "calls": 42,
+          "wall_seconds": 1.3856945389998145,
+          "solver_wall_sum": 0.9385832159168785,
+          "service_wall_sum": 2.18827248600428,
+          "ideal_unlimited_service_makespan": 0.9021250709774904,
+          "history": [
+            2.4399314459219337,
+            2.31625122746737,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919,
+            2.314480649389919
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 9,
+          "accepted_by_round": [
+            7,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.964280452210808e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 20,
+        "year": 2018,
+        "subset_seed": 2718,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 4,
+      "community_sizes": [
+        112,
+        69,
+        66,
+        53
+      ],
+      "static_objective": 2.326783414916472,
+      "static_seconds": 0.3542873020051047,
+      "preprocessing_seconds": 0.4515727389953099,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.2911716834840745,
+          "gain_pct": 1.5305133775708988,
+          "risk": 4.60402086375793,
+          "expected_return": 0.010838748394890494,
+          "calls": 24,
+          "wall_seconds": 1.7985145389975514,
+          "solver_wall_sum": 0.1625962710386375,
+          "service_wall_sum": 0.40002471703337505,
+          "ideal_unlimited_service_makespan": 0.2058057250105776,
+          "history": [
+            2.326783414916472,
+            2.292606817251243,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 7,
+          "accepted_by_round": [
+            4,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.737104842796399e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.2911716834840745,
+          "gain_pct": 1.5305133775708988,
+          "risk": 4.60402086375793,
+          "expected_return": 0.010838748394890494,
+          "calls": 24,
+          "wall_seconds": 1.9999313739972422,
+          "solver_wall_sum": 0.17097104698768817,
+          "service_wall_sum": 0.6095127320004394,
+          "ideal_unlimited_service_makespan": 0.37052984299953096,
+          "history": [
+            2.326783414916472,
+            2.291830436638071,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 5,
+          "accepted_by_round": [
+            4,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.0665477282694286e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.2911716834840745,
+          "gain_pct": 1.5305133775708988,
+          "risk": 4.60402086375793,
+          "expected_return": 0.010838748394890494,
+          "calls": 24,
+          "wall_seconds": 1.7825810729991645,
+          "solver_wall_sum": 1.399660540977493,
+          "service_wall_sum": 2.692701058986131,
+          "ideal_unlimited_service_makespan": 0.982667054006015,
+          "history": [
+            2.326783414916472,
+            2.292606817251243,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745,
+            2.2911716834840745
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 7,
+          "accepted_by_round": [
+            4,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 8.737104842796399e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 21,
+        "year": 2018,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 75,
+        "method_order": [
+          "caf_serial",
+          "sequential_bcd",
+          "caf_parallel4"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 11,
+      "community_sizes": [
+        40,
+        35,
+        33,
+        33,
+        30,
+        28,
+        24,
+        21,
+        20,
+        19,
+        17
+      ],
+      "static_objective": 2.524276978804603,
+      "static_seconds": 0.21963865200814325,
+      "preprocessing_seconds": 0.47208756700274535,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.385062962602549,
+          "gain_pct": 5.515005578665956,
+          "risk": 4.802075045264576,
+          "expected_return": 0.015974560029739474,
+          "calls": 66,
+          "wall_seconds": 0.843925555003807,
+          "solver_wall_sum": 0.1007803319953382,
+          "service_wall_sum": 0.300897905981401,
+          "ideal_unlimited_service_makespan": 0.03819525396102108,
+          "history": [
+            2.524276978804603,
+            2.3855423219479057,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 13,
+          "accepted_by_round": [
+            11,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 4.260059162845654e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.385062962602549,
+          "gain_pct": 5.515005578665956,
+          "risk": 4.802075045264576,
+          "expected_return": 0.015974560029739474,
+          "calls": 66,
+          "wall_seconds": 0.8411017409962369,
+          "solver_wall_sum": 0.10953547991812229,
+          "service_wall_sum": 0.3417181120166788,
+          "ideal_unlimited_service_makespan": 0.07518763701955322,
+          "history": [
+            2.524276978804603,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549
+          ],
+          "first_final_round": 1,
+          "accepted_updates": 11,
+          "accepted_by_round": [
+            11,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 7.228753192177576e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.385062962602549,
+          "gain_pct": 5.515005578665956,
+          "risk": 4.802075045264576,
+          "expected_return": 0.015974560029739474,
+          "calls": 66,
+          "wall_seconds": 0.8595342759945197,
+          "solver_wall_sum": 0.9341042110754643,
+          "service_wall_sum": 1.7948169150186004,
+          "ideal_unlimited_service_makespan": 0.3427460630045971,
+          "history": [
+            2.524276978804603,
+            2.3855423219479057,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549,
+            2.385062962602549
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 13,
+          "accepted_by_round": [
+            11,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 4.260059162845654e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 22,
+        "year": 2018,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 100,
+        "method_order": [
+          "sequential_bcd",
+          "caf_parallel4",
+          "caf_serial"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 6,
+      "community_sizes": [
+        92,
+        87,
+        35,
+        33,
+        33,
+        20
+      ],
+      "static_objective": 2.3629063546299225,
+      "static_seconds": 0.31238327898608986,
+      "preprocessing_seconds": 0.5139715770055773,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.2980670950282036,
+          "gain_pct": 2.7440469434885406,
+          "risk": 4.637846825269351,
+          "expected_return": 0.020856317606472,
+          "calls": 36,
+          "wall_seconds": 1.6462194850028027,
+          "solver_wall_sum": 0.1552076729858527,
+          "service_wall_sum": 0.39521744097874034,
+          "ideal_unlimited_service_makespan": 0.16151029500178993,
+          "history": [
+            2.3629063546299225,
+            2.2983048372485917,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 7,
+          "accepted_by_round": [
+            6,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 7.788574931026708e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.2980670950282036,
+          "gain_pct": 2.7440469434885406,
+          "risk": 4.637846825269351,
+          "expected_return": 0.020856317606472,
+          "calls": 36,
+          "wall_seconds": 1.740899829994305,
+          "solver_wall_sum": 0.15763967503153253,
+          "service_wall_sum": 0.5061680780345341,
+          "ideal_unlimited_service_makespan": 0.21944289300881792,
+          "history": [
+            2.3629063546299225,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036
+          ],
+          "first_final_round": 1,
+          "accepted_updates": 6,
+          "accepted_by_round": [
+            6,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 6.560048823306328e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.2980670950282036,
+          "gain_pct": 2.7440469434885406,
+          "risk": 4.637846825269351,
+          "expected_return": 0.020856317606472,
+          "calls": 36,
+          "wall_seconds": 1.6758288740093121,
+          "solver_wall_sum": 1.7151834129763301,
+          "service_wall_sum": 3.1621611979353474,
+          "ideal_unlimited_service_makespan": 1.102351462977822,
+          "history": [
+            2.3629063546299225,
+            2.2983048372485917,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036,
+            2.2980670950282036
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 7,
+          "accepted_by_round": [
+            6,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 7.788574931026708e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    },
+    {
+      "case": {
+        "index": 23,
+        "year": 2018,
+        "subset_seed": 3141,
+        "assets": 300,
+        "capacity": 150,
+        "method_order": [
+          "caf_parallel4",
+          "caf_serial",
+          "sequential_bcd"
+        ]
+      },
+      "assets": 300,
+      "cardinality": 150,
+      "community_count": 3,
+      "community_sizes": [
+        121,
+        92,
+        87
+      ],
+      "static_objective": 2.3038280141202985,
+      "static_seconds": 0.46103420900180936,
+      "preprocessing_seconds": 0.4653111630032072,
+      "methods": {
+        "caf_serial": {
+          "objective": 2.2833597538977477,
+          "gain_pct": 0.8884456694292973,
+          "risk": 4.619800155850454,
+          "expected_return": 0.0265403240274792,
+          "calls": 18,
+          "wall_seconds": 2.3598334879934555,
+          "solver_wall_sum": 0.23587822302943096,
+          "service_wall_sum": 0.6156008090329124,
+          "ideal_unlimited_service_makespan": 0.3374249690241413,
+          "history": [
+            2.3038280141202985,
+            2.283412694161476,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 4,
+          "accepted_by_round": [
+            3,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.888892197967252e-05
+        },
+        "sequential_bcd": {
+          "objective": 2.2833597538977477,
+          "gain_pct": 0.8884456694292973,
+          "risk": 4.619800155850454,
+          "expected_return": 0.0265403240274792,
+          "calls": 18,
+          "wall_seconds": 2.364430777990492,
+          "solver_wall_sum": 0.24872248094470706,
+          "service_wall_sum": 0.5178517539752647,
+          "ideal_unlimited_service_makespan": 0.26305726199643686,
+          "history": [
+            2.3038280141202985,
+            2.283412694161476,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 4,
+          "accepted_by_round": [
+            3,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.888892197967252e-05
+        },
+        "caf_parallel4": {
+          "objective": 2.2833597538977477,
+          "gain_pct": 0.8884456694292973,
+          "risk": 4.619800155850454,
+          "expected_return": 0.0265403240274792,
+          "calls": 18,
+          "wall_seconds": 2.491173299989896,
+          "solver_wall_sum": 0.5077766139584128,
+          "service_wall_sum": 1.6566627979918849,
+          "ideal_unlimited_service_makespan": 0.8758585079922341,
+          "history": [
+            2.3038280141202985,
+            2.283412694161476,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477,
+            2.2833597538977477
+          ],
+          "first_final_round": 2,
+          "accepted_updates": 4,
+          "accepted_by_round": [
+            3,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "time_limits": 0,
+          "max_local_gap": 9.888892197967252e-05
+        }
+      },
+      "parallel_serial_objective_delta": 0.0,
+      "bcd_minus_caf_objective": 0.0
+    }
+  ],
+  "partition_failures": [],
+  "missing_cases": [],
+  "source_files": {
+    "panel2016-full-cap75.json": "0eddb1a022c78463a57ec77d3a8ef7acb4ad7a27e7e96a4f38d3af900f00dd42",
+    "panel2016-full-cap100.json": "26daadf64ae25f08b6c54d015ae449e3faf86bb0dce40dc95c90d3a9b6ee5874",
+    "panel2016-full-cap150.json": "2418c49890728cf95f922f5dbb2bf0d9ea060e542dfb59ef19e9d1f9a66ce21e",
+    "panel2016-n300-seed1729-cap75.json": "a138c206e8ae2210501b665bfc66cfb8e00a6926eecca7a0d7a082fd00c04a5d",
+    "panel2016-n300-seed1729-cap100.json": "f729bb045ac2dc0a3f89fba37aa3b30d1188202cb96d7513e4d1fe384dcad526",
+    "panel2016-n300-seed1729-cap150.json": "b6d1119aa3a5e759f917876e6b15cfe0cc70f9c20e24191f7fc555b59aaa5f47",
+    "panel2016-n300-seed2718-cap75.json": "f653f64c0360f3a107a6a15f4f8698a34b527a5677bcd15f003e608324d21063",
+    "panel2016-n300-seed2718-cap100.json": "fb4efeb049d457bfddfccb0afff298e49f5065d6df2b2294e16073b6392b9522",
+    "panel2016-n300-seed2718-cap150.json": "deda474a305dcc9a3a6f60a6618aa116010583d1489858815afb75c7911cb003",
+    "panel2016-n300-seed3141-cap75.json": "043e326a98745d12ad599180b969196dc95b2fa64cf969a2711076058bc7e196",
+    "panel2016-n300-seed3141-cap100.json": "ecb8e08934ccca619e74f377c7e6fedd3acdf5c3e58733408fb2e3fe62b586ea",
+    "panel2016-n300-seed3141-cap150.json": "2369e6d51d605cfa95015816b26ee8f93a32b3e38b41e741341762aef0bbced8",
+    "panel2018-full-cap75.json": "b6294212690f099b69bd0ef0051739f0e69e16d97f9396835da4bebd320d1c93",
+    "panel2018-full-cap100.json": "86cbe2445caee6b310a344cf7a389ea545f67a82f8b50f803ad0bc47240b400c",
+    "panel2018-full-cap150.json": "1103fc20feb0b8684b1d709e1a7451d49d92c1cc84c4c2c2dce59ffbf12c5455",
+    "panel2018-n300-seed1729-cap75.json": "9756522a9b814a57126df8a0141f7a32a217d83ac6f354ac14cbcbab89479bdc",
+    "panel2018-n300-seed1729-cap100.json": "f5741746d67535e12c10e0dda7c6521dd29efa576d07cadfbb30d5ec6ca947b1",
+    "panel2018-n300-seed1729-cap150.json": "be9538341dc41983eef888d737194993ceb075a091fa25f440447169fb0e93f5",
+    "panel2018-n300-seed2718-cap75.json": "bf96bacf62a2e1229367719779c2caf199406efe8a1d8ec047e6a2c9b2091766",
+    "panel2018-n300-seed2718-cap100.json": "6eef3f514161eda44c97a14bc91c21b92529e3947b4f887a10bf8a174194e9ab",
+    "panel2018-n300-seed2718-cap150.json": "76e1df154b53b0f7b04ba1c30e116191b6d862f27cd52302ee9859838bef2b96",
+    "panel2018-n300-seed3141-cap75.json": "4073cb3588a915726a4c4f5c0e8f2454f333d00c3de23f0eaef35ebe3a7532a8",
+    "panel2018-n300-seed3141-cap100.json": "ed854bc1a9b6168eb1f7ef41fd1206ff171a385d81359f751fe1aad09c4b76d3",
+    "panel2018-n300-seed3141-cap150.json": "cafdc681c0dc4975210e51145ae020740f603b37587e721ee4cd6865ab11ae42"
+  },
+  "validation_sha256": "74efc4f70e7e0bb792db8d2e8e69b205d92fc81a3e74e0600caf7da78d7bb331",
+  "checks": {
+    "optimal_local_solves": 5320,
+    "verified_local_solves": 5320,
+    "verified_portfolios": 96,
+    "verified_proposals": 5094,
+    "verified_histories": 72,
+    "complete_cases": 24
+  }
+}

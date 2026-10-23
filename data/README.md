@@ -30,7 +30,7 @@ Panels kept here
 - `1_2016-01-01_*`
   - Main benchmark panel used by the default CAF experiments and by the paper's primary large-scale results.
 - `1_2018-01-01_*`
-  - Retained out-of-sample full-panel dataset used for the 2018 validation in this review snapshot.
+  - Additional historical full-panel dataset used for a separate in-sample optimization check. Portfolios are optimized using this panel’s own mean and covariance; this is not a holdout evaluation of portfolios trained on the 2016 panel.
 
 Practical rule
 - If you are reproducing the main paper results, start from `russell3000_subset/`.

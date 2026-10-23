@@ -1,0 +1,50 @@
+{
+  "status": "complete",
+  "local_solves": 178,
+  "optimal_with_requested_tolerance": 178,
+  "time_limits": 0,
+  "other_terminations": 0,
+  "logs": [
+    {
+      "file": "group-gurobi_index-0_k-100_n-200.log",
+      "solves": 15,
+      "optimal_with_requested_tolerance": 15,
+      "time_limits": 0,
+      "sha256": "b898440526369fe158f3c2988aed3a5cb1d6a0fdf01f024d77a82af9cc1a672b",
+      "other_terminations": 0
+    },
+    {
+      "file": "group-gurobi_index-0_k-150_n-300.log",
+      "solves": 55,
+      "optimal_with_requested_tolerance": 55,
+      "time_limits": 0,
+      "sha256": "44c81963c52b776693e0b4fc3f637bc294d2f75cb2ff7567ba73569cfab938f8",
+      "other_terminations": 0
+    },
+    {
+      "file": "group-gurobi_index-0_k-242_n-484.log",
+      "solves": 90,
+      "optimal_with_requested_tolerance": 90,
+      "time_limits": 0,
+      "sha256": "6679d598a93ab4a2c0e4996f9f5648235a558088ce89cb0bfed378f4e1f07255",
+      "other_terminations": 0
+    },
+    {
+      "file": "group-gurobi_index-0_k-50_n-100.log",
+      "solves": 3,
+      "optimal_with_requested_tolerance": 3,
+      "time_limits": 0,
+      "sha256": "69d4cceb57184a252c81a8de32fb3b1138625a337464bd4c436b89b611429051",
+      "other_terminations": 0
+    },
+    {
+      "file": "group-gurobi_index-0_k-50_n-200.log",
+      "solves": 15,
+      "optimal_with_requested_tolerance": 15,
+      "time_limits": 0,
+      "sha256": "827cfa4223d553d133c438c9c57ab408039520de12501288e985580242136473",
+      "other_terminations": 0
+    }
+  ],
+  "note": "Optimal refers to the requested MIPGap1e-4, not an exact global certificate for the full portfolio."
+}

@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 .pytest_cache/
 venv/
+.venv/
 env/
 .env
 
@@ -41,3 +42,12 @@ experiments/config.py
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Revision rerun checkpoints and local TeX builds
+/revision_results/
+/manuscript/build/
+*.fdb_latexmk
+
+# Local package metadata and server run outputs
+*.egg-info/
+/results/

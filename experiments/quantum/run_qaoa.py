@@ -35,6 +35,7 @@ from experiments._common import (
     subset_problem,
     to_jsonable,
 )
+from experiments.revision_protocol import QUANTUM_CAPACITY
 
 
 def _relax_local_problem(adjusted_returns, sub_covariance, budget, risk_factor):
@@ -100,6 +101,7 @@ class QiskitQAOAOptimizer:
         self.last_theta = None       # optimized θ*, exposed for hardware-in-the-loop (shared-θ*) use
         self.last_probs = None
         self.last_energies = None
+        self.last_candidate_sampled = None
         self.params = {
             "name": "QiskitQAOAOptimizer",
             "p": int(config.p),
@@ -161,6 +163,7 @@ class QiskitQAOAOptimizer:
         self.last_energies = energies
 
         sample = self._select_candidate(best_probs, energies, var_labels, cqm)
+        self.last_candidate_sampled = sample is not None
         if sample is None:
             # No feasible state was sampled (mirrors hardware behavior on infeasible outcomes).
             values_by_label = {label: 0 for label in var_labels}
@@ -197,7 +200,8 @@ class QiskitQAOAOptimizer:
         dim = 1 << n
         states = np.arange(dim, dtype=np.uint64)
         bit_matrix = ((states[:, None] >> np.arange(n, dtype=np.uint64)) & 1).astype(np.int8)
-        # dimod.to_ising() uses s = 2x - 1, so x=1 maps to the +1 eigenstate.
+        # dimod uses s=2x-1; Pauli Z has z=1-2x=-s on |x>.
+        # Energies below use s, while cost RZ gates therefore use -h.
         spins = 2 * bit_matrix - 1
         energies = np.full(dim, float(offset), dtype=float)
         label_to_pos = {label: pos for pos, label in enumerate(var_labels)}
@@ -227,7 +231,7 @@ class QiskitQAOAOptimizer:
                 gamma = float(gammas[layer])
                 beta = float(betas[layer])
                 for i, coeff in h.items():
-                    qc.rz(2.0 * gamma * float(coeff), label_to_pos[i])
+                    qc.rz(-2.0 * gamma * float(coeff), label_to_pos[i])
                 for (i, j), coeff in J.items():
                     qc.rzz(2.0 * gamma * float(coeff), label_to_pos[i], label_to_pos[j])
                 for q in range(n):
@@ -329,7 +333,10 @@ class SQAOptimizer:
             "num_reads": self.num_reads,
             "num_sweeps": self.num_sweeps,
             "seed": self.seed,
+            "transverse_field_schedule": "Hd_field=linspace(1,0,num_sweeps); Gamma=1",
         }
+        if self.num_sweeps < 2:
+            raise ValueError("SQA requires at least two sweeps for the declared transverse-field schedule")
 
     def __call__(self, model, weights=None, unique_identifier=None, log_best_feasible=False):
         del unique_identifier, log_best_feasible
@@ -361,6 +368,10 @@ class SQAOptimizer:
         sample_kwargs = {
             "num_reads": self.num_reads,
             "num_sweeps": self.num_sweeps,
+            # This sampler's omitted Hd_field defaults to zero, a classical limit.
+            # Values here are inverse-temperature-scaled transverse fields.
+            "Hd_field": np.linspace(1., 0., self.num_sweeps),
+            "Gamma": 1.,
         }
         if self.seed is not None:
             sample_kwargs["seed"] = self.seed
@@ -548,6 +559,10 @@ def aggregate_results(records):
         out["diagnostics"] = {
             "num_proposals": int(num_proposals),
             "num_feasible": int(num_feasible),
+            "num_raw_feasible": int(sum(d.get("raw_candidate_feasible") is True for d in diagnostic_rows)),
+            "num_raw_unknown": int(sum(d.get("raw_candidate_feasible") is None for d in diagnostic_rows)),
+            "num_repaired": int(sum(d.get("candidate_repaired", False) for d in diagnostic_rows)),
+            "num_backend_calls": int(sum(d.get("backend_called", True) for d in diagnostic_rows)),
             "num_local_improved": int(num_local_improved),
             "num_global_accepted": int(num_global_accepted),
             "num_local_improved_but_rejected": int(num_local_improved_rejected),
@@ -575,6 +590,8 @@ def parse_args():
     parser.add_argument("--summary-file", type=Path, default=None, help="Optional summary JSON output path.")
     parser.add_argument("--runs", type=int, default=10, help="Number of stochastic runs.")
     parser.add_argument("--n-assets", type=int, default=24, help="Subinstance size.")
+    parser.add_argument("--max-community-size", type=int, default=QUANTUM_CAPACITY,
+                        help="Induced-subgraph Newman capacity; 0 selects natural communities.")
     parser.add_argument("--subset-seed", type=int, default=1234, help="Seed for subinstance extraction.")
     parser.add_argument("--base-seed", type=int, default=42, help="Base seed for stochastic runs.")
     parser.add_argument("--risk-factor", type=float, default=0.5, help="Risk factor q.")
@@ -637,6 +654,7 @@ def run_one_setting(
     get_model,
     rebalancing_risk_factor,
     max_workers=None,
+    max_community_size=QUANTUM_CAPACITY,
 ):
     # Fix upstream decomposition to isolate backend variance, then solve both the
     # static baseline and CAF proposals against that same decomposition.
@@ -649,7 +667,8 @@ def run_one_setting(
         cov.values,
         ret.values,
         denoiser=denoiser_factory(),
-        cluster=Clustering(active=True, clustering_method="louvain", take_absolute_value=True),
+        cluster=Clustering(active=True, clustering_method="newman", take_absolute_value=True,
+                           max_community_size=max_community_size, seed=42),
         optimize_func=optimizer_factory_static(int(base_seed)),
     )
     _matrix_to_cluster, partitions = template_pipeline.run(
@@ -728,9 +747,12 @@ def run_one_setting(
                 "run_idx": int(run_idx),
                 "seed": int(run_seed),
                 "community_sizes": [int(len(c)) for c in communities],
+                "communities": [c.tolist() for c in communities],
+                "partition_max_community_size": int(max_community_size),
                 "subproblem_cardinalities": [int(k) for k in subproblem_cardinalities],
                 "static": static_metrics,
                 "caf": caf_res["metrics"],
+                "history": caf_res["history"],
                 "static_time_sec": float(static_time),
                 "caf_time_sec": float(caf_time),
                 "proposal_diagnostics": caf_res.get("proposal_diagnostics", []),
@@ -759,6 +781,7 @@ def run_reference_backend(
     max_workers=None,
     default_num_reads=20,
     num_sweeps=1000,
+    max_community_size=QUANTUM_CAPACITY,
 ):
     def optimizer_factory(seed, num_reads=None):
         reads = int(default_num_reads if num_reads is None else num_reads)
@@ -782,6 +805,7 @@ def run_reference_backend(
         get_model=get_model,
         rebalancing_risk_factor=rebalancing_risk_factor,
         max_workers=max_workers,
+        max_community_size=max_community_size,
     )
     summary = aggregate_results(records)
     return summary, records
@@ -865,6 +889,7 @@ def main():
         get_model=get_model,
         rebalancing_risk_factor=rebalancing_risk_factor,
         max_workers=args.max_workers,
+        max_community_size=args.max_community_size,
     )
     qaoa_summary = aggregate_results(qaoa_records)
     print("QAOA summary (CAF vs Static):")
@@ -895,6 +920,7 @@ def main():
             get_model=get_model,
             rebalancing_risk_factor=rebalancing_risk_factor,
             max_workers=args.max_workers,
+            max_community_size=args.max_community_size,
         )
         print("SA summary (CAF vs Static):")
         print(f"  wins/runs: {sa_summary['wins']}/{sa_summary['total_runs']}")
@@ -924,6 +950,7 @@ def main():
             get_model=get_model,
             rebalancing_risk_factor=rebalancing_risk_factor,
             max_workers=args.max_workers,
+            max_community_size=args.max_community_size,
         )
         print("SQA summary (CAF vs Static):")
         print(f"  wins/runs: {sqa_summary['wins']}/{sqa_summary['total_runs']}")
@@ -935,6 +962,7 @@ def main():
         "config": {
             "runs": int(args.runs),
             "n_assets": int(args.n_assets),
+            "max_community_size": int(args.max_community_size),
             "cardinality": int(cardinality),
             "risk_factor": float(args.risk_factor),
             "iterations": int(args.iterations),

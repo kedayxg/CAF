@@ -1,0 +1,541 @@
+{
+  "implementation": "CAF adapters use only igraph Newman; historical spectral implementation and method aliases removed",
+  "historical_commit": "356c1852c65a185b05aed040052c5c3f750991bd",
+  "source_digest_scope": "sorted Python files under caf_core, dcmppln, experiments, tests; excludes local config.py",
+  "python": "3.11.17",
+  "dependencies": {
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "pandas": "3.0.3",
+    "qiskit": "2.5.0",
+    "dimod": "0.12.22",
+    "dwave-samplers": "1.7.0",
+    "gurobipy": "13.0.2",
+    "igraph": "0.11.9",
+    "igraph_c": "0.10.16"
+  },
+  "dataset_sha256": {
+    "1_2016-01-01_correlation.npy": "5ae4904dcd9a8b488d65f4471aa75deb32d66d09df14c957d61a5f5905c3e43c",
+    "1_2016-01-01_covariance.npy": "37949a878477c60c2402642927aedc4c65305ab177c07cb19e21c6409dd07220",
+    "1_2016-01-01_returns.npy": "af12abf79796046765f12e611b3ce392bcbff5a30e1b2154534f642eb04ae77f",
+    "1_2018-01-01_correlation.npy": "3b25a1d8c279a0710fc6703efb705cf2a11886525399a8758b9c1b8b46a1ffe3",
+    "1_2018-01-01_covariance.npy": "c1e0af2cbf28f8e1c90b0a22d23e87015b79274d0c36881b677ea8b2c6267caf",
+    "1_2018-01-01_returns.npy": "165ea17020651f6a332c49eb8a62ada7c60d87f43f298207ed61d511a7705e86"
+  },
+  "default_clustering": {
+    "method": "newman",
+    "seed": 42,
+    "arpack_maxiter": 10000,
+    "arpack_tol": 1e-10,
+    "graph_convention": "A_ii/2 self-loops; preserve matrix row degrees; natural community count",
+    "supported_methods": [
+      "newman"
+    ],
+    "max_community_size": 0,
+    "positive_capacity": "Restart igraph on oversized induced subgraphs; stop when a block fits; fail explicitly if oversized and unsplittable"
+  },
+  "not_performed": [
+    "Repository push or release",
+    "arXiv upload",
+    "Fresh QPU execution"
+  ],
+  "source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+  "tests": {
+    "source_sha256": "9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8",
+    "passed": 96,
+    "expected_failures": 0,
+    "unexpected_failures": 0,
+    "log_sha256": "bcd96f2d85c4c72bd97b18fbff9b864ae6e829db8aff6c386e8ac6ede08e0392"
+  },
+  "paper_protocol": {
+    "name": "igraph-newman-induced-capacity-v2",
+    "classical_capacity": 100,
+    "quantum_capacity": 16
+  },
+  "revision_status": "Complete: 345 retained tasks, 40 SA injection ablations, two Gurobi primary flows and 24 BCD/capacity/subset configurations; independent validations passed",
+  "benchmark_2016": {
+    "static": {
+      "objective_mean": 1.72982675413217,
+      "objective_std": 0.022649951544350504,
+      "risk_mean": 3.7612959299491218,
+      "risk_std": 0.04618975584945016,
+      "return_mean": 0.15082121084239108,
+      "return_std": 0.002551632730454868,
+      "time_sec_mean": 6.880634614901647,
+      "time_sec_std": 0.6513705348148279
+    },
+    "caf": {
+      "objective_mean": 1.5125298162919667,
+      "objective_std": 0.008740247218246738,
+      "risk_mean": 3.262771434699192,
+      "risk_std": 0.019462640774116066,
+      "return_mean": 0.11885590105762955,
+      "return_std": 0.003682187230228629,
+      "time_sec_mean": 16.555344130049342,
+      "time_sec_std": 1.3490112708470634
+    },
+    "objective_improvement_pct_mean": 12.544363005648934,
+    "objective_improvement_pct_std": 1.4090581158231463,
+    "absolute_delta_mean": -0.2172969378402032,
+    "absolute_delta_std": 0.027224304799464492,
+    "risk_reduction_pct_mean": 13.238293588812123,
+    "risk_reduction_pct_std": 1.3663284184613007,
+    "return_increase_pct_mean": -21.176287409894773,
+    "return_increase_pct_std": 2.624947057135985,
+    "wins": 20,
+    "total_runs": 20,
+    "objective_sign_test_pvalue": 1.9073486328125e-06,
+    "objective_improvement_runs": 20,
+    "objective_worsened_runs": 0,
+    "objective_tied_runs": 0,
+    "objective_relative_improvement_mean_pct": 12.544363005648934,
+    "objective_relative_improvement_std_pct": 1.4090581158231463,
+    "objective_relative_improvement_ci95_pct": [
+      11.93744223813022,
+      13.164444017079784
+    ],
+    "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+  },
+  "benchmark_2018": {
+    "N=1397,K=698": {
+      "static": {
+        "objective_mean": 62.994889282481914,
+        "objective_std": 0.3650389395078497,
+        "risk_mean": 126.09311781269562,
+        "risk_std": 0.7326563455982702,
+        "return_mean": 0.05166962386590009,
+        "return_std": 0.008315881443728558,
+        "time_sec_mean": 28.49572223704963,
+        "time_sec_std": 3.725329967703043
+      },
+      "caf": {
+        "objective_mean": 62.04710903766388,
+        "objective_std": 0.2789005201442934,
+        "risk_mean": 124.07861211051477,
+        "risk_std": 0.5589944181765805,
+        "return_mean": -0.007802982406508248,
+        "return_std": 0.015546703140691379,
+        "time_sec_mean": 107.96873558895022,
+        "time_sec_std": 14.150415084986198
+      },
+      "objective_improvement_pct_mean": 1.5035858671204876,
+      "objective_improvement_pct_std": 0.2397377001892748,
+      "absolute_delta_mean": -0.9477802448180175,
+      "absolute_delta_std": 0.15516560785022104,
+      "risk_reduction_pct_mean": 1.5966503689145064,
+      "risk_reduction_pct_std": 0.2516436646276336,
+      "return_increase_pct_mean": -118.12512178625366,
+      "return_increase_pct_std": 29.604192194335845,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 3000,
+        "num_feasible": 3000,
+        "num_raw_feasible": 3000,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 3000,
+        "num_local_improved": 377,
+        "num_global_accepted": 379,
+        "num_local_improved_but_rejected": 0,
+        "local_improvement_rate_over_feasible": 0.12566666666666668,
+        "global_accept_rate_over_local_improved": 1.0053050397877985
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 1.5035858671204876,
+      "objective_relative_improvement_std_pct": 0.2397377001892748,
+      "objective_relative_improvement_ci95_pct": [
+        1.4018190068900669,
+        1.6123786399463722
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    }
+  },
+  "sampling_matched_control": {
+    "2016": {
+      "runs": 20,
+      "static_mean": 1.72982675413217,
+      "caf_mean": 1.5125298162919667,
+      "no_context_mean": 1.618213340043192,
+      "caf_gain_mean_pct": 12.544363005648934,
+      "control_gain_mean_pct": 6.4324867572095386,
+      "caf_advantage_mean_percentage_points": 6.111876248439396,
+      "caf_advantage_ci95_percentage_points": [
+        5.623630754408642,
+        6.5261127472149285
+      ],
+      "caf_wins": 20,
+      "caf_losses": 0,
+      "ties": 0,
+      "paired_sign_pvalue": 1.9073486328125e-06,
+      "reads_per_method_mean": 5640.0
+    },
+    "2018": {
+      "runs": 20,
+      "static_mean": 62.994889282481914,
+      "caf_mean": 62.04710903766388,
+      "no_context_mean": 60.638537515767,
+      "caf_gain_mean_pct": 1.5035858671204876,
+      "control_gain_mean_pct": 3.738841029886445,
+      "caf_advantage_mean_percentage_points": -2.2352551627659567,
+      "caf_advantage_ci95_percentage_points": [
+        -2.4112511905126257,
+        -2.065418507186937
+      ],
+      "caf_wins": 0,
+      "caf_losses": 20,
+      "ties": 0,
+      "paired_sign_pvalue": 1.9073486328125e-06,
+      "reads_per_method_mean": 15000.0
+    }
+  },
+  "quantum_revision_summary": {
+    "qaoa2": {
+      "static": {
+        "objective_mean": -0.0018532587904627773,
+        "objective_std": 0.00019621001778193821,
+        "risk_mean": 0.02233447527023378,
+        "risk_std": 0.0004118834022928686,
+        "return_mean": 0.013020496425579666,
+        "return_std": 3.881676539810979e-05,
+        "time_sec_mean": 33.35624137264822,
+        "time_sec_std": 5.616643584512397
+      },
+      "caf": {
+        "objective_mean": -0.002238849226571073,
+        "objective_std": 7.750672776866712e-05,
+        "risk_mean": 0.01966342362570385,
+        "risk_std": 0.0002437719099933446,
+        "return_mean": 0.012070561039422997,
+        "return_std": 0.00016205109316115967,
+        "time_sec_mean": 111.01634996144784,
+        "time_sec_std": 16.31406720326327
+      },
+      "objective_improvement_pct_mean": 22.208954328194658,
+      "objective_improvement_pct_std": 14.26029543635294,
+      "absolute_delta_mean": -0.00038559043610829563,
+      "absolute_delta_std": 0.00018967401897449667,
+      "risk_reduction_pct_mean": 11.927143312870054,
+      "risk_reduction_pct_std": 2.046400707183313,
+      "return_increase_pct_mean": -7.294176159373009,
+      "return_increase_pct_std": 1.323168005617843,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 280,
+        "num_feasible": 280,
+        "num_raw_feasible": 280,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 280,
+        "num_local_improved": 65,
+        "num_global_accepted": 63,
+        "num_local_improved_but_rejected": 2,
+        "local_improvement_rate_over_feasible": 0.23214285714285715,
+        "global_accept_rate_over_local_improved": 0.9692307692307692
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 22.208954328194658,
+      "objective_relative_improvement_std_pct": 14.26029543635294,
+      "objective_relative_improvement_ci95_pct": [
+        16.43931694016958,
+        29.114830763756036
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    },
+    "qaoa3": {
+      "static": {
+        "objective_mean": -0.001880300588529165,
+        "objective_std": 0.00015455229141021407,
+        "risk_mean": 0.02228655021938806,
+        "risk_std": 0.00027692600897683586,
+        "return_mean": 0.013023575698223192,
+        "return_std": 3.696816198454174e-05,
+        "time_sec_mean": 46.61146139639968,
+        "time_sec_std": 7.281164555322594
+      },
+      "caf": {
+        "objective_mean": -0.0022498405357221944,
+        "objective_std": 4.8274079444631116e-05,
+        "risk_mean": 0.01970276907246927,
+        "risk_std": 0.0002440500687274428,
+        "return_mean": 0.01210122507195683,
+        "return_std": 0.00014543029833606597,
+        "time_sec_mean": 148.15555992939989,
+        "time_sec_std": 33.593279840277674
+      },
+      "objective_improvement_pct_mean": 20.410390802354613,
+      "objective_improvement_pct_std": 9.518825067261039,
+      "absolute_delta_mean": -0.00036953994719302963,
+      "absolute_delta_std": 0.00014787497941746208,
+      "risk_reduction_pct_mean": 11.578491735307397,
+      "risk_reduction_pct_std": 1.6222054843718445,
+      "return_increase_pct_mean": -7.081419706284109,
+      "return_increase_pct_std": 1.148284383726584,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 260,
+        "num_feasible": 260,
+        "num_raw_feasible": 260,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 260,
+        "num_local_improved": 63,
+        "num_global_accepted": 62,
+        "num_local_improved_but_rejected": 1,
+        "local_improvement_rate_over_feasible": 0.2423076923076923,
+        "global_accept_rate_over_local_improved": 0.9841269841269841
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 20.410390802354613,
+      "objective_relative_improvement_std_pct": 9.518825067261039,
+      "objective_relative_improvement_ci95_pct": [
+        16.359909620208672,
+        24.66379962312108
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    },
+    "sqa": {
+      "static": {
+        "objective_mean": -0.0009067412431304656,
+        "objective_std": 0.00047292451800784734,
+        "risk_mean": 0.02310597444008869,
+        "risk_std": 0.00116753998342676,
+        "return_mean": 0.01245972846317481,
+        "return_std": 0.0003857255159845456,
+        "time_sec_mean": 0.9938460650504567,
+        "time_sec_std": 0.1737749077302978
+      },
+      "caf": {
+        "objective_mean": -0.0018874427958233617,
+        "objective_std": 0.0002309158237565844,
+        "risk_mean": 0.01981158986399178,
+        "risk_std": 0.0004428776385624697,
+        "return_mean": 0.01179323772781925,
+        "return_std": 0.0003108883458534413,
+        "time_sec_mean": 1.9891682560992194,
+        "time_sec_std": 0.6125491758451245
+      },
+      "objective_improvement_pct_mean": 159.85832215830712,
+      "objective_improvement_pct_std": 161.89900543291887,
+      "absolute_delta_mean": -0.0009807015526928958,
+      "absolute_delta_std": 0.0004966152373493923,
+      "risk_reduction_pct_mean": 14.058017607326969,
+      "risk_reduction_pct_std": 4.385243344882699,
+      "return_increase_pct_mean": -5.282428403280654,
+      "return_increase_pct_std": 3.1690043213316983,
+      "wins": 20,
+      "total_runs": 20,
+      "diagnostics": {
+        "num_proposals": 312,
+        "num_feasible": 312,
+        "num_raw_feasible": 312,
+        "num_raw_unknown": 0,
+        "num_repaired": 0,
+        "num_backend_calls": 312,
+        "num_local_improved": 90,
+        "num_global_accepted": 87,
+        "num_local_improved_but_rejected": 3,
+        "local_improvement_rate_over_feasible": 0.28846153846153844,
+        "global_accept_rate_over_local_improved": 0.9666666666666667
+      },
+      "objective_sign_test_pvalue": 1.9073486328125e-06,
+      "objective_improvement_runs": 20,
+      "objective_worsened_runs": 0,
+      "objective_tied_runs": 0,
+      "objective_relative_improvement_mean_pct": 159.85832215830712,
+      "objective_relative_improvement_std_pct": 161.89900543291887,
+      "objective_relative_improvement_ci95_pct": [
+        94.74489361195214,
+        237.06954848904454
+      ],
+      "objective_statistics_method": "paired_sign_test_excluding_ties_at_1e-9"
+    }
+  },
+  "validation_checks": {
+    "verified_portfolios": 730,
+    "verified_iteration_deltas": 1582,
+    "verified_histories": 305,
+    "paired_revision_runs": 305,
+    "main_2016_runs": 20,
+    "suppression_community_observations": 265,
+    "suppression_seeded_replays": 40,
+    "new_revision_portfolios": 610,
+    "natural_reference_portfolios": 80,
+    "sampling_matched_control_portfolios": 40
+  },
+  "gurobi_validation": "gurobi-v2-validation.json",
+  "revision_report": "REVISION_RESULTS.md",
+  "revision_coverage": "revision-results.json",
+  "revision_validation": "revision-validation.json",
+  "paper_revision": "ARXIV_REVISION.md",
+  "paper_review": "ARXIV_V2_PAPER_REVIEW.md",
+  "prior_maintenance_record": "maintenance-before-capacity-v2.json",
+  "natural_reference": "natural-newman-revision-results.json",
+  "legacy_maintenance_record": "legacy-maintenance-results.json",
+  "sqa_protocol_correction": "SQA_PROTOCOL_REVIEW.md",
+  "frozen_result_sha256": "c7bc0e9273e3cd8487db9e31a976676dd0cf30ba193b0b23097d76eaa97ef5cf",
+  "code_snapshot": "CAF_v2_code_snapshot.zip",
+  "manuscript_pdf": "../manuscript/CAF_arxiv_revision.pdf",
+  "manuscript_source": "../manuscript/CAF_arxiv_source.zip",
+  "interpretation": "Both full CAF and CAF without injection improve static initialization. The SA ablation favors full CAF on 2016 and CAF without injection on 2018, qualifying injection benefit under finite sampling. It does not invalidate CAF as a whole or isolate the shared acceptance mechanism. Gurobi primary results and all original execution fingerprints remain unchanged.",
+  "primary_backend": "Gurobi",
+  "primary_experiments": {
+    "2016": {
+      "assets": 484,
+      "cardinality": 242,
+      "communities": 15,
+      "community_sizes": [
+        60,
+        53,
+        49,
+        49,
+        41,
+        39,
+        35,
+        32,
+        29,
+        24,
+        22,
+        17,
+        15,
+        12,
+        7
+      ],
+      "static_objective": 1.6379595984022908,
+      "caf_objective": 1.335466020068208,
+      "control_objective": 1.6379595984022908,
+      "gain_pct": 18.467706934233483,
+      "static_risk": 3.614440412589733,
+      "caf_risk": 2.9007048726635403,
+      "static_return": 0.16926060789257585,
+      "caf_return": 0.11488641626356215,
+      "static_time_sec": 0.4438997620018199,
+      "caf_time_sec": 1.7480298489972483,
+      "static_local_solves": 15,
+      "caf_local_solves": 75,
+      "control_local_solves": 75,
+      "local_solves": 165,
+      "max_local_gap": 9.896307071491107e-05,
+      "methods": {
+        "caf": {
+          "rounds": 5,
+          "accepted_updates": 24,
+          "objective": 1.335466020068208,
+          "time_sec": 1.7480298489972483,
+          "same_weights_as_static": false
+        },
+        "control": {
+          "rounds": 5,
+          "accepted_updates": 0,
+          "objective": 1.6379595984022908,
+          "time_sec": 1.968912158990861,
+          "same_weights_as_static": true
+        }
+      }
+    },
+    "2018": {
+      "assets": 1397,
+      "cardinality": 698,
+      "communities": 25,
+      "community_sizes": [
+        100,
+        98,
+        92,
+        89,
+        87,
+        85,
+        82,
+        81,
+        80,
+        79,
+        78,
+        77,
+        68,
+        64,
+        37,
+        30,
+        28,
+        26,
+        23,
+        19,
+        18,
+        16,
+        15,
+        14,
+        11
+      ],
+      "static_objective": 54.504183500014676,
+      "caf_objective": 51.64909860074284,
+      "control_objective": 54.504183500014676,
+      "gain_pct": 5.238285790064295,
+      "static_risk": 109.27482829496601,
+      "caf_risk": 103.33985780120096,
+      "static_return": 0.13323064746833221,
+      "caf_return": 0.020830299857641496,
+      "static_time_sec": 1.6424485150055261,
+      "caf_time_sec": 6.871687699996983,
+      "static_local_solves": 25,
+      "caf_local_solves": 125,
+      "control_local_solves": 125,
+      "local_solves": 275,
+      "max_local_gap": 8.323156530965671e-05,
+      "methods": {
+        "caf": {
+          "rounds": 5,
+          "accepted_updates": 35,
+          "objective": 51.64909860074284,
+          "time_sec": 6.871687699996983,
+          "same_weights_as_static": false
+        },
+        "control": {
+          "rounds": 5,
+          "accepted_updates": 0,
+          "objective": 54.504183500014676,
+          "time_sec": 7.476344106995384,
+          "same_weights_as_static": true
+        }
+      }
+    }
+  },
+  "gurobi_main_validation": "gurobi-main-validation.json",
+  "gurobi_main_results": "gurobi-main-results.json",
+  "gurobi_main_checks": {
+    "verified_local_solves": 440,
+    "verified_portfolios": 6,
+    "verified_proposals": 400,
+    "verified_histories": 4,
+    "accepted_updates": 59
+  },
+  "backend_emphasis_chronology": "Gurobi primary emphasis selected after observing SA controls, as a diagnostic follow-up; not a preregistered ranking. SA negative result retained.",
+  "sampling_control_role": "CAF without injection: retains full-global objective verification and greedy sequential acceptance; this is an internal component ablation, not an independent static baseline.",
+  "coordination_study": {
+    "results": "coordination-study-results.json",
+    "validation": "coordination-study-validation.json",
+    "report": "COORDINATION_STUDY.md",
+    "declared_cases": 24,
+    "complete_cases": 24,
+    "distinct_configurations": 22,
+    "bcd_caf_final_objective_ties": 24,
+    "bcd_fewer_endpoint_rounds": 9,
+    "parallel_faster_single_timings": 6,
+    "checks": {
+      "optimal_local_solves": 5320,
+      "verified_local_solves": 5320,
+      "verified_portfolios": 96,
+      "verified_proposals": 5094,
+      "verified_histories": 72,
+      "complete_cases": 24
+    }
+  }
+}
