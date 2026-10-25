@@ -2,6 +2,8 @@
 
 入口：`python -m experiments.quantum.diagnose_hardware`。使用现有 Python 3.11 / pyqpanda3 0.5.0 环境，在仓库根目录运行。这里不重新优化 QAOA，不改变四社区冻结实验，也不修改其结果或接受判据。
 
+已保存多比特参数的重放及 p=0/1/2 层数诊断统一使用[冻结参数重放](HARDWARE_REPLAY.md)。共享 helper 现支持明确的计数宽度和 `optimization_level=0/1/2`，两比特入口默认值保持不变。服务器历史修改版本仍应保留，不能用当前 helper 代替旧任务的源码归档。
+
 **建议先反馈两比特结果，再决定是否重跑大电路。** 默认命令只生成计划，不导入 SDK、不访问云端。只有 `--submit` 提交任务；`--list-pairs` 和 `--compile-only` 读取真实芯片配置，不提交量子任务。脚本启动时打印电路数量、每电路 shots 和总 shots；计划超过 `--max-jobs`（默认 24）时直接停止。
 
 ## 本次确认的 SDK 行为

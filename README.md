@@ -10,6 +10,8 @@ reproduction tools and evidence; the pending v2 manuscript remains with the auth
 For small hardware probes before repeating QAOA, use the
 [two-qubit diagnostics guide](docs/HARDWARE_DIAGNOSTICS.md): it records submitted
 instructions, calibration, measurement maps and raw counts for feedback.
+The [frozen-parameter replay guide](docs/HARDWARE_REPLAY.md) covers p=0 controls,
+correct saved-layer truncation and offline recalculation of historical metrics.
 
 The maintained reproduction path uses python-igraph 0.11.9 Newman's leading-
 eigenvector method (`clustering_method="newman"`). It replaces the upstream

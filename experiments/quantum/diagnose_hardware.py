@@ -85,7 +85,11 @@ def probes(suite="readout", compensation="on"):
     return result
 
 
-def counts_checked(raw, shots):
+def counts_checked(raw, shots, width=2):
+    if isinstance(shots, bool) or not isinstance(shots, int) or shots < 1:
+        raise ValueError("Shots must be a positive integer")
+    if isinstance(width, bool) or not isinstance(width, int) or width < 1:
+        raise ValueError("Count width must be a positive integer")
     normalized = {}
     for key, value in raw.items():
         if not isinstance(key, str) or not key:
@@ -96,9 +100,9 @@ def counts_checked(raw, shots):
             index = int(key, 2)
         else:
             raise ValueError("Count key must be a binary/hex string")
-        if not 0 <= index < 4 or isinstance(value, bool) or not isinstance(value, int) or value < 0:
-            raise ValueError("Invalid two-qubit raw count")
-        bits = f"{index:02b}"
+        if not 0 <= index < 2**width or isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise ValueError("Invalid raw count or bit width")
+        bits = format(index, f"0{width}b")
         if value:
             normalized[bits] = normalized.get(bits, 0) + value
     if sum(normalized.values()) != shots:
@@ -135,19 +139,21 @@ def ideal_compiled_distribution(core, compiled, pair):
     """Check ideal gate evolution before device-specific pulse compensation."""
     compact = {q: i for i, q in enumerate(pair)}
     prog = core.QProg()
-    prog << core.I(0) << core.I(1)
+    n = len(pair)
+    for q in range(n):
+        prog << core.I(q)
     for gate in compiled.gate_operations():
         prog << gate.remap(compact)
     vm = core.CPUQVM()
     vm.run(prog, 1)
-    probabilities = vm.result().get_prob_list([0, 1])
-    result = {f"{i:02b}": 0.0 for i in range(4)}
+    probabilities = vm.result().get_prob_list(list(range(n)))
+    result = {format(i, f"0{n}b"): 0.0 for i in range(2**n)}
     mapping = measure_map(compiled)
-    if len(mapping) != 2 or sorted(c for _, c in mapping) != [0, 1]:
-        raise ValueError("Expected exactly two distinct classical measurement bits")
+    if len(mapping) != n or sorted(c for _, c in mapping) != list(range(n)) or len({q for q, _ in mapping}) != n:
+        raise ValueError("Expected one distinct measurement per logical bit")
     for index, probability in enumerate(probabilities):
         output = sum(((index >> compact[q]) & 1) << c for q, c in mapping)
-        result[f"{output:02b}"] += probability
+        result[format(output, f"0{n}b")] += probability
     return result
 
 
@@ -160,7 +166,8 @@ def pulse_program(core, instruction, pair, original_measurements):
     """
     compact = {q: i for i, q in enumerate(pair)}
     prog = core.QProg()
-    prog << core.I(0) << core.I(1)
+    for q in range(len(pair)):
+        prog << core.I(q)
     for operation in json.loads(instruction):
         name, args = next(iter(operation.items()))
         if name == "RPhi":
@@ -172,7 +179,7 @@ def pulse_program(core, instruction, pair, original_measurements):
             a, b, *_ = args
             prog << core.CZ(compact[a-1], compact[b-1])
         elif name != "Measure":
-            raise ValueError(f"Unexpected instruction in two-qubit probe: {name}")
+            raise ValueError(f"Unexpected instruction in probe: {name}")
     for q, c in original_measurements:
         prog << core.measure(compact[q], c)
     return prog
@@ -185,7 +192,9 @@ def copy_chip(transpilation, chip):
     return clone
 
 
-def prepare(core, transpilation, chip, pair, case, directory, compiler_basis="fixed"):
+def prepare(core, transpilation, chip, pair, case, directory, compiler_basis="fixed", optimization_level=2):
+    if isinstance(optimization_level, bool) or not isinstance(optimization_level, int) or optimization_level not in (0, 1, 2):
+        raise ValueError("optimization_level must be 0, 1 or 2")
     original = build_program(core, case["gates"])
     target = copy_chip(transpilation, chip)
     # The SDK transpiler can itself apply calibration when this map is nonzero.
@@ -195,7 +204,7 @@ def prepare(core, transpilation, chip, pair, case, directory, compiler_basis="fi
         # The SDK virtual-Z converter accepts X1/RZ/CZ, but rejects arbitrary
         # RPhi rotation angles produced by its generic RPhi-basis optimizer.
         target.basic_gates = ["X1", "RZ", "CZ"]
-    compiled = transpilation.Transpiler().transpile(original, target, {0: pair[0], 1: pair[1]}, 2, "default")
+    compiled = transpilation.Transpiler().transpile(original, target, {0: pair[0], 1: pair[1]}, optimization_level, "default")
     # Retain the SDK's actual placement; don't assume an init_mapping was honored.
     if set(int(q) for q in compiled.qubits()) - set(pair):
         raise ValueError("Compiler used qubits outside the requested pair")
@@ -207,7 +216,7 @@ def prepare(core, transpilation, chip, pair, case, directory, compiler_basis="fi
     (directory / "uncalibrated_compiled.originir").write_text(compiled.originir(17), encoding="utf-8")
     if compiler_basis == "backend" and case["cz_phase_compensation"]:
         target.compensate_angle_map = chip.compensate_angle_map
-        compiled = transpilation.Transpiler().transpile(original, target, {0: pair[0], 1: pair[1]}, 2, "default")
+        compiled = transpilation.Transpiler().transpile(original, target, {0: pair[0], 1: pair[1]}, optimization_level, "default")
     pulse_backend = copy_chip(transpilation, chip)
     if compiler_basis == "fixed" and not case["cz_phase_compensation"]:
         pulse_backend.compensate_angle_map = {k: (0., 0.) for k in chip.compensate_angle_map}
@@ -233,7 +242,7 @@ def prepare(core, transpilation, chip, pair, case, directory, compiler_basis="fi
             raise ValueError(f"Zero-calibration pulse replay differs from reference: TV={pulse_tv}")
         case["zero_calibration_pulse_tv"] = pulse_tv
     angles = [op["RPhi"][2] for op in instruction_data if "RPhi" in op]
-    case.update(status="compiled", compiler_basis=compiler_basis,
+    case.update(status="compiled", compiler_basis=compiler_basis, optimization_level=optimization_level,
                 converter_compensate_pulse_argument=converter_flag,
                 calibration_stage=("instruction_converter" if compiler_basis == "fixed" else "transpiler") if case["cz_phase_compensation"] else "disabled",
                 transpiler_calibration_map_enabled=compiler_basis == "backend" and case["cz_phase_compensation"],
@@ -264,7 +273,7 @@ def field(obj, name):
         return None
 
 
-def collect_job(job, case, directory, shots, interval, polls):
+def collect_job(job, case, directory, shots, interval, polls, width=2):
     path = directory / "record.json"
     case.update(status="submitted", job_id=job.job_id(), status_trace=[])
     save(path, case)
@@ -290,7 +299,7 @@ def collect_job(job, case, directory, shots, interval, polls):
     save(path, case)
     if case["backend_error"]:
         raise RuntimeError("Platform reported an error; raw receipt retained")
-    case["counts"] = counts_checked(raw or {}, shots)
+    case["counts"] = counts_checked(raw or {}, shots, width)
     save(path, case)
     try:
         extra = job.result(keys=RESULT_FIELDS)

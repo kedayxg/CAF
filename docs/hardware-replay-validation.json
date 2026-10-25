@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-25",
+  "replay_script_sha256": "80fd6add55c93b89395782f59d232ba26a00d22f88ffb8346f962c61fe2e2f7b",
+  "diagnostic_helper_sha256": "c06f621db9071ededeff839d052565c5ff8953fce1797525596aa61ffceb09f3",
+  "original_hardware_driver_sha256": "43d8b4180f3b4ce3e899a3486a307cf3d0598ef0492741f99c1f42bcbc32f574",
+  "original_hardware_driver_unchanged": true,
+  "caf_solver_unchanged": true,
+  "regression_tests": {
+    "command": "python -m pytest -q",
+    "passed": 143,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sdk_version": "0.5.0",
+  "local_synthetic_replays": [
+    {
+      "p": 0,
+      "theta_used": [],
+      "ideal_candidate_probability": 0.43603318105683087,
+      "sampled_candidate_frequency": 1779,
+      "tv_compiled_vs_qiskit": 8.109832250191573e-16,
+      "sampled_tv": 0.009339809729458047,
+      "record_sha256": "3e0c532338428f85caf088cd54f46127887c52dea308cf7a5fc43083ed5fce4a",
+      "manifest_sha256": "aad3cfc0956b31ee95003ae3c45805accc3112e8ed2f72595e6202b0240b5c04"
+    },
+    {
+      "p": 2,
+      "theta_used": [
+        2.1524959226177693,
+        4.8795980106703025,
+        1.5041866260889607,
+        1.2030389957302463
+      ],
+      "ideal_candidate_probability": 0.4534301110361246,
+      "sampled_candidate_frequency": 1785,
+      "tv_compiled_vs_qiskit": 2.412398013504977e-14,
+      "sampled_tv": 0.007678084345311495,
+      "record_sha256": "b003fd257fb6b78e9f98b7c25deda2559842454fdce8d5415a972667711c86d2",
+      "manifest_sha256": "31e14d083921aa89733e8174f141d2223d1896fc89eccb6765cc796d113157f6"
+    },
+    {
+      "p": 1,
+      "theta_used": [
+        2.1524959226177693,
+        1.5041866260889607
+      ],
+      "ideal_candidate_probability": 0.4369041226688691,
+      "sampled_candidate_frequency": 1716,
+      "tv_compiled_vs_qiskit": 1.2168163738496484e-14,
+      "sampled_tv": 0.014046040986205485,
+      "record_sha256": "b90ffe74723a83f4fd55a7ea42d1e55be09bcb67006cdb3326b04c813de58834",
+      "manifest_sha256": "e0ff81f0417faf75a4574f0cd87b637ced5108305e8948f4e2f610246096938f"
+    }
+  ],
+  "local_two_qubit_probes_completed": 20,
+  "historical_file_analysis": [
+    {
+      "case": "level0",
+      "expected_count": 0,
+      "recomputed_count": 0,
+      "tv": 0.9999999999999984,
+      "record_unchanged": true,
+      "stored_metric_differences": {
+        "sim_candidate_frequency": {
+          "stored": 52,
+          "recomputed": 0
+        },
+        "sim_candidate_ideal_probability": {
+          "stored": 0.0,
+          "recomputed": 0.4534301110361246
+        }
+      }
+    },
+    {
+      "case": "level2",
+      "expected_count": 58,
+      "recomputed_count": 58,
+      "tv": 0.9312499999999986,
+      "record_unchanged": true,
+      "stored_metric_differences": {
+        "sim_candidate_frequency": {
+          "stored": 15,
+          "recomputed": 58
+        },
+        "sim_candidate_ideal_probability": {
+          "stored": 0.0,
+          "recomputed": 0.4534301110361246
+        }
+      }
+    },
+    {
+      "case": "p0",
+      "expected_count": 1337,
+      "recomputed_count": 1337,
+      "tv": 0.1456229907862884,
+      "record_unchanged": true,
+      "stored_metric_differences": {}
+    }
+  ],
+  "cloud_accessed": false,
+  "qpu_submitted": false,
+  "limits": "Synthetic CPUQVM/SDK checks and offline analysis of uploaded historical files only; no new hardware evidence or changed experimental defaults."
+}
