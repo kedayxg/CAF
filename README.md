@@ -12,6 +12,9 @@ For small hardware probes before repeating QAOA, use the
 instructions, calibration, measurement maps and raw counts for feedback.
 The [frozen-parameter replay guide](docs/HARDWARE_REPLAY.md) covers p=0 controls,
 correct saved-layer truncation and offline recalculation of historical metrics.
+The [basis-channel screening guide](docs/HARDWARE_SCREEN.md) adds retained active
+controls, one-hot mapping probes and recent raw-count checks required before
+maintained frozen replay submits a QPU job.
 
 The maintained reproduction path uses python-igraph 0.11.9 Newman's leading-
 eigenvector method (`clustering_method="newman"`). It replaces the upstream

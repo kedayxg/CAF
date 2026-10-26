@@ -1,0 +1,252 @@
+{
+  "date": "2026-10-26",
+  "branch": "v2-development",
+  "base_commit": "f4ad5ff410b33a7187921f92e387bf657eb3a706",
+  "scope": "Basis-channel screening and maintained frozen-replay admission only; no QPU submissions, manuscript edits or main-branch changes.",
+  "pytest": {
+    "command": "python -m pytest -q",
+    "passed": 165,
+    "failed": 0,
+    "skipped": 0
+  },
+  "actual_sdk_offline_checks": {
+    "scope": "Actual pyqpanda3 0.5.0 CPUQVM and archived-topology compilation; no cloud requests or QPU submission.",
+    "archived_real_topology_cases": [
+      {
+        "n": 1,
+        "case": "idle_zero",
+        "compiled_operations": {
+          "RZ": 1
+        },
+        "compiled_depth": 1,
+        "pulses": {}
+      },
+      {
+        "n": 1,
+        "case": "active_zero",
+        "compiled_operations": {
+          "X1": 4,
+          "RZ": 1
+        },
+        "compiled_depth": 5,
+        "pulses": {
+          "110": 4
+        }
+      },
+      {
+        "n": 1,
+        "case": "onehot_0",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 1
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "110": 2
+        }
+      },
+      {
+        "n": 1,
+        "case": "all_one",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 1
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "110": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "idle_zero",
+        "compiled_operations": {
+          "RZ": 8
+        },
+        "compiled_depth": 1,
+        "pulses": {}
+      },
+      {
+        "n": 8,
+        "case": "active_zero",
+        "compiled_operations": {
+          "X1": 32,
+          "RZ": 8
+        },
+        "compiled_depth": 5,
+        "pulses": {
+          "110": 4,
+          "119": 4,
+          "120": 4,
+          "128": 4,
+          "129": 4,
+          "130": 4,
+          "138": 4,
+          "139": 4
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_0",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "110": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_1",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "119": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_2",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "120": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_3",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "128": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_4",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "129": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_5",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "130": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_6",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "138": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "onehot_7",
+        "compiled_operations": {
+          "X1": 2,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "139": 2
+        }
+      },
+      {
+        "n": 8,
+        "case": "all_one",
+        "compiled_operations": {
+          "X1": 16,
+          "RZ": 8
+        },
+        "compiled_depth": 3,
+        "pulses": {
+          "110": 2,
+          "119": 2,
+          "120": 2,
+          "128": 2,
+          "129": 2,
+          "130": 2,
+          "138": 2,
+          "139": 2
+        }
+      }
+    ],
+    "local_cpuqvm_batches": [
+      {
+        "n": 1,
+        "cases": 4,
+        "shots_per_case": 1024,
+        "basis_screen_passed": true,
+        "qpu_eligible": false
+      },
+      {
+        "n": 2,
+        "cases": 5,
+        "shots_per_case": 1024,
+        "basis_screen_passed": true,
+        "qpu_eligible": false
+      },
+      {
+        "n": 8,
+        "cases": 11,
+        "shots_per_case": 1024,
+        "basis_screen_passed": true,
+        "qpu_eligible": false
+      }
+    ]
+  },
+  "screen_policy": {
+    "min_shots_per_pattern": 1024,
+    "per_channel_per_pattern_wilson_95_lower": 0.9,
+    "max_age_hours": 4,
+    "requires_same_machine_and_physical_set": true,
+    "stored_pass_flags_not_trusted": true,
+    "local_counts_cannot_authorize_qpu": true
+  },
+  "unchanged_files": {
+    "caf_core/solver.py": "6efac2d9c4afd525cd0c17fd01a7d5be0a7178e4d85ea7bf71fb2c8bd1ae4116",
+    "experiments/quantum/run_hardware_qaoa.py": "43d8b4180f3b4ce3e899a3486a307cf3d0598ef0492741f99c1f42bcbc32f574"
+  },
+  "changed_python_sha256": {
+    "experiments/quantum/screen_hardware.py": "66a3bcd18d58d602a0c0550c4863de2c0be0a8bcb07e99ade7ff665615a90687",
+    "experiments/quantum/replay_hardware_qaoa.py": "794f3df5d8c8af7f8516eb6a1e629c2ee2ea645cd019d84392b7330362c33516",
+    "tests/test_hardware_screen.py": "47ad8bd4016ebb847d834efdde594787f5c0476a90856a633d2c34cd1945b28a",
+    "tests/test_frozen_hardware_replay.py": "73a4741d98a8b6e1497037f3e4dc6831055885f3d2211c6449bcbd84c0831dfc"
+  },
+  "historical_data_policy": "Preserve old source, counts, receipts and hash manifests; no relabeling as new screened runs.",
+  "limitations": [
+    "Basis preparation/control/readout screening is not CZ/coherence certification.",
+    "Replay records whether its final readout order matches probe order; differently routed order is not independently certified by this screen.",
+    "Original hardware optimization driver is unchanged; new admission checks apply to maintained frozen replay."
+  ]
+}

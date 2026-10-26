@@ -149,6 +149,7 @@ def test_analysis_does_not_silently_reinterpret_incorrect_p1_parameters(source, 
 
 
 @pytest.mark.parametrize("arguments", [["--p", "3"], ["--p", "-1"], ["--submit"],
+                                      ["--submit", "--physical-qubits", "12,13"],
                                       ["--shots", "0"], ["--poll-interval", "nan"]])
 def test_invalid_replay_stops_before_sdk(source, monkeypatch, tmp_path, arguments):
     from experiments.quantum import run_hardware_qaoa as hardware
@@ -169,12 +170,42 @@ def test_compile_failure_never_submits_and_preserves_preparation(source, monkeyp
     monkeypatch.setattr(hardware, "setup_pyqpanda", lambda *a, **kw: None)
     monkeypatch.setattr(hardware, "BACKEND", SimpleNamespace(run_instruction=lambda *a: pytest.fail("Submitted")))
     monkeypatch.setattr(replay.importlib.metadata, "version", lambda name: "0.5.0")
+    monkeypatch.setattr(replay.screening, "require_screen", lambda *a, **kw: {})
+    monkeypatch.setattr(replay.screening, "archive_screen", lambda *a, **kw: None)
     def fail(*args, **kwargs):
         raise ValueError("Preflight failed")
     monkeypatch.setattr(replay, "compile_replay", fail)
     with pytest.raises(ValueError, match="Preflight"):
-        replay.main(["--record", str(path), "--submit", "--physical-qubits", "12,13", "--out-dir", str(tmp_path/"out")])
+        replay.main(["--record", str(path), "--submit", "--screen-dir", str(tmp_path/"screen"),
+                     "--physical-qubits", "12,13", "--out-dir", str(tmp_path/"out")])
     directory = next((tmp_path/"out").iterdir())
     record = json.loads((directory/"record.json").read_text())
     assert record["status"] == "failed" and not record.get("job_id")
     assert (directory/"source_record.json").exists() and (directory/"SHA256.json").exists()
+
+
+def test_screen_is_checked_again_after_compilation_before_submission(source, monkeypatch, tmp_path):
+    from experiments.quantum import run_hardware_qaoa as hardware
+    path = tmp_path/"frozen.json"
+    path.write_text(json.dumps(source))
+    chip = SimpleNamespace(**{k: {} for k in diagnostic.CHIP_FIELDS})
+    monkeypatch.setattr(hardware, "CHIP_BACKEND", chip)
+    monkeypatch.setattr(hardware, "setup_pyqpanda", lambda *a, **kw: None)
+    monkeypatch.setattr(hardware, "BACKEND", SimpleNamespace(run_instruction=lambda *a: pytest.fail("Submitted")))
+    monkeypatch.setattr(replay.importlib.metadata, "version", lambda name: "0.5.0")
+    calls = []
+    def check(*args, **kwargs):
+        calls.append(args[0])
+        if len(calls) == 2:
+            raise ValueError("Screen expired during compilation")
+        return {}
+    monkeypatch.setattr(replay.screening, "require_screen", check)
+    monkeypatch.setattr(replay.screening, "archive_screen", lambda *a, **kw: None)
+    monkeypatch.setattr(replay, "compile_replay", lambda *a: ("[]", None, dict(measurement_map=[[12, 0], [13, 1]])))
+    with pytest.raises(ValueError, match="expired"):
+        replay.main(["--record", str(path), "--submit", "--screen-dir", str(tmp_path/"screen"),
+                     "--physical-qubits", "12,13", "--out-dir", str(tmp_path/"out")])
+    directory = next((tmp_path/"out").iterdir())
+    record = json.loads((directory/"record.json").read_text())
+    assert len(calls) == 2 and calls[1] == directory/"screen_evidence"
+    assert record["status"] == "failed" and not record.get("job_id")

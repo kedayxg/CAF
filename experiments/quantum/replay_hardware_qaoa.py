@@ -20,6 +20,7 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
 from experiments.quantum import diagnose_hardware as diagnostic
+from experiments.quantum import screen_hardware as screening
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -236,6 +237,7 @@ def main(argv=None):
     parser.add_argument("--record", type=Path)
     parser.add_argument("--p", type=int)
     parser.add_argument("--physical-qubits", help="Exactly n distinct SDK physical indices, comma-separated")
+    parser.add_argument("--screen-dir", type=Path, help="Required for --submit: recent passing QPU basis screen")
     parser.add_argument("--machine", default="WK_C180")
     parser.add_argument("--shots", type=int, default=4000)
     parser.add_argument("--optimization-level", type=int, choices=[0, 1, 2], default=2)
@@ -265,19 +267,26 @@ def main(argv=None):
             raise ValueError("Physical block must contain n distinct nonnegative indices")
         if (args.submit or args.compile_only) and args.physical_qubits is None:
             raise ValueError("Specify --physical-qubits for real chip compilation/submission")
+        screen_evidence = None
+        if args.submit:
+            if args.screen_dir is None:
+                raise ValueError("--submit requires --screen-dir from the maintained QPU basis screen")
+            screen_evidence = screening.require_screen(args.screen_dir, args.machine, physical)
         if args.local and physical != list(range(source["n"])):
             raise ValueError("--local uses synthetic physical indices 0..n-1")
         # Validate the financial reference before SDK loading or submission.
         metrics(source, {"".join(str(int(x)) for x in source["sim_candidate"][::-1]): 1}, ideal_probabilities(source, p), args.tau)
-    except ValueError as exc:
+    except (ValueError, OSError, KeyError, TypeError) as exc:
         parser.error(str(exc))
     directory = args.out_dir / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
     directory.mkdir(parents=True, exist_ok=False)
     (directory / "source_record.json").write_bytes(source_bytes)
+    if args.submit:
+        screening.archive_screen(args.screen_dir, directory/"screen_evidence")
     code = directory / "source_code"
     code.mkdir()
     code_hashes = {}
-    for path in [Path(__file__), Path(diagnostic.__file__), Path(__file__).with_name("run_hardware_qaoa.py"), ROOT/"requirements.txt", ROOT/"requirements-hardware.txt"]:
+    for path in [Path(__file__), Path(diagnostic.__file__), Path(screening.__file__), Path(__file__).with_name("run_hardware_qaoa.py"), ROOT/"requirements.txt", ROOT/"requirements-hardware.txt"]:
         (code/path.name).write_bytes(path.read_bytes())
         code_hashes[path.name] = sha(path)
     try:
@@ -292,6 +301,7 @@ def main(argv=None):
                   physical_qubits=physical, shots=args.shots, tau=args.tau, optimization_level=args.optimization_level,
                   machine="CPUQVM(synthetic)" if args.local else args.machine,
                   cloud_mapping=False, cloud_optimization=False, readout_amend=False,
+                  basis_screen=screen_evidence,
                   git_commit=commit, code_sha256=code_hashes, python_version=platform.python_version())
     diagnostic.save(directory / "record.json", record)
     print(f"Mode={execution_mode}; p={p}/{source['p']}; one circuit, {args.shots} shots. Output: {directory}", flush=True)
@@ -324,6 +334,12 @@ def main(argv=None):
             record["counts"] = diagnostic.counts_checked(record["raw_counts"], args.shots, source["n"])
             record["status"] = "completed"
         else:
+            # Recheck age and integrity immediately before submitting, against
+            # the evidence copy retained with this new run.
+            record["basis_screen"] = screening.require_screen(directory/"screen_evidence", args.machine, physical)
+            record["screen_probe_readout_order_matches_replay"] = (
+                [q for q, c in sorted(record["measurement_map"], key=lambda pair: pair[1])]
+                == record["basis_screen"]["physical_qubits"])
             options = hardware.qcloud.QCloudOptions()
             options.set_mapping(False)
             options.set_optimization(False)

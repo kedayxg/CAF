@@ -36,18 +36,19 @@ python -m experiments.quantum.replay_hardware_qaoa \
 
 ## 真实芯片预检与提交
 
-沿用原手册的服务器凭据配置。下面的块是本次诊断中使用的示例；仍需核实当前可用拓扑。
+沿用原手册的服务器凭据配置。提交前先完成[通道筛查](HARDWARE_SCREEN.md)，设置 `CAF_SCREEN_BLOCK` 和 `CAF_SCREEN_DIR`。不再将历史异常的 110/111 通道作为推荐块。缺少同机、同物理集合、最近四小时内通过的真机筛查记录时，维护入口会拒绝 `--submit`。
 
 ```bash
-CAF_REPLAY_BLOCK=110,119,120,128,129,130,138,139
+: "${CAF_SCREEN_BLOCK:?请先设置已筛查的物理编号列表}"
+: "${CAF_SCREEN_DIR:?请先设置真机筛查目录}"
 
 python -m experiments.quantum.replay_hardware_qaoa \
   --record "$CAF_REPLAY_RECORD" --p 1 --compile-only \
-  --physical-qubits "$CAF_REPLAY_BLOCK"
+  --physical-qubits "$CAF_SCREEN_BLOCK"
 
 python -m experiments.quantum.replay_hardware_qaoa \
   --record "$CAF_REPLAY_RECORD" --p 1 --submit --shots 4000 \
-  --physical-qubits "$CAF_REPLAY_BLOCK"
+  --physical-qubits "$CAF_SCREEN_BLOCK" --screen-dir "$CAF_SCREEN_DIR"
 ```
 
 `--compile-only` 读取真实配置而不提交任务；只有 `--submit` 会发起一个硬件任务。不自动运行 p=0/1/2 全套，也不自动重试或恢复提交。失败/超时先查询已保存的 job ID。
@@ -61,7 +62,8 @@ python -m experiments.quantum.replay_hardware_qaoa \
 每次运行在 `results/hardware_replay/<UTC时间戳>/` 保存：
 
 - `source_record.json`：输入记录的原始字节及 SHA256；实际参数与原始参数分开记录。
-- `source_code/`：重放、诊断、原驱动三个实际 Python 文件及两份 requirements；不复制本地凭据配置。
+- `source_code/`：重放、诊断、筛查、原驱动实际 Python 文件及两份 requirements；不复制本地凭据配置。
+- `screen_evidence/`：实际用于提交前检查的真机筛查证据副本。
 - `chip_backend.json`：当前芯片配置、校准角、拓扑及可用保真度。
 - 逻辑/编译 OriginIR、实际提交 instruction 原文与哈希、实际测量映射、CZ 数和深度。
 - `record.json`：运行模式、版本、job ID、状态轨迹、原始/规范化 counts、可获取的平台元数据和重新计算的指标。

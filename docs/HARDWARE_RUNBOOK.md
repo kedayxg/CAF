@@ -4,6 +4,8 @@
 
 复用已保存 theta、运行 p=0 对照或截断 p=1，以及重算服务器历史指标，统一使用[冻结参数重放入口](HARDWARE_REPLAY.md)。它不会重新优化参数；临时脚本中的 gamma/beta 截断和候选位序问题已在该维护入口修正。
 
+维护的冻结回放提交前，现在必须先完成[通道筛查](HARDWARE_SCREEN.md)，提供近期同机同块的原始证据。主动回零测试使用保留的原生脉冲，逐位单激发用于检查基态输出关联。旧正式驱动保留复现用途；新任务建议 `--prepare-only` 后走维护回放流程。
+
 维护后的 v2 代码位于 [`v2-development`](https://github.com/kedayxg/CAF/tree/v2-development)，`main` 暂时保留 v1，待 v2 成熟后再合并。原论文代码也原样保留在 [`archive/arxiv-v1`](https://github.com/kedayxg/CAF/tree/archive/arxiv-v1)，提交为 `356c1852c65a185b05aed040052c5c3f750991bd`。已完成的经典与模拟实验对应提交 [`17253da`](https://github.com/kedayxg/CAF/tree/17253dab077d6f7cc77520d09908d0a3ddb90195)，源码指纹为 `9fc43f0fe1de39fcefb2dd021cdd99efab882ca98d37df1055a2669d305fe9d8`。后续真机入口维护不改写这些实验记录。
 
 当前代码发布不包含待定的 v2 论文 TeX、PDF、投稿元数据或内部审稿记录。`manuscript/` 中发布的 Python 文件是实验、验证和生成工具；其中论文生成工具还需要作者另行提供的稿件源文件。
